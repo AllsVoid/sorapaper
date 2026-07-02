@@ -1,6 +1,15 @@
-export const themeConfig = {
-  name: "SoraPaper",
-  description: "A soft, readable Astro theme for long-form writing.",
+import userConfig from "../../sorapaper";
+import { mergeConfig } from "@/config/merge";
+import type { SoraPaperThemeConfig } from "@/config/types";
+
+export const defaultThemeConfig = {
+  site: {
+    name: "SoraPaper",
+    description: "A soft, readable Astro theme for long-form writing.",
+    url: "https://example.com",
+    defaultLocale: "zh",
+    locales: ["zh", "en"]
+  },
   author: {
     name: "Sora",
     title: "Frontend Developer & Design Lover",
@@ -24,7 +33,15 @@ export const themeConfig = {
     analytics: false,
     viewTransitions: true
   },
-  colorSchemes: ["paper", "sakura", "moon", "ocean"] as const
+  colorSchemes: ["paper", "sakura", "moon", "ocean"]
+} satisfies SoraPaperThemeConfig;
+
+const mergedThemeConfig = mergeConfig(defaultThemeConfig, userConfig);
+
+export const themeConfig = {
+  ...mergedThemeConfig,
+  name: mergedThemeConfig.site.name,
+  description: mergedThemeConfig.site.description
 };
 
 export type ThemeConfig = typeof themeConfig;

@@ -1,8 +1,10 @@
-export const defaultLocale = "zh";
+import { themeConfig } from "@/config/theme";
 
 export const locales = ["zh", "en"] as const;
 
 export type Locale = (typeof locales)[number];
+
+export const defaultLocale: Locale = themeConfig.site.defaultLocale;
 
 export const localeLabels: Record<Locale, string> = {
   zh: "中文",

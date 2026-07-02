@@ -43,6 +43,7 @@ npm run preview
 .
 ├─ astro.config.mjs
 ├─ package.json
+├─ sorapaper.ts
 ├─ tsconfig.json
 ├─ README.md
 ├─ docs/
@@ -66,8 +67,9 @@ npm run preview
 
 关键目录职责：
 
-- `src/config/theme.ts`：站点级配置，包括站点名称、作者、Now 卡片、功能开关和主题色列表。
-- `src/i18n/ui.ts`：本地化界面文案，包括导航、Hero、页面标题、搜索文案和页脚文案。
+- `sorapaper.ts`：用户统一配置入口，包括站点信息、作者、功能开关、Now 卡片和多语言页面文案。
+- `src/config/theme.ts`：内部默认主题配置，会被 `sorapaper.ts` 强覆盖。
+- `src/i18n/ui.ts`：内部默认本地化界面文案，会被 `sorapaper.ts.ui` 强覆盖。
 - `src/styles/global.css`：全局样式和视觉 token，是视觉一致性的核心文件。
 - `src/content.config.ts`：文章和友链的 Content Collections schema。
 - `src/content/blog`：示例文章，支持 `.md` 和 `.mdx`。
@@ -84,7 +86,9 @@ npm run preview
 
 ```mermaid
 flowchart TD
-  ThemeConfig[theme.ts] --> Layouts[Layouts]
+  RootConfig[sorapaper.ts] --> ThemeConfig[theme.ts]
+  RootConfig --> I18nUi[i18n/ui.ts]
+  ThemeConfig --> Layouts[Layouts]
   ThemeConfig --> Components[Components]
   ContentConfig[content.config.ts] --> ContentCollections[Content Collections]
   ContentCollections --> PostUtils[posts.ts]
@@ -233,7 +237,7 @@ tags: ["Framework", "Frontend"]
 核心文件：
 
 - `src/i18n/config.ts`：定义 `defaultLocale`、`locales`、语言名称、路径生成和语言切换工具。
-- `src/i18n/ui.ts`：定义中文和英文界面文案。
+- `src/i18n/ui.ts`：定义中文和英文默认界面文案，并用 `sorapaper.ts.ui` 覆盖。
 - `src/layouts/BaseLayout.astro`：在首屏前读取 URL `?lang=` 或 `localStorage.locale`，设置 `html[data-locale]`。
 - `src/components/SiteHeader.astro`：提供语言图标按钮，切换当前 locale；文章页会跳到对应译文 slug。
 
@@ -253,8 +257,8 @@ tags: ["Framework", "Frontend"]
 
 新增语言时需要：
 
-1. 在 `src/i18n/config.ts` 增加 locale。
-2. 在 `src/i18n/ui.ts` 增加完整界面文案。
+1. 在 `src/i18n/config.ts` 增加 locale 类型。
+2. 在 `sorapaper.ts` 增加完整界面文案。
 3. 在 `src/content.config.ts` 扩展 `lang` enum。
 4. 添加对应语言文章内容。
 5. 检查导航、搜索、RSS、归档、标签页是否支持新语言显示和过滤。
@@ -421,19 +425,18 @@ tags: ["Framework", "Frontend"]
 
 ### 修改站点信息
 
-编辑 `src/config/theme.ts`：
+优先编辑根目录 `sorapaper.ts`：
 
 - 站点名称：`name`
 - 站点描述：`description`
 - 作者信息：`author`
 - Now 卡片：`now`
 - 功能开关：`featureFlags`
-
-编辑 `src/i18n/ui.ts`：
-
 - 导航文案。
 - 首页 Hero 文案。
 - 页面标题、搜索文案、文章页文案和页脚文案。
+
+`src/config/theme.ts` 和 `src/i18n/ui.ts` 是内部默认值文件。只有在维护主题默认行为时才修改它们；普通用户配置应写在 `sorapaper.ts`。
 
 ### 新增文章
 

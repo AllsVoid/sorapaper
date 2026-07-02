@@ -1,6 +1,9 @@
 import type { Locale } from "@/i18n/config";
+import userConfig from "../../sorapaper";
+import { mergeConfig } from "@/config/merge";
+import type { UiConfig } from "@/config/types";
 
-export const ui = {
+export const defaultUi = {
   zh: {
     nav: {
       home: "首页",
@@ -109,7 +112,9 @@ export const ui = {
     },
     readingTime: "{minutes} min read"
   }
-} as const;
+} satisfies UiConfig;
+
+export const ui = mergeConfig(defaultUi, userConfig.ui);
 
 export function getUi(locale: Locale) {
   return ui[locale];

@@ -49,7 +49,9 @@ toc: true
 
 ## Theme Configuration
 
-Edit `src/config/theme.ts` for author profile, feature flags and sidebar content. Edit `src/i18n/ui.ts` for localized navigation, hero text and page copy.
+Edit the root `sorapaper.ts` file for site metadata, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
+
+Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
 
