@@ -9,7 +9,8 @@ export async function GET() {
         title: post.data.title,
         description: post.data.description,
         tags: post.data.tags,
-        href: getPostHref(post)
+        href: getPostHref(post),
+        lang: post.data.lang
       }))
     ),
     {

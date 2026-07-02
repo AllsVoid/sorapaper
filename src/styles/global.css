@@ -154,6 +154,11 @@ input {
   color: var(--muted);
 }
 
+html[data-locale="zh"] [data-lang]:not([data-lang="zh"]),
+html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
+  display: none !important;
+}
+
 .article-content {
   width: min(100%, var(--article));
   margin-inline: auto;

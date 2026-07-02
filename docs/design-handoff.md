@@ -68,7 +68,7 @@ Posts are defined in `src/content.config.ts`. Required fields are `title`, `desc
 
 Friend links use the `friends` collection with `name`, `description`, `href`, optional `avatar` and `tags`.
 
-Localized routes live under `/zh/` and `/en/`. The root path redirects to the default Chinese locale.
+Localized UI lives on clean routes without `/zh` or `/en` prefixes. The language toggle stores the current locale in `localStorage.locale`.
 
 ## Acceptance Criteria
 
@@ -77,7 +77,7 @@ Localized routes live under `/zh/` and `/en/`. The root path redirects to the de
 - No horizontal scrolling at 375px viewport width.
 - Light and dark modes must both pass practical readability checks.
 - Search, RSS, archive, tag pages and post rendering should work without backend services.
-- Search and RSS should be available per locale, e.g. `/zh/search.json`, `/en/search.json`, `/zh/rss.xml`, `/en/rss.xml`.
+- Search and RSS should remain available on clean routes, e.g. `/search.json` and `/rss.xml`, with search results filtered by the current locale.
 - New visual components should not introduce hard-coded color palettes outside the token system.
 
 ## Optional Integrations

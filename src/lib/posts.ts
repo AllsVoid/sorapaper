@@ -18,8 +18,8 @@ export function getPostSlug(post: BlogPost) {
   return post.id.replace(/\.(md|mdx)$/i, "");
 }
 
-export function getPostHref(post: BlogPost, locale: Locale = post.data.lang ?? defaultLocale) {
-  return `/${locale}/posts/${getPostSlug(post)}/`;
+export function getPostHref(post: BlogPost) {
+  return `/posts/${getPostSlug(post)}/`;
 }
 
 export function getReadingTime(body = "", locale: Locale = defaultLocale) {
@@ -47,7 +47,7 @@ export function getAllTags(posts: BlogPost[]) {
     }
   }
   return [...tags.entries()]
-    .map(([name, count]) => ({ name, count, slug: encodeURIComponent(name.toLowerCase()) }))
+    .map(([name, count]) => ({ name, count, slug: name.toLowerCase() }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
 }
 

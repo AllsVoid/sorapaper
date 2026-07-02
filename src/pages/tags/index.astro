@@ -1,27 +1,37 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 import { getAllTags, getPublishedPosts } from "@/lib/posts";
 
-const tags = getAllTags(await getPublishedPosts());
+const localeData = await Promise.all(
+  locales.map(async (locale) => ({
+    locale,
+    t: getUi(locale),
+    tags: getAllTags(await getPublishedPosts(locale))
+  }))
+);
 ---
 
 <BaseLayout title="Tags" description="Browse posts by tag.">
-  <section class="container page">
-    <header>
-      <span class="pill">Tags</span>
-      <h1>Find notes by topic</h1>
-      <p class="muted">A soft index for the garden.</p>
-    </header>
+  {localeData.map(({ locale, t, tags }) => (
+    <section class="container page" data-lang={locale}>
+      <header>
+        <span class="pill">{t.nav.tags}</span>
+        <h1>{t.pages.tagsTitle}</h1>
+        <p class="muted">{t.pages.tagsDescription}</p>
+      </header>
 
-    <div class="tag-cloud">
-      {tags.map((tag) => (
-        <a class="glass" href={`/tags/${tag.slug}/`}>
-          <span>{tag.name}</span>
-          <strong>{tag.count}</strong>
-        </a>
-      ))}
-    </div>
-  </section>
+      <div class="tag-cloud">
+        {tags.map((tag) => (
+          <a class="glass" href={`/tags/${tag.slug}/`}>
+            <span>{tag.name}</span>
+            <strong>{tag.count}</strong>
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
 </BaseLayout>
 
 <style>

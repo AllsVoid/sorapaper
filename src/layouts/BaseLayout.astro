@@ -24,7 +24,7 @@ const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfi
 ---
 
 <!doctype html>
-<html lang={locale} data-scheme="paper">
+<html lang={locale} data-locale={locale} data-scheme="paper">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
@@ -41,6 +41,12 @@ const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfi
       }
       const scheme = localStorage.getItem("scheme");
       if (scheme) document.documentElement.dataset.scheme = scheme;
+      const queryLocale = new URLSearchParams(window.location.search).get("lang");
+      const storedLocale = localStorage.getItem("locale");
+      const locale = queryLocale === "en" || queryLocale === "zh" ? queryLocale : storedLocale === "en" || storedLocale === "zh" ? storedLocale : "zh";
+      document.documentElement.dataset.locale = locale;
+      document.documentElement.lang = locale;
+      localStorage.setItem("locale", locale);
     </script>
   </head>
   <body>

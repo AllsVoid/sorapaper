@@ -1,5 +1,78 @@
 ---
-import { defaultLocale, localizePath } from "@/i18n/config";
+import HeroSection from "@/components/HeroSection.astro";
+import PostCard from "@/components/PostCard.astro";
+import Sidebar from "@/components/Sidebar.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllTags, getPinnedPosts, getPublishedPosts } from "@/lib/posts";
 
-return Astro.redirect(localizePath(defaultLocale));
+const localeData = await Promise.all(
+  locales.map(async (locale) => {
+    const posts = await getPublishedPosts(locale);
+    const pinned = await getPinnedPosts(locale);
+    const featuredPosts = pinned.length > 0 ? pinned : posts.slice(0, 1);
+    return {
+      locale,
+      t: getUi(locale),
+      posts,
+      featuredPosts,
+      tags: getAllTags(posts)
+    };
+  })
+);
 ---
+
+<BaseLayout>
+  <div class="container">
+    {localeData.map(({ locale, t, posts, featuredPosts, tags }) => (
+      <div data-lang={locale}>
+        <HeroSection locale={locale} />
+        <section class="home-grid">
+          <div>
+            <div class="section-title">
+              <h2>{t.home.latestPosts}</h2>
+              <a href="/archive/">{t.home.viewAll} →</a>
+            </div>
+            <div class="posts">
+              {[...featuredPosts, ...posts.filter((post) => !featuredPosts.includes(post)).slice(0, 5)].map((post) => (
+                <PostCard post={post} locale={locale} />
+              ))}
+            </div>
+          </div>
+          <Sidebar tags={tags} locale={locale} />
+        </section>
+      </div>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .home-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .section-title h2 {
+    margin: 0;
+    font-size: 1.14rem;
+  }
+
+  .section-title a {
+    color: var(--primary);
+    font-size: 0.92rem;
+  }
+
+  .posts {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (max-width: 940px) {
+    .home-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

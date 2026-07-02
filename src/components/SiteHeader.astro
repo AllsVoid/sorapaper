@@ -2,8 +2,8 @@
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import SearchDialog from "@/components/SearchDialog.astro";
 import { themeConfig } from "@/config/theme";
-import { localeLabels, localizePath, switchLocalePath, type Locale } from "@/i18n/config";
-import { getUi } from "@/i18n/ui";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi, ui } from "@/i18n/ui";
 
 interface Props {
   locale: Locale;
@@ -14,44 +14,65 @@ interface Props {
 const { locale, currentPath, alternatePath } = Astro.props;
 const t = getUi(locale);
 const nav = [
-  { label: t.nav.home, href: "/" },
-  { label: t.nav.archive, href: "/archive/" },
-  { label: t.nav.tags, href: "/tags/" },
-  { label: t.nav.about, href: "/about/" },
-  { label: t.nav.friends, href: "/friends/" }
+  { zh: ui.zh.nav.home, en: ui.en.nav.home, href: "/" },
+  { zh: ui.zh.nav.archive, en: ui.en.nav.archive, href: "/archive/" },
+  { zh: ui.zh.nav.tags, en: ui.en.nav.tags, href: "/tags/" },
+  { zh: ui.zh.nav.about, en: ui.en.nav.about, href: "/about/" },
+  { zh: ui.zh.nav.friends, en: ui.en.nav.friends, href: "/friends/" }
 ];
 ---
 
 <header class="site-header container glass">
-  <a class="brand" href={localizePath(locale)} aria-label={`${themeConfig.name} ${t.nav.home}`}>
+  <a class="brand" href="/" aria-label={`${themeConfig.name} ${t.nav.home}`}>
     <img src="/favicon.svg" alt="" width="34" height="34" />
     <span>Sora<span>Paper</span></span>
   </a>
 
   <nav class="nav" aria-label="Primary navigation">
-    {nav.map((item) => <a href={localizePath(locale, item.href)}>{item.label}</a>)}
+    {nav.map((item) => (
+      <a href={localizePath(locale, item.href)}>
+        <span data-lang="zh">{item.zh}</span>
+        <span data-lang="en">{item.en}</span>
+      </a>
+    ))}
   </nav>
 
   <div class="actions">
     <button class="scheme" type="button" aria-label="Change color scheme" data-scheme-toggle>◌</button>
     <button class="search" type="button" aria-label={t.search.ariaOpen} data-search-trigger>⌕</button>
-    <a class="language" href={alternatePath ?? switchLocalePath(locale === "zh" ? "en" : "zh", currentPath)} aria-label="Switch language">
-      {localeLabels[locale === "zh" ? "en" : "zh"]}
-    </a>
+    <button class="language" type="button" aria-label="Switch language" data-locale-toggle data-alternate-path={alternatePath ?? ""}>
+      <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" aria-hidden="true">
+        <path d="m476-80 182-480h84L924-80h-84l-43-122H603L560-80h-84ZM160-200l-56-56 202-202q-35-35-63.5-80T190-640h84q20 39 40 68t48 58q33-33 68.5-92.5T484-720H40v-80h280v-80h80v80h280v80H564q-21 72-63 148t-83 116l96 98-30 82-122-125-202 201Zm468-72h144l-72-204-72 204Z" />
+      </svg>
+    </button>
     <ThemeToggle />
   </div>
 </header>
-<SearchDialog locale={locale} />
+<SearchDialog />
 
-<script>
+<script is:inline define:vars={{ currentPath }}>
   const schemes = ["paper", "sakura", "moon", "ocean"];
   const button = document.querySelector("[data-scheme-toggle]");
+  const localeButton = document.querySelector("[data-locale-toggle]");
 
   button?.addEventListener("click", () => {
     const current = document.documentElement.dataset.scheme ?? "paper";
     const next = schemes[(schemes.indexOf(current) + 1) % schemes.length];
     document.documentElement.dataset.scheme = next;
     localStorage.setItem("scheme", next);
+  });
+
+  localeButton?.addEventListener("click", () => {
+    const current = document.documentElement.dataset.locale === "en" ? "en" : "zh";
+    const next = current === "zh" ? "en" : "zh";
+    localStorage.setItem("locale", next);
+    document.documentElement.dataset.locale = next;
+    document.documentElement.lang = next;
+
+    const alternatePath = localeButton.getAttribute("data-alternate-path");
+    if (alternatePath && alternatePath !== currentPath) {
+      window.location.href = alternatePath;
+    }
   });
 </script>
 
@@ -123,14 +144,17 @@ const nav = [
   }
 
   .search,
-  .scheme {
+  .scheme,
+  .language {
     width: 2.5rem;
   }
 
   .language {
-    min-width: 3.2rem;
-    font-size: 0.82rem;
-    padding-inline: 0.7rem;
+    padding: 0;
+  }
+
+  .language svg {
+    fill: currentColor;
   }
 
   @media (max-width: 780px) {

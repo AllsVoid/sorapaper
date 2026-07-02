@@ -1,22 +1,28 @@
 ---
 import { themeConfig } from "@/config/theme";
 import { localizePath, type Locale } from "@/i18n/config";
-import { getUi } from "@/i18n/ui";
+import { ui } from "@/i18n/ui";
 
 interface Props {
   locale: Locale;
 }
 
 const { locale } = Astro.props;
-const t = getUi(locale);
 ---
 
 <footer class="site-footer container">
-  <p>© {new Date().getFullYear()} {themeConfig.name}. {t.footer.builtWith}</p>
+  <p>
+    © {new Date().getFullYear()} {themeConfig.name}.
+    <span data-lang="zh">{ui.zh.footer.builtWith}</span>
+    <span data-lang="en">{ui.en.footer.builtWith}</span>
+  </p>
   <div>
     <a href={localizePath(locale, "/rss.xml")}>RSS</a>
     <span aria-hidden="true">·</span>
-    <a href={localizePath(locale, "/about/")}>{t.nav.about}</a>
+    <a href={localizePath(locale, "/about/")}>
+      <span data-lang="zh">{ui.zh.nav.about}</span>
+      <span data-lang="en">{ui.en.nav.about}</span>
+    </a>
   </div>
 </footer>
 

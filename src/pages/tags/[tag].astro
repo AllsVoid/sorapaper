@@ -1,34 +1,46 @@
 ---
 import PostCard from "@/components/PostCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 import { getAllTags, getPublishedPosts } from "@/lib/posts";
 
 export async function getStaticPaths() {
-  const posts = await getPublishedPosts();
-  return getAllTags(posts).map((tag) => ({
-    params: { tag: tag.slug },
-    props: {
-      tag: tag.name,
-      posts: posts.filter((post) => post.data.tags.some((item) => item.toLowerCase() === tag.name.toLowerCase()))
+  const tags = new Map<string, string>();
+  for (const locale of locales) {
+    const posts = await getPublishedPosts(locale);
+    for (const tag of getAllTags(posts)) {
+      tags.set(tag.slug, tag.name);
     }
-  }));
+  }
+  return [...tags.entries()].map(([slug, name]) => ({ params: { tag: slug }, props: { tag: name } }));
 }
 
-const { tag, posts } = Astro.props;
+const { tag } = Astro.props;
+const localeData = await Promise.all(
+  locales.map(async (locale) => {
+    const posts = (await getPublishedPosts(locale)).filter((post) =>
+      post.data.tags.some((item) => item.toLowerCase() === String(tag).toLowerCase())
+    );
+    return { locale, t: getUi(locale), posts };
+  })
+);
 ---
 
 <BaseLayout title={`#${tag}`} description={`Posts tagged ${tag}.`}>
-  <section class="container page">
-    <header>
-      <a class="pill" href="/tags/">← Tags</a>
-      <h1>#{tag}</h1>
-      <p class="muted">{posts.length} posts collected under this tag.</p>
-    </header>
+  {localeData.map(({ locale, t, posts }) => (
+    <section class="container page" data-lang={locale}>
+      <header>
+        <a class="pill" href="/tags/">← {t.nav.tags}</a>
+        <h1>#{tag}</h1>
+        <p class="muted">{posts.length} {t.pages.taggedDescription}</p>
+      </header>
 
-    <div class="posts">
-      {posts.map((post) => <PostCard post={post} />)}
-    </div>
-  </section>
+      <div class="posts">
+        {posts.map((post) => <PostCard post={post} locale={locale} />)}
+      </div>
+    </section>
+  ))}
 </BaseLayout>
 
 <style>

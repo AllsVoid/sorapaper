@@ -7,12 +7,12 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Astro static-first blog architecture.
 - Markdown and MDX posts through Content Collections.
 - Typed frontmatter for title, description, dates, tags, category, draft, cover, series, TOC and pinned posts.
-- Built-in i18n structure for Chinese and English at `/zh/` and `/en/`.
+- Built-in i18n structure for Chinese and English without visible locale prefixes.
 - Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
 - Homepage hero, latest posts, profile sidebar, tags and now card.
 - Archive, tag index, tag detail, about and friends pages.
 - Article layout with metadata, reading time, floating TOC and reading progress.
-- Zero-dependency localized static search using `/zh/search.json` and `/en/search.json`.
+- Zero-dependency localized static search using `/search.json`.
 - RSS and sitemap-ready configuration.
 
 ## Commands
@@ -55,7 +55,7 @@ The main visual system lives in `src/styles/global.css`. Use the CSS variables t
 
 ## Internationalization
 
-Chinese is the default locale. The root path redirects to `/zh/`, and English content is available at `/en/`.
+Chinese is the default locale. Routes stay clean without `/zh` or `/en` prefixes; the language toggle stores the current locale in `localStorage.locale`.
 
 Add `lang: zh` or `lang: en` to each post frontmatter. Use the same `translationKey` for translated versions of the same article.
 

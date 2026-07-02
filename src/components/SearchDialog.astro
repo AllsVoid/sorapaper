@@ -1,13 +1,5 @@
 ---
-import type { Locale } from "@/i18n/config";
-import { getUi } from "@/i18n/ui";
-
-interface Props {
-  locale: Locale;
-}
-
-const { locale } = Astro.props;
-const t = getUi(locale);
+import { ui } from "@/i18n/ui";
 ---
 
 <dialog class="search-dialog glass" data-search-dialog>
@@ -15,30 +7,39 @@ const t = getUi(locale);
     <button type="submit" aria-label="Close search">×</button>
   </form>
   <label>
-    <span>{t.search.label}</span>
-    <input type="search" placeholder={t.search.placeholder} data-search-input />
+    <span>
+      <span data-lang="zh">{ui.zh.search.label}</span>
+      <span data-lang="en">{ui.en.search.label}</span>
+    </span>
+    <input type="search" placeholder={ui.zh.search.placeholder} data-search-input data-placeholder-zh={ui.zh.search.placeholder} data-placeholder-en={ui.en.search.placeholder} />
   </label>
   <div class="results" data-search-results>
-    <p class="muted">{t.search.empty}</p>
+    <p class="muted">
+      <span data-lang="zh">{ui.zh.search.empty}</span>
+      <span data-lang="en">{ui.en.search.empty}</span>
+    </p>
   </div>
 </dialog>
 
-<script define:vars={{ locale, emptyText: t.search.empty, noResultsText: t.search.noResults }}>
-  type SearchItem = {
-    title: string;
-    description: string;
-    tags: string[];
-    href: string;
+<script is:inline define:vars={{ emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
+  const dialog = document.querySelector("[data-search-dialog]");
+  const input = document.querySelector("[data-search-input]");
+  const results = document.querySelector("[data-search-results]");
+  const triggers = document.querySelectorAll("[data-search-trigger]");
+  let index = [];
+
+  const getCurrentLocale = () => (document.documentElement.dataset.locale === "en" ? "en" : "zh");
+  const getCopy = () => {
+    const locale = getCurrentLocale();
+    return {
+      emptyText: locale === "en" ? emptyTextEn : emptyTextZh,
+      noResultsText: locale === "en" ? noResultsTextEn : noResultsTextZh
+    };
   };
 
-  const dialog = document.querySelector<HTMLDialogElement>("[data-search-dialog]");
-  const input = document.querySelector<HTMLInputElement>("[data-search-input]");
-  const results = document.querySelector<HTMLElement>("[data-search-results]");
-  const triggers = document.querySelectorAll("[data-search-trigger]");
-  let index: SearchItem[] = [];
-
-  const render = (items: SearchItem[]) => {
+  const render = (items) => {
     if (!results) return;
+    const { emptyText, noResultsText } = getCopy();
     if (!input?.value.trim()) {
       results.innerHTML = `<p class="muted">${emptyText}</p>`;
       return;
@@ -61,13 +62,16 @@ const t = getUi(locale);
 
   const loadIndex = async () => {
     if (index.length > 0) return;
-    const response = await fetch(`/${locale}/search.json`);
+    const response = await fetch("/search.json");
     index = await response.json();
   };
 
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", async () => {
       await loadIndex();
+      const locale = getCurrentLocale();
+      if (input) input.placeholder = locale === "en" ? input.dataset.placeholderEn ?? "" : input.dataset.placeholderZh ?? "";
+      render([]);
       dialog?.showModal();
       input?.focus();
     });
@@ -75,7 +79,9 @@ const t = getUi(locale);
 
   input?.addEventListener("input", () => {
     const query = input.value.trim().toLowerCase();
+    const currentLocale = getCurrentLocale();
     const matches = index
+      .filter((item) => item.lang === currentLocale)
       .filter((item) => [item.title, item.description, item.tags.join(" ")].join(" ").toLowerCase().includes(query))
       .slice(0, 8);
     render(matches);

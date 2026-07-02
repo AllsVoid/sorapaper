@@ -17,16 +17,13 @@ export function getLocaleFromParams(params: Record<string, string | undefined>) 
   return isLocale(params.lang) ? params.lang : defaultLocale;
 }
 
-export function localizePath(locale: Locale, path = "/") {
+export function localizePath(_locale: Locale, path = "/") {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `/${locale}${normalized === "/" ? "/" : normalized}`;
+  return normalized;
 }
 
 export function switchLocalePath(targetLocale: Locale, currentPath: string) {
-  const segments = currentPath.split("/").filter(Boolean);
-  if (isLocale(segments[0])) {
-    segments[0] = targetLocale;
-    return `/${segments.join("/")}${currentPath.endsWith("/") ? "/" : ""}`;
-  }
-  return localizePath(targetLocale, currentPath);
+  const url = new URL(currentPath, "https://example.com");
+  url.searchParams.set("lang", targetLocale);
+  return `${url.pathname}${url.search}`;
 }
