@@ -11,6 +11,8 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    lang: z.enum(["zh", "en"]).default("en"),
+    translationKey: z.string().optional(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),

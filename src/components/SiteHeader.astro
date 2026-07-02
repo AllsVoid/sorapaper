@@ -2,25 +2,46 @@
 import ThemeToggle from "@/components/ThemeToggle.astro";
 import SearchDialog from "@/components/SearchDialog.astro";
 import { themeConfig } from "@/config/theme";
+import { localeLabels, localizePath, switchLocalePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+  alternatePath?: string;
+}
+
+const { locale, currentPath, alternatePath } = Astro.props;
+const t = getUi(locale);
+const nav = [
+  { label: t.nav.home, href: "/" },
+  { label: t.nav.archive, href: "/archive/" },
+  { label: t.nav.tags, href: "/tags/" },
+  { label: t.nav.about, href: "/about/" },
+  { label: t.nav.friends, href: "/friends/" }
+];
 ---
 
 <header class="site-header container glass">
-  <a class="brand" href="/" aria-label={`${themeConfig.name} home`}>
+  <a class="brand" href={localizePath(locale)} aria-label={`${themeConfig.name} ${t.nav.home}`}>
     <img src="/favicon.svg" alt="" width="34" height="34" />
     <span>Sora<span>Paper</span></span>
   </a>
 
   <nav class="nav" aria-label="Primary navigation">
-    {themeConfig.nav.map((item) => <a href={item.href}>{item.label}</a>)}
+    {nav.map((item) => <a href={localizePath(locale, item.href)}>{item.label}</a>)}
   </nav>
 
   <div class="actions">
     <button class="scheme" type="button" aria-label="Change color scheme" data-scheme-toggle>◌</button>
-    <button class="search" type="button" aria-label="Search" data-search-trigger>⌕</button>
+    <button class="search" type="button" aria-label={t.search.ariaOpen} data-search-trigger>⌕</button>
+    <a class="language" href={alternatePath ?? switchLocalePath(locale === "zh" ? "en" : "zh", currentPath)} aria-label="Switch language">
+      {localeLabels[locale === "zh" ? "en" : "zh"]}
+    </a>
     <ThemeToggle />
   </div>
 </header>
-<SearchDialog />
+<SearchDialog locale={locale} />
 
 <script>
   const schemes = ["paper", "sakura", "moon", "ocean"];
@@ -88,9 +109,9 @@ import { themeConfig } from "@/config/theme";
   }
 
   .search,
-  .scheme {
+  .scheme,
+  .language {
     display: inline-grid;
-    width: 2.5rem;
     height: 2.5rem;
     place-items: center;
     border: 1px solid var(--border);
@@ -99,6 +120,17 @@ import { themeConfig } from "@/config/theme";
     color: var(--text);
     cursor: pointer;
     box-shadow: var(--shadow-soft);
+  }
+
+  .search,
+  .scheme {
+    width: 2.5rem;
+  }
+
+  .language {
+    min-width: 3.2rem;
+    font-size: 0.82rem;
+    padding-inline: 0.7rem;
   }
 
   @media (max-width: 780px) {

@@ -1,0 +1,116 @@
+import type { Locale } from "@/i18n/config";
+
+export const ui = {
+  zh: {
+    nav: {
+      home: "首页",
+      archive: "归档",
+      tags: "标签",
+      about: "关于",
+      friends: "友链"
+    },
+    hero: {
+      eyebrow: "欢迎来到我的空间",
+      title: "你好，我写前端、设计与生活",
+      description: "一个记录想法、实验和日常的小花园。持续构建，持续学习，也持续写作。",
+      chips: ["Astro", "前端", "笔记"]
+    },
+    home: {
+      latestPosts: "最新文章",
+      viewAll: "查看全部"
+    },
+    sidebar: {
+      tags: "标签",
+      browseAllTags: "浏览所有标签",
+      now: "Now",
+      listening: "正在听",
+      reading: "正在读",
+      working: "正在做"
+    },
+    article: {
+      back: "返回",
+      updated: "更新于",
+      copyright: "使用 SoraPaper 写作。转载时请保留原文链接。",
+      browseArchive: "浏览归档"
+    },
+    pages: {
+      archiveTitle: "按年份归档所有文章",
+      archiveDescription: "花园中已发布的文章。",
+      tagsTitle: "按主题寻找笔记",
+      tagsDescription: "柔和的内容索引。",
+      taggedDescription: "这个标签下收录的文章。",
+      aboutTitle: "关于",
+      friendsTitle: "网络花园里的邻居",
+      friendsDescription: "一些值得访问的链接。"
+    },
+    search: {
+      label: "搜索文章",
+      placeholder: "Astro、设计、生活...",
+      empty: "输入关键词搜索标题、摘要和标签。",
+      noResults: "暂时没有匹配的文章。",
+      ariaOpen: "搜索"
+    },
+    footer: {
+      builtWith: "使用 Astro、柔和色彩和长文阅读理念构建。"
+    },
+    readingTime: "{minutes} 分钟阅读"
+  },
+  en: {
+    nav: {
+      home: "Home",
+      archive: "Archive",
+      tags: "Tags",
+      about: "About",
+      friends: "Friends"
+    },
+    hero: {
+      eyebrow: "Welcome to my space",
+      title: "Hi, I write about frontend, design and life",
+      description: "A digital garden of thoughts, experiments and little by little. Building in public, learning out loud.",
+      chips: ["Astro", "Frontend", "Notes"]
+    },
+    home: {
+      latestPosts: "Latest Posts",
+      viewAll: "View all"
+    },
+    sidebar: {
+      tags: "Tags",
+      browseAllTags: "Browse all tags",
+      now: "Now",
+      listening: "Listening",
+      reading: "Reading",
+      working: "Working on"
+    },
+    article: {
+      back: "Back",
+      updated: "Updated",
+      copyright: "Written with SoraPaper. Please keep the original link when reposting.",
+      browseArchive: "Browse archive"
+    },
+    pages: {
+      archiveTitle: "All writing, grouped by year",
+      archiveDescription: "Published posts in the garden.",
+      tagsTitle: "Find notes by topic",
+      tagsDescription: "A soft index for the garden.",
+      taggedDescription: "Posts collected under this tag.",
+      aboutTitle: "About",
+      friendsTitle: "Neighbors in the web garden",
+      friendsDescription: "A small collection of links worth visiting."
+    },
+    search: {
+      label: "Search posts",
+      placeholder: "Astro, design, life...",
+      empty: "Type to search titles, descriptions and tags.",
+      noResults: "No matching posts yet.",
+      ariaOpen: "Search"
+    },
+    footer: {
+      builtWith: "Built with Astro, quiet colors and long-form reading in mind."
+    },
+    readingTime: "{minutes} min read"
+  }
+} as const;
+
+export function getUi(locale: Locale) {
+  return ui[locale];
+}

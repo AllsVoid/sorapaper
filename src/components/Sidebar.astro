@@ -1,5 +1,7 @@
 ---
 import { themeConfig } from "@/config/theme";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 
 interface TagItem {
   name: string;
@@ -9,9 +11,11 @@ interface TagItem {
 
 interface Props {
   tags: TagItem[];
+  locale: Locale;
 }
 
-const { tags } = Astro.props;
+const { tags, locale } = Astro.props;
+const t = getUi(locale);
 ---
 
 <aside class="sidebar">
@@ -26,31 +30,31 @@ const { tags } = Astro.props;
   </section>
 
   <section class="panel glass">
-    <h2>Tags</h2>
+    <h2>{t.sidebar.tags}</h2>
     <div class="tag-grid">
       {tags.slice(0, 8).map((tag) => (
-        <a href={`/tags/${tag.slug}/`}>
+        <a href={localizePath(locale, `/tags/${tag.slug}/`)}>
           <span>{tag.name}</span>
           <strong>{tag.count}</strong>
         </a>
       ))}
     </div>
-    <a class="more" href="/tags/">Browse all tags →</a>
+    <a class="more" href={localizePath(locale, "/tags/")}>{t.sidebar.browseAllTags} →</a>
   </section>
 
   <section class="panel glass">
-    <h2>Now</h2>
+    <h2>{t.sidebar.now}</h2>
     <dl>
       <div>
-        <dt>Listening</dt>
+        <dt>{t.sidebar.listening}</dt>
         <dd>{themeConfig.now.listening}</dd>
       </div>
       <div>
-        <dt>Reading</dt>
+        <dt>{t.sidebar.reading}</dt>
         <dd>{themeConfig.now.reading}</dd>
       </div>
       <div>
-        <dt>Working on</dt>
+        <dt>{t.sidebar.working}</dt>
         <dd>{themeConfig.now.working}</dd>
       </div>
     </dl>

@@ -19,6 +19,7 @@ SoraPaper 是一个内容优先的 Astro 博客主题。它的设计基准是：
 
 - Astro：页面、路由、静态生成。
 - Astro Content Collections：文章和友链内容建模。
+- Astro i18n routing：默认支持中文和英文路径。
 - MDX：允许文章中使用组件。
 - CSS variables：设计 token、明暗主题、多主题色。
 - 少量原生浏览器 JavaScript：搜索弹窗、主题切换、阅读进度条。
@@ -59,18 +60,21 @@ npm run preview
    ├─ layouts/
    ├─ lib/
    ├─ pages/
+   │  └─ [lang]/
    ├─ styles/
    └─ content.config.ts
 ```
 
 关键目录职责：
 
-- `src/config/theme.ts`：站点级配置，包括站点名称、作者、导航、Hero、Now 卡片、功能开关和主题色列表。
+- `src/config/theme.ts`：站点级配置，包括站点名称、作者、Now 卡片、功能开关和主题色列表。
+- `src/i18n/ui.ts`：本地化界面文案，包括导航、Hero、页面标题、搜索文案和页脚文案。
 - `src/styles/global.css`：全局样式和视觉 token，是视觉一致性的核心文件。
 - `src/content.config.ts`：文章和友链的 Content Collections schema。
 - `src/content/blog`：示例文章，支持 `.md` 和 `.mdx`。
 - `src/content/friends`：友链内容。
 - `src/lib/posts.ts`：文章查询、排序、slug、阅读时间、标签和归档工具函数。
+- `src/i18n`：语言配置、路径工具和界面文案翻译表。
 - `src/layouts`：页面骨架，主要是全站布局和文章布局。
 - `src/components`：可复用 UI 组件。
 - `src/pages`：Astro 文件路由。
@@ -94,15 +98,16 @@ flowchart TD
 
 页面路由：
 
-- `/`：首页，展示 Hero、最新文章、侧栏信息。
-- `/posts/[...slug]/`：文章详情页。
-- `/archive/`：归档页，按年份分组。
-- `/tags/`：标签总览。
-- `/tags/[tag]/`：标签详情页。
-- `/about/`：关于页。
-- `/friends/`：友链页。
-- `/rss.xml`：RSS 输出。
-- `/search.json`：静态搜索索引。
+- `/`：默认语言跳转入口，当前跳转到 `/zh/`。
+- `/zh/`、`/en/`：首页，展示 Hero、最新文章、侧栏信息。
+- `/zh/posts/[...slug]/`、`/en/posts/[...slug]/`：文章详情页。
+- `/zh/archive/`、`/en/archive/`：归档页，按年份分组。
+- `/zh/tags/`、`/en/tags/`：标签总览。
+- `/zh/tags/[tag]/`、`/en/tags/[tag]/`：标签详情页。
+- `/zh/about/`、`/en/about/`：关于页。
+- `/zh/friends/`、`/en/friends/`：友链页。
+- `/zh/rss.xml`、`/en/rss.xml`：RSS 输出。
+- `/zh/search.json`、`/en/search.json`：静态搜索索引。
 
 组件分层：
 
@@ -187,6 +192,8 @@ const blog = defineCollection({
 ---
 title: "文章标题"
 description: "文章摘要，会显示在列表、SEO 和搜索结果中"
+lang: zh
+translationKey: astro-theme-design
 pubDate: 2026-07-02
 updatedDate: 2026-07-03
 tags: ["Astro", "Design"]
@@ -204,6 +211,8 @@ toc: true
 维护约定：
 
 - `title`、`description`、`pubDate` 是必填字段。
+- `lang` 当前支持 `zh` 和 `en`，用于文章过滤、搜索索引和 RSS 输出。
+- 同一篇文章的不同语言版本应使用相同的 `translationKey`，便于后续实现文章互译跳转。
 - `draft: true` 的文章不会进入列表和详情路由。
 - `cover.alt` 必须可读，避免空 alt 描述用于重要封面。
 - 标签命名要统一，例如不要混用 `frontend`、`Frontend`、`front-end`。
@@ -221,16 +230,46 @@ tags: ["Framework", "Frontend"]
 ---
 ```
 
-## 7. 页面实现说明
+## 7. i18n 实现说明
+
+核心文件：
+
+- `src/i18n/config.ts`：定义 `defaultLocale`、`locales`、语言名称、路径生成和语言切换工具。
+- `src/i18n/ui.ts`：定义中文和英文界面文案。
+- `astro.config.mjs`：声明 Astro i18n 配置，当前 `defaultLocale` 是 `zh`，并启用 `prefixDefaultLocale`。
+
+路由策略：
+
+- 实际内容页面都放在 `src/pages/[lang]/` 下。
+- 根路径 `src/pages/index.astro` 只负责跳转到默认语言。
+- 组件通过 `locale` prop 接收当前语言。
+- 页面通过 `getStaticPaths()` 为 `zh` 和 `en` 分别生成静态路由。
+- 文章列表通过 `getPublishedPosts(locale)` 按 frontmatter 的 `lang` 过滤。
+
+路径工具：
+
+- `localizePath(locale, path)`：生成带语言前缀的内部链接。
+- `switchLocalePath(targetLocale, currentPath)`：根据当前路径生成语言切换链接。
+- `getLocaleFromParams(Astro.params)`：从动态路由参数解析当前语言。
+
+新增语言时需要：
+
+1. 在 `src/i18n/config.ts` 增加 locale。
+2. 在 `src/i18n/ui.ts` 增加完整界面文案。
+3. 在 `src/content.config.ts` 扩展 `lang` enum。
+4. 添加对应语言文章内容。
+5. 检查导航、搜索、RSS、归档、标签页是否生成新语言路径。
+
+## 8. 页面实现说明
 
 ### 首页
 
-入口：`src/pages/index.astro`
+入口：`src/pages/[lang]/index.astro`
 
 职责：
 
-- 调用 `getPublishedPosts()` 获取文章。
-- 调用 `getPinnedPosts()` 获取置顶文章。
+- 调用 `getPublishedPosts(locale)` 获取当前语言文章。
+- 调用 `getPinnedPosts(locale)` 获取当前语言置顶文章。
 - 调用 `getAllTags()` 生成标签侧栏。
 - 组合 `HeroSection`、`PostCard` 和 `Sidebar`。
 
@@ -242,7 +281,7 @@ tags: ["Framework", "Frontend"]
 
 ### 文章页
 
-入口：`src/pages/posts/[...slug].astro`
+入口：`src/pages/[lang]/posts/[...slug].astro`
 
 职责：
 
@@ -262,9 +301,9 @@ tags: ["Framework", "Frontend"]
 
 入口：
 
-- `src/pages/archive.astro`
-- `src/pages/tags/index.astro`
-- `src/pages/tags/[tag].astro`
+- `src/pages/[lang]/archive.astro`
+- `src/pages/[lang]/tags/index.astro`
+- `src/pages/[lang]/tags/[tag].astro`
 
 工具函数：
 
@@ -277,23 +316,23 @@ tags: ["Framework", "Frontend"]
 
 入口：
 
-- `src/pages/about.astro`
-- `src/pages/friends.astro`
+- `src/pages/[lang]/about.astro`
+- `src/pages/[lang]/friends.astro`
 
 关于页读取 `themeConfig.author`。友链页读取 `friends` collection。
 
-## 8. 核心工具函数
+## 9. 核心工具函数
 
 文件：`src/lib/posts.ts`
 
 已有函数：
 
-- `getPublishedPosts()`：读取非草稿文章，按发布时间倒序。
-- `getPinnedPosts()`：返回置顶文章。
+- `getPublishedPosts(locale)`：读取指定语言的非草稿文章，按发布时间倒序。
+- `getPinnedPosts(locale)`：返回指定语言的置顶文章。
 - `getPostSlug(post)`：从 content entry id 得到 slug。
-- `getPostHref(post)`：生成文章链接。
-- `getReadingTime(body)`：按中英文混合内容粗略计算阅读时间。
-- `formatDate(date)`：格式化日期。
+- `getPostHref(post, locale)`：生成带语言前缀的文章链接。
+- `getReadingTime(body, locale)`：按中英文混合内容粗略计算本地化阅读时间。
+- `formatDate(date, locale)`：按当前语言格式化日期。
 - `getAllTags(posts)`：生成标签计数和 slug。
 - `getArchiveGroups(posts)`：按年份分组文章。
 
@@ -304,7 +343,7 @@ tags: ["Framework", "Frontend"]
 - 分页：新增 `paginatePosts(posts, page, pageSize)`。
 - 相邻文章：新增 `getAdjacentPosts(posts, currentPost)`。
 
-## 9. 交互功能
+## 10. 交互功能
 
 ### 明暗模式
 
@@ -335,11 +374,11 @@ tags: ["Framework", "Frontend"]
 
 组件：`src/components/SearchDialog.astro`
 
-索引：`src/pages/search.json.ts`
+索引：`src/pages/[lang]/search.json.ts`
 
 机制：
 
-- `/search.json` 输出标题、摘要、标签和链接。
+- `/zh/search.json` 和 `/en/search.json` 分别输出对应语言的标题、摘要、标签和链接。
 - 客户端打开搜索弹窗时懒加载 JSON。
 - 使用原生 `includes()` 做轻量过滤。
 
@@ -360,7 +399,7 @@ tags: ["Framework", "Frontend"]
 
 如果页面出现性能问题，优先检查这里和搜索组件的事件监听。
 
-## 10. 样式开发规范
+## 11. 样式开发规范
 
 新增组件时建议：
 
@@ -378,7 +417,7 @@ tags: ["Framework", "Frontend"]
 - 让正文容器过宽。
 - 让装饰元素遮挡正文或产生横向滚动。
 
-## 11. 常见二次开发任务
+## 12. 常见二次开发任务
 
 ### 修改站点信息
 
@@ -387,10 +426,14 @@ tags: ["Framework", "Frontend"]
 - 站点名称：`name`
 - 站点描述：`description`
 - 作者信息：`author`
-- 导航：`nav`
-- 首页 Hero：`hero`
 - Now 卡片：`now`
 - 功能开关：`featureFlags`
+
+编辑 `src/i18n/ui.ts`：
+
+- 导航文案。
+- 首页 Hero 文案。
+- 页面标题、搜索文案、文章页文案和页脚文案。
 
 ### 新增文章
 
@@ -433,14 +476,14 @@ src/lib/comments.ts
 
 1. 保留 `SearchDialog.astro` 作为 UI。
 2. 添加 Pagefind 构建脚本。
-3. 将搜索逻辑从 `/search.json` 切换到 Pagefind API。
+3. 将搜索逻辑从 `/zh/search.json`、`/en/search.json` 切换到 Pagefind API。
 4. 保留当前轻量搜索作为 fallback 或删除无用代码。
 
 ### 新增 Open Graph 图片
 
 建议创建专门的 OG 生成路由或脚本，不要把 OG 逻辑塞进文章页布局。OG 样式应复用主题 token。
 
-## 12. Bug 修复指南
+## 13. Bug 修复指南
 
 ### 页面构建失败
 
@@ -479,7 +522,7 @@ npm run build
 
 检查：
 
-- `/search.json` 是否能访问。
+- 当前语言的搜索索引是否能访问，例如 `/zh/search.json` 或 `/en/search.json`。
 - 文章是否为草稿。
 - 搜索内容是否在标题、摘要或标签中。
 - 浏览器控制台是否有 JSON 解析或 fetch 错误。
@@ -508,7 +551,7 @@ npm run build
 - 新组件是否依赖 `--surface`、`--text`、`--muted`。
 - 代码块、引用块、标签是否复用全局样式。
 
-## 13. LLM 维护指南
+## 14. LLM 维护指南
 
 如果由 LLM 继续开发，请遵守：
 
@@ -532,15 +575,15 @@ LLM 推荐排查顺序：
 6. 运行 check/build。
 7. 总结改动、验证结果和剩余风险。
 
-## 14. 验收清单
+## 15. 验收清单
 
 功能验收：
 
 - 首页可打开，文章列表正常。
 - 文章页可打开，Markdown/MDX 渲染正常。
 - 归档页、标签页、关于页、友链页可打开。
-- `/rss.xml` 可访问。
-- `/search.json` 可访问。
+- `/zh/rss.xml` 和 `/en/rss.xml` 可访问。
+- `/zh/search.json` 和 `/en/search.json` 可访问。
 - 搜索弹窗可打开并返回结果。
 - 明暗模式可切换并持久化。
 - 主题色可切换并持久化。
@@ -564,7 +607,7 @@ LLM 推荐排查顺序：
 - 新增内容符合 Content Collections schema。
 - 文档同步更新。
 
-## 15. 后续路线建议
+## 16. 后续路线建议
 
 短期：
 

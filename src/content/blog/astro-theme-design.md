@@ -1,6 +1,8 @@
 ---
 title: "Build a Minimal Blog with Astro and Markdown"
 description: "How I built this blog with Astro, MDX, and a love for simplicity."
+lang: en
+translationKey: astro-theme-design
 pubDate: 2026-07-02
 updatedDate: 2026-07-02
 tags: ["Astro", "Frontend", "Design"]

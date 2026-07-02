@@ -7,11 +7,12 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Astro static-first blog architecture.
 - Markdown and MDX posts through Content Collections.
 - Typed frontmatter for title, description, dates, tags, category, draft, cover, series, TOC and pinned posts.
+- Built-in i18n structure for Chinese and English at `/zh/` and `/en/`.
 - Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
 - Homepage hero, latest posts, profile sidebar, tags and now card.
 - Archive, tag index, tag detail, about and friends pages.
 - Article layout with metadata, reading time, floating TOC and reading progress.
-- Zero-dependency static search using `/search.json`.
+- Zero-dependency localized static search using `/zh/search.json` and `/en/search.json`.
 - RSS and sitemap-ready configuration.
 
 ## Commands
@@ -31,6 +32,8 @@ Create posts in `src/content/blog` using Markdown or MDX:
 ---
 title: "Astro Theme Design Notes"
 description: "Readable writing with a soft visual system."
+lang: en
+translationKey: astro-theme-design
 pubDate: 2026-07-02
 updatedDate: 2026-07-03
 tags: ["Astro", "Design"]
@@ -46,9 +49,15 @@ toc: true
 
 ## Theme Configuration
 
-Edit `src/config/theme.ts` for navigation, author profile, hero text, feature flags and sidebar content.
+Edit `src/config/theme.ts` for author profile, feature flags and sidebar content. Edit `src/i18n/ui.ts` for localized navigation, hero text and page copy.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
+
+## Internationalization
+
+Chinese is the default locale. The root path redirects to `/zh/`, and English content is available at `/en/`.
+
+Add `lang: zh` or `lang: en` to each post frontmatter. Use the same `translationKey` for translated versions of the same article.
 
 ## Design Handoff
 

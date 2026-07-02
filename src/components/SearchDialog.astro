@@ -1,17 +1,29 @@
+---
+import type { Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getUi(locale);
+---
+
 <dialog class="search-dialog glass" data-search-dialog>
   <form method="dialog">
     <button type="submit" aria-label="Close search">×</button>
   </form>
   <label>
-    <span>Search posts</span>
-    <input type="search" placeholder="Astro, design, life..." data-search-input />
+    <span>{t.search.label}</span>
+    <input type="search" placeholder={t.search.placeholder} data-search-input />
   </label>
   <div class="results" data-search-results>
-    <p class="muted">Type to search titles, descriptions and tags.</p>
+    <p class="muted">{t.search.empty}</p>
   </div>
 </dialog>
 
-<script>
+<script define:vars={{ locale, emptyText: t.search.empty, noResultsText: t.search.noResults }}>
   type SearchItem = {
     title: string;
     description: string;
@@ -28,11 +40,11 @@
   const render = (items: SearchItem[]) => {
     if (!results) return;
     if (!input?.value.trim()) {
-      results.innerHTML = `<p class="muted">Type to search titles, descriptions and tags.</p>`;
+      results.innerHTML = `<p class="muted">${emptyText}</p>`;
       return;
     }
     if (items.length === 0) {
-      results.innerHTML = `<p class="muted">No matching posts yet.</p>`;
+      results.innerHTML = `<p class="muted">${noResultsText}</p>`;
       return;
     }
     results.innerHTML = items
@@ -49,7 +61,7 @@
 
   const loadIndex = async () => {
     if (index.length > 0) return;
-    const response = await fetch("/search.json");
+    const response = await fetch(`/${locale}/search.json`);
     index = await response.json();
   };
 

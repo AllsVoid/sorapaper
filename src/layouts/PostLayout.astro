@@ -3,18 +3,23 @@ import ArticleHeader from "@/components/ArticleHeader.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import type { BlogPost } from "@/lib/posts";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 
 interface Props {
   post: BlogPost;
+  locale: Locale;
+  alternatePath?: string;
   headings: { depth: number; slug: string; text: string }[];
 }
 
-const { post, headings } = Astro.props;
+const { post, locale, alternatePath, headings } = Astro.props;
+const t = getUi(locale);
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
+<BaseLayout title={post.data.title} description={post.data.description} locale={locale} alternatePath={alternatePath}>
   <article class="container">
-    <ArticleHeader post={post} />
+    <ArticleHeader post={post} locale={locale} />
     <div class="article-grid">
       <div></div>
       <div class="article-content glass">
@@ -23,8 +28,8 @@ const { post, headings } = Astro.props;
       {post.data.toc ? <TableOfContents headings={headings} /> : <div></div>}
     </div>
     <footer class="post-footer">
-      <p>Written with SoraPaper. Please keep the original link when reposting.</p>
-      <a href="/archive/">Browse archive →</a>
+      <p>{t.article.copyright}</p>
+      <a href={localizePath(locale, "/archive/")}>{t.article.browseArchive} →</a>
     </footer>
   </article>
 </BaseLayout>

@@ -13,20 +13,6 @@ export const themeConfig = {
       { label: "Email", href: "mailto:hello@example.com" }
     ]
   },
-  nav: [
-    { label: "Home", href: "/" },
-    { label: "Archive", href: "/archive/" },
-    { label: "Tags", href: "/tags/" },
-    { label: "About", href: "/about/" },
-    { label: "Friends", href: "/friends/" }
-  ],
-  hero: {
-    eyebrow: "Welcome to my space",
-    title: "Hi, I write about frontend, design and life",
-    description:
-      "A digital garden of thoughts, experiments and little by little. Building in public, learning out loud.",
-    chips: ["Astro", "Frontend", "Notes"]
-  },
   now: {
     listening: "miwa - ヒカリヘ",
     reading: "The Design of Everyday Things",

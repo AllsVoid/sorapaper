@@ -1,6 +1,8 @@
 ---
 title: "Designing for Calm: My Take on Soft UI"
 description: "Thoughts on crafting soft, minimal and readable interfaces that feel calm and inviting."
+lang: en
+translationKey: soft-ui
 pubDate: 2026-06-18
 tags: ["Design", "Life"]
 category: "Design"

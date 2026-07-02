@@ -1,34 +1,37 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import type { Locale } from "@/i18n/config";
+import { defaultLocale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 
 export type BlogPost = CollectionEntry<"blog">;
 
-export async function getPublishedPosts() {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+export async function getPublishedPosts(locale?: Locale) {
+  const posts = await getCollection("blog", ({ data }) => !data.draft && (!locale || data.lang === locale));
   return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 }
 
-export async function getPinnedPosts() {
-  return (await getPublishedPosts()).filter((post) => post.data.pinned);
+export async function getPinnedPosts(locale?: Locale) {
+  return (await getPublishedPosts(locale)).filter((post) => post.data.pinned);
 }
 
 export function getPostSlug(post: BlogPost) {
   return post.id.replace(/\.(md|mdx)$/i, "");
 }
 
-export function getPostHref(post: BlogPost) {
-  return `/posts/${getPostSlug(post)}/`;
+export function getPostHref(post: BlogPost, locale: Locale = post.data.lang ?? defaultLocale) {
+  return `/${locale}/posts/${getPostSlug(post)}/`;
 }
 
-export function getReadingTime(body = "") {
+export function getReadingTime(body = "", locale: Locale = defaultLocale) {
   const wordsPerMinute = 320;
   const chineseChars = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;
   const latinWords = body.replace(/[\u4e00-\u9fa5]/g, " ").trim().split(/\s+/).filter(Boolean).length;
   const minutes = Math.max(1, Math.ceil((chineseChars + latinWords) / wordsPerMinute));
-  return `${minutes} min read`;
+  return getUi(locale).readingTime.replace("{minutes}", String(minutes));
 }
 
-export function formatDate(date: Date) {
-  return new Intl.DateTimeFormat("en", {
+export function formatDate(date: Date, locale: Locale = defaultLocale) {
+  return new Intl.DateTimeFormat(locale === "zh" ? "zh-CN" : "en", {
     year: "numeric",
     month: "short",
     day: "numeric"

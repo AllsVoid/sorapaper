@@ -1,0 +1,72 @@
+---
+import PostCard from "@/components/PostCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getLocaleFromParams, locales, localizePath } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllTags, getPublishedPosts } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const paths: Array<{
+    params: { lang: string; tag: string };
+    props: { tag: string; posts: Awaited<ReturnType<typeof getPublishedPosts>> };
+  }> = [];
+  for (const lang of locales) {
+    const posts = await getPublishedPosts(lang);
+    for (const tag of getAllTags(posts)) {
+      paths.push({
+        params: { lang, tag: tag.slug },
+        props: {
+          tag: tag.name,
+          posts: posts.filter((post) => post.data.tags.some((item) => item.toLowerCase() === tag.name.toLowerCase()))
+        }
+      });
+    }
+  }
+  return paths;
+}
+
+const locale = getLocaleFromParams(Astro.params);
+const t = getUi(locale);
+const { tag, posts } = Astro.props;
+const targetLocale = locale === "zh" ? "en" : "zh";
+---
+
+<BaseLayout title={`#${tag}`} description={`${tag}: ${t.pages.taggedDescription}`} locale={locale} alternatePath={localizePath(targetLocale, "/tags/")}>
+  <section class="container page">
+    <header>
+      <a class="pill" href={localizePath(locale, "/tags/")}>← {t.nav.tags}</a>
+      <h1>#{tag}</h1>
+      <p class="muted">{posts.length} {t.pages.taggedDescription}</p>
+    </header>
+
+    <div class="posts">
+      {posts.map((post) => <PostCard post={post} locale={locale} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 3.2rem 0 0;
+  }
+
+  header,
+  .posts {
+    width: min(100%, 880px);
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin: 1rem 0 0.6rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    letter-spacing: -0.06em;
+    line-height: 1.02;
+  }
+
+  .posts {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+</style>

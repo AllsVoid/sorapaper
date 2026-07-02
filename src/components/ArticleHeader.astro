@@ -1,26 +1,30 @@
 ---
 import type { BlogPost } from "@/lib/posts";
 import { formatDate, getReadingTime } from "@/lib/posts";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
 
 interface Props {
   post: BlogPost;
+  locale: Locale;
 }
 
-const { post } = Astro.props;
+const { post, locale } = Astro.props;
+const t = getUi(locale);
 ---
 
 <header class="article-header">
-  <a class="back" href="/">← Back</a>
+  <a class="back" href={localizePath(locale)}>← {t.article.back}</a>
   <div class="inner">
     <div class="tags">
-      {post.data.tags.map((tag) => <a class="pill" href={`/tags/${encodeURIComponent(tag.toLowerCase())}/`}>{tag}</a>)}
+      {post.data.tags.map((tag) => <a class="pill" href={localizePath(locale, `/tags/${encodeURIComponent(tag.toLowerCase())}/`)}>{tag}</a>)}
     </div>
     <h1>{post.data.title}</h1>
     <p>{post.data.description}</p>
     <div class="meta">
-      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-      <span>{getReadingTime(post.body)}</span>
-      {post.data.updatedDate && <span>Updated {formatDate(post.data.updatedDate)}</span>}
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
+      <span>{getReadingTime(post.body, locale)}</span>
+      {post.data.updatedDate && <span>{t.article.updated} {formatDate(post.data.updatedDate, locale)}</span>}
     </div>
   </div>
 </header>

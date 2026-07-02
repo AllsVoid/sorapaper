@@ -1,0 +1,70 @@
+---
+import HeroSection from "@/components/HeroSection.astro";
+import PostCard from "@/components/PostCard.astro";
+import Sidebar from "@/components/Sidebar.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getLocaleFromParams, localizePath, locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllTags, getPinnedPosts, getPublishedPosts } from "@/lib/posts";
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+
+const locale = getLocaleFromParams(Astro.params);
+const t = getUi(locale);
+const posts = await getPublishedPosts(locale);
+const pinned = await getPinnedPosts(locale);
+const tags = getAllTags(posts);
+const featuredPosts = pinned.length > 0 ? pinned : posts.slice(0, 1);
+---
+
+<BaseLayout locale={locale}>
+  <div class="container">
+    <HeroSection locale={locale} />
+    <section class="home-grid">
+      <div>
+        <div class="section-title">
+          <h2>{t.home.latestPosts}</h2>
+          <a href={localizePath(locale, "/archive/")}>{t.home.viewAll} →</a>
+        </div>
+        <div class="posts">
+          {[...featuredPosts, ...posts.filter((post) => !featuredPosts.includes(post)).slice(0, 5)].map((post) => (
+            <PostCard post={post} locale={locale} />
+          ))}
+        </div>
+      </div>
+      <Sidebar tags={tags} locale={locale} />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .home-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 1.2rem;
+    align-items: start;
+  }
+
+  .section-title h2 {
+    margin: 0;
+    font-size: 1.14rem;
+  }
+
+  .section-title a {
+    color: var(--primary);
+    font-size: 0.92rem;
+  }
+
+  .posts {
+    display: grid;
+    gap: 1rem;
+  }
+
+  @media (max-width: 940px) {
+    .home-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

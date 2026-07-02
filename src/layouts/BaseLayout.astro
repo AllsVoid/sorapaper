@@ -3,23 +3,28 @@ import SiteFooter from "@/components/SiteFooter.astro";
 import SiteHeader from "@/components/SiteHeader.astro";
 import ScrollProgress from "@/components/ScrollProgress.astro";
 import { themeConfig } from "@/config/theme";
+import { defaultLocale, type Locale } from "@/i18n/config";
 import "@/styles/global.css";
 
 interface Props {
   title?: string;
   description?: string;
+  locale?: Locale;
+  alternatePath?: string;
 }
 
 const {
   title = themeConfig.name,
-  description = themeConfig.description
+  description = themeConfig.description,
+  locale = defaultLocale,
+  alternatePath
 } = Astro.props;
 
 const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfig.name}`;
 ---
 
 <!doctype html>
-<html lang="en" data-scheme="paper">
+<html lang={locale} data-scheme="paper">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
@@ -40,10 +45,10 @@ const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfi
   </head>
   <body>
     <ScrollProgress />
-    <SiteHeader />
+    <SiteHeader locale={locale} currentPath={Astro.url.pathname} alternatePath={alternatePath} />
     <main>
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter locale={locale} />
   </body>
 </html>

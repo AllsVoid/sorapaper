@@ -9,6 +9,7 @@ For detailed architecture, development workflow, extension points and bug-fixing
 - Content stays first. Article pages must remain calm, readable and fast.
 - Visual atmosphere comes from soft gradients, glass cards, rounded corners and subtle decorative shapes.
 - JavaScript stays optional and small. Static rendering is the default.
+- Chinese and English experiences should stay structurally equivalent unless a page intentionally has locale-specific content.
 - New UI must use design tokens from `src/styles/global.css`.
 
 ## Visual Tokens
@@ -54,6 +55,8 @@ About and friends:
 
 Posts are defined in `src/content.config.ts`. Required fields are `title`, `description` and `pubDate`. Optional fields provide richer theme behavior:
 
+- `lang`
+- `translationKey`
 - `updatedDate`
 - `tags`
 - `category`
@@ -65,6 +68,8 @@ Posts are defined in `src/content.config.ts`. Required fields are `title`, `desc
 
 Friend links use the `friends` collection with `name`, `description`, `href`, optional `avatar` and `tags`.
 
+Localized routes live under `/zh/` and `/en/`. The root path redirects to the default Chinese locale.
+
 ## Acceptance Criteria
 
 - The homepage should visually match the generated preview: airy spacing, soft gradient background, glass cards and content-first hierarchy.
@@ -72,6 +77,7 @@ Friend links use the `friends` collection with `name`, `description`, `href`, op
 - No horizontal scrolling at 375px viewport width.
 - Light and dark modes must both pass practical readability checks.
 - Search, RSS, archive, tag pages and post rendering should work without backend services.
+- Search and RSS should be available per locale, e.g. `/zh/search.json`, `/en/search.json`, `/zh/rss.xml`, `/en/rss.xml`.
 - New visual components should not introduce hard-coded color palettes outside the token system.
 
 ## Optional Integrations

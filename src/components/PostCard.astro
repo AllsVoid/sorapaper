@@ -1,31 +1,33 @@
 ---
 import type { BlogPost } from "@/lib/posts";
 import { formatDate, getPostHref, getReadingTime } from "@/lib/posts";
+import { localizePath, type Locale } from "@/i18n/config";
 
 interface Props {
   post: BlogPost;
+  locale: Locale;
   featured?: boolean;
 }
 
-const { post, featured = false } = Astro.props;
+const { post, locale, featured = false } = Astro.props;
 ---
 
 <article class:list={["post-card", "glass", { featured }]}>
   {post.data.cover && (
-    <a class="cover" href={getPostHref(post)} aria-label={post.data.title}>
+    <a class="cover" href={getPostHref(post, locale)} aria-label={post.data.title}>
       <img src={post.data.cover.src} alt={post.data.cover.alt} loading="lazy" />
     </a>
   )}
   <div class="content">
     <div class="meta">
-      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-      {post.data.tags[0] && <a class="tag" href={`/tags/${encodeURIComponent(post.data.tags[0].toLowerCase())}/`}>{post.data.tags[0]}</a>}
+      <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
+      {post.data.tags[0] && <a class="tag" href={localizePath(locale, `/tags/${encodeURIComponent(post.data.tags[0].toLowerCase())}/`)}>{post.data.tags[0]}</a>}
     </div>
-    <h3><a href={getPostHref(post)}>{post.data.title}</a></h3>
+    <h3><a href={getPostHref(post, locale)}>{post.data.title}</a></h3>
     <p>{post.data.description}</p>
     <div class="foot">
-      <span>{getReadingTime(post.body)}</span>
-      <a aria-label={`Read ${post.data.title}`} href={getPostHref(post)}>→</a>
+      <span>{getReadingTime(post.body, locale)}</span>
+      <a aria-label={`Read ${post.data.title}`} href={getPostHref(post, locale)}>→</a>
     </div>
   </div>
 </article>
