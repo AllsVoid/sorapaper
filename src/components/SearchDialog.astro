@@ -1,0 +1,142 @@
+<dialog class="search-dialog glass" data-search-dialog>
+  <form method="dialog">
+    <button type="submit" aria-label="Close search">×</button>
+  </form>
+  <label>
+    <span>Search posts</span>
+    <input type="search" placeholder="Astro, design, life..." data-search-input />
+  </label>
+  <div class="results" data-search-results>
+    <p class="muted">Type to search titles, descriptions and tags.</p>
+  </div>
+</dialog>
+
+<script>
+  type SearchItem = {
+    title: string;
+    description: string;
+    tags: string[];
+    href: string;
+  };
+
+  const dialog = document.querySelector<HTMLDialogElement>("[data-search-dialog]");
+  const input = document.querySelector<HTMLInputElement>("[data-search-input]");
+  const results = document.querySelector<HTMLElement>("[data-search-results]");
+  const triggers = document.querySelectorAll("[data-search-trigger]");
+  let index: SearchItem[] = [];
+
+  const render = (items: SearchItem[]) => {
+    if (!results) return;
+    if (!input?.value.trim()) {
+      results.innerHTML = `<p class="muted">Type to search titles, descriptions and tags.</p>`;
+      return;
+    }
+    if (items.length === 0) {
+      results.innerHTML = `<p class="muted">No matching posts yet.</p>`;
+      return;
+    }
+    results.innerHTML = items
+      .map(
+        (item) => `
+          <a class="result" href="${item.href}">
+            <strong>${item.title}</strong>
+            <span>${item.description}</span>
+          </a>
+        `
+      )
+      .join("");
+  };
+
+  const loadIndex = async () => {
+    if (index.length > 0) return;
+    const response = await fetch("/search.json");
+    index = await response.json();
+  };
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", async () => {
+      await loadIndex();
+      dialog?.showModal();
+      input?.focus();
+    });
+  });
+
+  input?.addEventListener("input", () => {
+    const query = input.value.trim().toLowerCase();
+    const matches = index
+      .filter((item) => [item.title, item.description, item.tags.join(" ")].join(" ").toLowerCase().includes(query))
+      .slice(0, 8);
+    render(matches);
+  });
+</script>
+
+<style>
+  .search-dialog {
+    width: min(92vw, 680px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    padding: 1rem;
+  }
+
+  .search-dialog::backdrop {
+    background: rgba(20, 24, 40, 0.36);
+    backdrop-filter: blur(8px);
+  }
+
+  form {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--tag);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  label {
+    display: grid;
+    gap: 0.65rem;
+    font-weight: 700;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    color: var(--text);
+    outline: none;
+    padding: 0.95rem 1rem;
+  }
+
+  input:focus {
+    border-color: var(--primary);
+  }
+
+  .results {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  :global(.result) {
+    display: grid;
+    gap: 0.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    padding: 0.85rem;
+  }
+
+  :global(.result span) {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+</style>

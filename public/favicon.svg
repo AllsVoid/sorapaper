@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SoraPaper">
+  <defs>
+    <linearGradient id="g" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b7a8ff"/>
+      <stop offset="1" stop-color="#83c5f7"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="20" fill="#fbf8f3"/>
+  <path d="M14 18 52 10 42 52 31 36 14 18Z" fill="url(#g)" opacity=".92"/>
+  <path d="M31 36 24 49 27 32 52 10" fill="#fff" opacity=".72"/>
+</svg>

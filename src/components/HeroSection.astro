@@ -1,0 +1,138 @@
+---
+import { themeConfig } from "@/config/theme";
+---
+
+<section class="hero">
+  <div class="copy">
+    <span class="pill">✦ {themeConfig.hero.eyebrow}</span>
+    <h1>{themeConfig.hero.title}</h1>
+    <p>{themeConfig.hero.description}</p>
+    <div class="chips">
+      {themeConfig.hero.chips.map((chip) => <span class="pill">{chip}</span>)}
+    </div>
+  </div>
+  <div class="art glass" aria-hidden="true">
+    <div class="moon"></div>
+    <span class="star s1">✦</span>
+    <span class="star s2">✧</span>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: center;
+    gap: clamp(1.5rem, 6vw, 5rem);
+    padding: clamp(3.2rem, 8vw, 6.2rem) 0 2rem;
+  }
+
+  .copy {
+    display: grid;
+    justify-items: start;
+    gap: 1.15rem;
+  }
+
+  h1 {
+    max-width: 780px;
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 8vw, 5.8rem);
+    font-weight: 700;
+    letter-spacing: -0.07em;
+    line-height: 0.98;
+  }
+
+  h1::first-line {
+    color: var(--text);
+  }
+
+  h1 {
+    background: linear-gradient(110deg, var(--text) 12%, var(--primary) 50%, var(--secondary) 88%);
+    background-clip: text;
+    color: transparent;
+  }
+
+  p {
+    max-width: 560px;
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.04rem;
+    line-height: 1.8;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+
+  .art {
+    position: relative;
+    min-height: 300px;
+    overflow: hidden;
+    border-radius: var(--radius-xl);
+  }
+
+  .art::before,
+  .art::after {
+    position: absolute;
+    content: "";
+    border-radius: 999px;
+    filter: blur(2px);
+  }
+
+  .art::before {
+    right: -35px;
+    bottom: -24px;
+    width: 220px;
+    height: 220px;
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+
+  .art::after {
+    top: 58px;
+    left: 42px;
+    width: 130px;
+    height: 130px;
+    background: color-mix(in srgb, var(--secondary) 28%, transparent);
+  }
+
+  .moon {
+    position: absolute;
+    top: 80px;
+    right: 72px;
+    width: 90px;
+    height: 90px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #fff, color-mix(in srgb, var(--accent) 38%, white));
+    box-shadow: 0 0 44px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  .star {
+    position: absolute;
+    color: var(--primary);
+    font-size: 1.5rem;
+  }
+
+  .s1 {
+    top: 50px;
+    left: 55px;
+  }
+
+  .s2 {
+    right: 48px;
+    bottom: 70px;
+  }
+
+  @media (max-width: 860px) {
+    .hero {
+      grid-template-columns: 1fr;
+      padding-top: 2.6rem;
+    }
+
+    .art {
+      min-height: 180px;
+    }
+  }
+</style>

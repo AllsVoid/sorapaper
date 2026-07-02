@@ -1,0 +1,67 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getAllTags, getPublishedPosts } from "@/lib/posts";
+
+const tags = getAllTags(await getPublishedPosts());
+---
+
+<BaseLayout title="Tags" description="Browse posts by tag.">
+  <section class="container page">
+    <header>
+      <span class="pill">Tags</span>
+      <h1>Find notes by topic</h1>
+      <p class="muted">A soft index for the garden.</p>
+    </header>
+
+    <div class="tag-cloud">
+      {tags.map((tag) => (
+        <a class="glass" href={`/tags/${tag.slug}/`}>
+          <span>{tag.name}</span>
+          <strong>{tag.count}</strong>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 3.2rem 0 0;
+  }
+
+  header {
+    width: min(100%, var(--article));
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin: 1rem 0 0.6rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: -0.06em;
+    line-height: 1.02;
+  }
+
+  .tag-cloud {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .tag-cloud a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+
+  .tag-cloud a:hover {
+    border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+  }
+
+  strong {
+    color: var(--primary);
+  }
+</style>

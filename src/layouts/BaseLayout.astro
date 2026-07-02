@@ -1,0 +1,49 @@
+---
+import SiteFooter from "@/components/SiteFooter.astro";
+import SiteHeader from "@/components/SiteHeader.astro";
+import ScrollProgress from "@/components/ScrollProgress.astro";
+import { themeConfig } from "@/config/theme";
+import "@/styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = themeConfig.name,
+  description = themeConfig.description
+} = Astro.props;
+
+const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfig.name}`;
+---
+
+<!doctype html>
+<html lang="en" data-scheme="paper">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    <script is:inline>
+      const theme = localStorage.getItem("theme");
+      if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.dataset.theme = "dark";
+      }
+      const scheme = localStorage.getItem("scheme");
+      if (scheme) document.documentElement.dataset.scheme = scheme;
+    </script>
+  </head>
+  <body>
+    <ScrollProgress />
+    <SiteHeader />
+    <main>
+      <slot />
+    </main>
+    <SiteFooter />
+  </body>
+</html>

@@ -1,0 +1,57 @@
+# SoraPaper Astro Theme
+
+SoraPaper is a soft, content-first Astro blog theme inspired by the readability of Astro Paper and the gentle visual language of Fuwari, Koharu and Yukina.
+
+## Features
+
+- Astro static-first blog architecture.
+- Markdown and MDX posts through Content Collections.
+- Typed frontmatter for title, description, dates, tags, category, draft, cover, series, TOC and pinned posts.
+- Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
+- Homepage hero, latest posts, profile sidebar, tags and now card.
+- Archive, tag index, tag detail, about and friends pages.
+- Article layout with metadata, reading time, floating TOC and reading progress.
+- Zero-dependency static search using `/search.json`.
+- RSS and sitemap-ready configuration.
+
+## Commands
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run preview
+```
+
+## Content
+
+Create posts in `src/content/blog` using Markdown or MDX:
+
+```yaml
+---
+title: "Astro Theme Design Notes"
+description: "Readable writing with a soft visual system."
+pubDate: 2026-07-02
+updatedDate: 2026-07-03
+tags: ["Astro", "Design"]
+category: "Frontend"
+draft: false
+cover:
+  src: "/covers/sky.svg"
+  alt: "Soft sky illustration."
+pinned: true
+toc: true
+---
+```
+
+## Theme Configuration
+
+Edit `src/config/theme.ts` for navigation, author profile, hero text, feature flags and sidebar content.
+
+The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
+
+## Design Handoff
+
+See `docs/design-handoff.md` for implementation rules and visual acceptance criteria.
+
+For deeper architecture, extension and bug-fixing guidance, see `docs/development-guide.md`.

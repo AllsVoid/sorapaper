@@ -1,0 +1,164 @@
+---
+import { themeConfig } from "@/config/theme";
+
+interface TagItem {
+  name: string;
+  count: number;
+  slug: string;
+}
+
+interface Props {
+  tags: TagItem[];
+}
+
+const { tags } = Astro.props;
+---
+
+<aside class="sidebar">
+  <section class="profile glass">
+    <img src={themeConfig.author.avatar} alt="" width="92" height="92" />
+    <h2>{themeConfig.author.name}</h2>
+    <p class="title">{themeConfig.author.title}</p>
+    <p>{themeConfig.author.bio}</p>
+    <div class="links">
+      {themeConfig.author.links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </div>
+  </section>
+
+  <section class="panel glass">
+    <h2>Tags</h2>
+    <div class="tag-grid">
+      {tags.slice(0, 8).map((tag) => (
+        <a href={`/tags/${tag.slug}/`}>
+          <span>{tag.name}</span>
+          <strong>{tag.count}</strong>
+        </a>
+      ))}
+    </div>
+    <a class="more" href="/tags/">Browse all tags →</a>
+  </section>
+
+  <section class="panel glass">
+    <h2>Now</h2>
+    <dl>
+      <div>
+        <dt>Listening</dt>
+        <dd>{themeConfig.now.listening}</dd>
+      </div>
+      <div>
+        <dt>Reading</dt>
+        <dd>{themeConfig.now.reading}</dd>
+      </div>
+      <div>
+        <dt>Working on</dt>
+        <dd>{themeConfig.now.working}</dd>
+      </div>
+    </dl>
+  </section>
+</aside>
+
+<style>
+  .sidebar {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+  }
+
+  .profile,
+  .panel {
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+  }
+
+  .profile {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  img {
+    border: 6px solid color-mix(in srgb, var(--surface-strong) 80%, white);
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  h2,
+  p,
+  dl {
+    margin: 0;
+  }
+
+  h2 {
+    margin-top: 0.75rem;
+    font-size: 1.08rem;
+  }
+
+  .title,
+  p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 1rem;
+  }
+
+  .links a {
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.4rem 0.62rem;
+  }
+
+  .tag-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  .tag-grid a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    border-radius: 999px;
+    background: var(--tag);
+    color: var(--muted);
+    font-size: 0.84rem;
+    padding: 0.48rem 0.65rem;
+  }
+
+  .tag-grid strong {
+    color: var(--text);
+    font-size: 0.78rem;
+  }
+
+  .more {
+    color: var(--primary);
+    font-size: 0.9rem;
+  }
+
+  dl {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.9rem;
+  }
+</style>

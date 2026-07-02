@@ -1,0 +1,58 @@
+---
+import PostCard from "@/components/PostCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getAllTags, getPublishedPosts } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return getAllTags(posts).map((tag) => ({
+    params: { tag: tag.slug },
+    props: {
+      tag: tag.name,
+      posts: posts.filter((post) => post.data.tags.some((item) => item.toLowerCase() === tag.name.toLowerCase()))
+    }
+  }));
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<BaseLayout title={`#${tag}`} description={`Posts tagged ${tag}.`}>
+  <section class="container page">
+    <header>
+      <a class="pill" href="/tags/">← Tags</a>
+      <h1>#{tag}</h1>
+      <p class="muted">{posts.length} posts collected under this tag.</p>
+    </header>
+
+    <div class="posts">
+      {posts.map((post) => <PostCard post={post} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 3.2rem 0 0;
+  }
+
+  header,
+  .posts {
+    width: min(100%, 880px);
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin: 1rem 0 0.6rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.8rem, 7vw, 5rem);
+    letter-spacing: -0.06em;
+    line-height: 1.02;
+  }
+
+  .posts {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+</style>

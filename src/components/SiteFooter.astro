@@ -1,0 +1,38 @@
+---
+import { themeConfig } from "@/config/theme";
+---
+
+<footer class="site-footer container">
+  <p>© {new Date().getFullYear()} {themeConfig.name}. Built with Astro, quiet colors and long-form reading in mind.</p>
+  <div>
+    <a href="/rss.xml">RSS</a>
+    <span aria-hidden="true">·</span>
+    <a href="/about/">About</a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+    padding: 3rem 0 2rem;
+  }
+
+  .site-footer div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .site-footer a:hover {
+    color: var(--primary);
+  }
+
+  @media (max-width: 680px) {
+    .site-footer {
+      flex-direction: column;
+    }
+  }
+</style>
