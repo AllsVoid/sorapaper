@@ -78,6 +78,7 @@ export interface SoraPaperThemeConfig {
     links: Array<{
       label: string;
       href: string;
+      icon?: string;
     }>;
   };
   now: {

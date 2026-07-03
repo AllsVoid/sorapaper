@@ -16,6 +16,37 @@ interface Props {
 
 const { tags, locale } = Astro.props;
 const t = getUi(locale);
+
+const socialIconAliases: Record<string, string> = {
+  github: "github",
+  gitlab: "gitlab",
+  email: "email",
+  mail: "email",
+  x: "x",
+  twitter: "x",
+  wechat: "wechat",
+  微信: "wechat",
+  bilibili: "bilibili",
+  哔哩哔哩: "bilibili",
+  discord: "discord",
+  telegram: "telegram",
+  linkedin: "linkedin",
+  instagram: "instagram",
+  youtube: "youtube",
+  facebook: "facebook",
+  rss: "rss",
+  website: "website",
+  site: "website",
+  blog: "website",
+  mastodon: "mastodon",
+  juejin: "juejin",
+  掘金: "juejin"
+};
+
+function getSocialIcon(link: { label: string; icon?: string }) {
+  const key = (link.icon ?? link.label).trim().toLowerCase();
+  return socialIconAliases[key] ?? key.replace(/\s+/g, "-");
+}
 ---
 
 <aside class="sidebar">
@@ -25,7 +56,14 @@ const t = getUi(locale);
     <p class="title">{themeConfig.author.title}</p>
     <p>{themeConfig.author.bio}</p>
     <div class="links">
-      {themeConfig.author.links.map((link) => <a href={link.href}>{link.label}</a>)}
+      {themeConfig.author.links.map((link) => {
+        const icon = getSocialIcon(link);
+        return (
+          <a href={link.href} aria-label={link.label} title={link.label}>
+            <span class="social-icon" style={`--icon-url: url("/assets/social/${icon}.svg")`}></span>
+          </a>
+        );
+      })}
     </div>
   </section>
 
@@ -108,17 +146,31 @@ const t = getUi(locale);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.45rem;
+    gap: 0.7rem;
     margin-top: 1rem;
   }
 
   .links a {
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface-strong);
+    display: inline-grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
     color: var(--muted);
-    font-size: 0.78rem;
-    padding: 0.4rem 0.62rem;
+    transition: color 160ms ease, transform 160ms ease;
+  }
+
+  .links a:hover {
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .social-icon {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: currentColor;
+    -webkit-mask: var(--icon-url) center / contain no-repeat;
+    mask: var(--icon-url) center / contain no-repeat;
   }
 
   .tag-grid {

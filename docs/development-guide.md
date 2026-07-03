@@ -50,6 +50,8 @@ npm run preview
 │  ├─ design-handoff.md
 │  └─ development-guide.md
 ├─ public/
+│  ├─ assets/
+│  │  └─ social/
 │  ├─ avatar.svg
 │  ├─ favicon.svg
 │  ├─ covers/
@@ -78,6 +80,7 @@ npm run preview
 - `src/i18n`：语言配置、路径工具和界面文案翻译表。
 - `src/layouts`：页面骨架，主要是全站布局和文章布局。
 - `src/components`：可复用 UI 组件。
+- `public/assets/social`：社交栏 SVG 图标资源，侧栏会根据 author link 的 `label` 或 `icon` 自动匹配。
 - `src/pages`：Astro 文件路由。
 
 ## 4. 架构说明
@@ -461,6 +464,23 @@ npm run check
 - 使用 `glass` 作为基础视觉。
 - 圆角使用 `--radius-md` 或 `--radius-lg`。
 - hover 只做轻微 `translateY` 或边框色变化。
+
+### 新增社交链接或图标
+
+社交栏配置优先写在 `sorapaper.ts` 的 `author.links`：
+
+```ts
+links: [
+  { label: "GitHub", href: "https://github.com/" },
+  { label: "Email", href: "mailto:hello@example.com" },
+  { label: "WeChat", href: "#wechat" },
+  { label: "My Site", href: "https://example.com", icon: "website" }
+]
+```
+
+侧栏会先读取 `icon`，没有 `icon` 时根据 `label` 自动匹配 `public/assets/social/*.svg`。常见内置图标包括 `github`、`email`、`x`、`wechat`、`bilibili`、`discord`、`telegram`、`linkedin`、`instagram`、`youtube`、`facebook`、`gitlab`、`rss`、`website`、`mastodon` 和 `juejin`。
+
+新增平台时，把同名 SVG 放到 `public/assets/social/<icon>.svg`，再在 `sorapaper.ts` 中使用 `icon: "<icon>"`。
 
 ### 新增评论系统
 

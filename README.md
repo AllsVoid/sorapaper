@@ -55,6 +55,8 @@ Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaul
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
 
+Social icons live in `public/assets/social`. Author links in `sorapaper.ts` are matched by `label` or optional `icon`, for example `GitHub`, `Email`, `X`, `WeChat`, `Bilibili`, `Discord`, `Telegram`, `LinkedIn`, `Instagram`, `YouTube`, `RSS` and `Website`.
+
 ## Internationalization
 
 Chinese is the default locale. Routes stay clean without `/zh` or `/en` prefixes; the language toggle stores the current locale in `localStorage.locale`.

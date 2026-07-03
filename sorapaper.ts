@@ -16,8 +16,9 @@ const config = {
     location: "Cloud garden",
     links: [
       { label: "GitHub", href: "https://github.com/" },
-      { label: "Twitter", href: "https://twitter.com/" },
-      { label: "Email", href: "mailto:hello@example.com" }
+      { label: "X", href: "https://x.com/" },
+      { label: "Email", href: "mailto:hello@example.com" },
+      { label: "WeChat", href: "#wechat" }
     ]
   },
   now: {
