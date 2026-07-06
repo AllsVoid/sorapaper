@@ -11,8 +11,8 @@ const config = {
   },
   author: {
     name: "Sora",
-    title: "Frontend Developer & Design Lover",
-    bio: "I enjoy building things for the web, beautiful interfaces and writing about the process.",
+    title: "Design Lover",
+    bio: "Shark shark~",
     avatar: "/avatar.svg",
     location: "Cloud garden",
     links: [
@@ -45,9 +45,9 @@ const config = {
       },
       hero: {
         eyebrow: "欢迎来到我的空间",
-        title: "你好，我写前端、设计与生活",
-        description: "一个记录想法、实验和日常的小花园。持续构建，持续学习，也持续写作。",
-        chips: ["Astro", "前端", "笔记"]
+        title: "设计并享受生活",
+        description: "一个记录想法、实验和日常的小花园。",
+        chips: ["生活", "技术", "笔记"]
       },
       article: {
         translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。",
@@ -66,9 +66,9 @@ const config = {
       },
       hero: {
         eyebrow: "Welcome to my space",
-        title: "Hi, I write about frontend, design and life",
-        description: "A digital garden of thoughts, experiments and little by little. Building in public, learning out loud.",
-        chips: ["Astro", "Frontend", "Notes"]
+        title: "Design and enjoy my life",
+        description: "A digital garden of thoughts, experiments and little by little. ",
+        chips: ["Life", "Technology", "Notes"]
       },
       article: {
         translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here.",
