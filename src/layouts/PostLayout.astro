@@ -108,14 +108,29 @@ const t = getUi(locale);
 <style>
   .article-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--article)) 220px;
-    gap: 1.2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--article)) minmax(0, 1fr);
     align-items: start;
+  }
+
+  article.container {
+    --article: 920px;
+    --article-aside: 220px;
+    --article-gap: 1.4rem;
+    --container: calc(var(--article) + (var(--article-aside) + var(--article-gap)) * 2);
   }
 
   .article-content {
     border-radius: var(--radius-lg);
-    padding: clamp(1.2rem, 4vw, 2.4rem);
+    grid-column: 2;
+    font-size: clamp(1.08rem, 0.55vw + 1rem, 1.24rem);
+    line-height: 1.95;
+    padding: clamp(1.4rem, 4vw, 2.8rem);
+  }
+
+  .article-grid :global(.toc) {
+    justify-self: start;
+    width: min(var(--article-aside), calc(100% - var(--article-gap)));
+    margin-left: var(--article-gap);
   }
 
   .translation-toast {
@@ -226,6 +241,10 @@ const t = getUi(locale);
     .article-grid > div:first-child,
     .article-grid > div:last-child {
       display: none;
+    }
+
+    .article-content {
+      grid-column: auto;
     }
   }
 
