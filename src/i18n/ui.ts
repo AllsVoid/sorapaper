@@ -33,6 +33,7 @@ export const defaultUi = {
     article: {
       back: "返回",
       updated: "更新于",
+      translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。",
       copyright: "使用 SoraPaper 写作。转载时请保留原文链接。",
       browseArchive: "浏览归档"
     },
@@ -87,6 +88,7 @@ export const defaultUi = {
     article: {
       back: "Back",
       updated: "Updated",
+      translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here.",
       copyright: "Written with SoraPaper. Please keep the original link when reposting.",
       browseArchive: "Browse archive"
     },

@@ -33,6 +33,7 @@ export interface LocaleUiConfig {
   article: {
     back: string;
     updated: string;
+    translationUnavailable: string;
     copyright: string;
     browseArchive: string;
   };

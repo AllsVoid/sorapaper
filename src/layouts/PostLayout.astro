@@ -35,6 +35,11 @@ const t = getUi(locale);
     }
   }}
 >
+  {!alternatePath && (
+    <div class="translation-toast" role="status" aria-live="polite" data-translation-toast data-post-locale={post.data.lang}>
+      {t.article.translationUnavailable}
+    </div>
+  )}
   <article class="container">
     <ArticleHeader post={post} locale={locale} />
     <div class="article-grid">
@@ -51,6 +56,34 @@ const t = getUi(locale);
   </article>
 </BaseLayout>
 
+<script>
+  const translationToast = document.querySelector("[data-translation-toast]");
+  const postLocale = translationToast?.getAttribute("data-post-locale");
+
+  function showTranslationToast() {
+    if (!translationToast) return;
+    translationToast.classList.remove("is-visible");
+    window.requestAnimationFrame(() => {
+      translationToast.classList.add("is-visible");
+    });
+  }
+
+  function syncTranslationToast(locale = document.documentElement.dataset.locale) {
+    if (!translationToast || !postLocale) return;
+    if (locale && locale !== postLocale) {
+      showTranslationToast();
+    } else {
+      translationToast.classList.remove("is-visible");
+    }
+  }
+
+  syncTranslationToast();
+  document.addEventListener("sorapaper:locale-change", (event) => {
+    const locale = event instanceof CustomEvent ? event.detail?.locale : undefined;
+    syncTranslationToast(locale);
+  });
+</script>
+
 <style>
   .article-grid {
     display: grid;
@@ -62,6 +95,50 @@ const t = getUi(locale);
   .article-content {
     border-radius: var(--radius-lg);
     padding: clamp(1.2rem, 4vw, 2.4rem);
+  }
+
+  .translation-toast {
+    position: fixed;
+    right: max(1rem, calc((100vw - var(--container)) / 2));
+    bottom: 1.25rem;
+    z-index: 40;
+    width: min(22rem, calc(100vw - 2rem));
+    border: 1px solid color-mix(in srgb, var(--primary) 46%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 18%, var(--surface-strong));
+    color: var(--text);
+    box-shadow: var(--shadow-card);
+    padding: 0.9rem 1.1rem;
+    line-height: 1.55;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.6rem) scale(0.96);
+    visibility: hidden;
+    backdrop-filter: blur(16px);
+  }
+
+  .translation-toast.is-visible {
+    animation: toast-bubble 5s ease-in-out forwards;
+    visibility: visible;
+  }
+
+  @keyframes toast-bubble {
+    0% {
+      opacity: 0;
+      transform: translateY(0.6rem) scale(0.96);
+    }
+
+    10%,
+    82% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(0.35rem) scale(0.98);
+    }
   }
 
   .post-footer {
@@ -90,6 +167,33 @@ const t = getUi(locale);
     .article-grid > div:first-child,
     .article-grid > div:last-child {
       display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .translation-toast {
+      right: 1rem;
+      bottom: 1rem;
+      width: calc(100vw - 2rem);
+      border-radius: var(--radius-lg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .translation-toast.is-visible {
+      animation: toast-fade 5s linear forwards;
+    }
+
+    @keyframes toast-fade {
+      0%,
+      82% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
     }
   }
 </style>

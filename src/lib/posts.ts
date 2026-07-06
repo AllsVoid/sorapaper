@@ -35,6 +35,12 @@ export function getPostAlternates(post: BlogPost, posts: BlogPost[]) {
   return Object.fromEntries(alternates) as Partial<Record<Locale, string>>;
 }
 
+export function getTranslatedPost(post: BlogPost, posts: BlogPost[], targetLocale: Locale) {
+  if (!post.data.translationKey) return undefined;
+
+  return posts.find((item) => item.data.lang === targetLocale && item.data.translationKey === post.data.translationKey);
+}
+
 export function getReadingTime(body = "", locale: Locale = defaultLocale) {
   const wordsPerMinute = 320;
   const chineseChars = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;

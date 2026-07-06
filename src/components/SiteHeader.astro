@@ -68,6 +68,7 @@ const nav = [
     localStorage.setItem("locale", next);
     document.documentElement.dataset.locale = next;
     document.documentElement.lang = next;
+    document.dispatchEvent(new CustomEvent("sorapaper:locale-change", { detail: { locale: next } }));
 
     const alternatePath = localeButton.getAttribute("data-alternate-path");
     if (alternatePath && alternatePath !== currentPath) {

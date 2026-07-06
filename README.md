@@ -61,7 +61,7 @@ Social icons live in `public/assets/social`. Author links in `sorapaper.ts` are 
 
 Chinese is the default locale. Routes stay clean without `/zh` or `/en` prefixes; the language toggle stores the current locale in `localStorage.locale`.
 
-Add `lang: zh` or `lang: en` to each post frontmatter. Use the same `translationKey` for translated versions of the same article.
+Add `lang: zh` or `lang: en` to each post frontmatter. Use the same `translationKey` for translated versions of the same article. When a translated article is missing, the language toggle keeps readers on the current post and only changes the interface locale; the notice text can be customized with `ui.{locale}.article.translationUnavailable`.
 
 ## Design Handoff
 

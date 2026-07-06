@@ -250,7 +250,7 @@ tags: ["Framework", "Frontend"]
 
 - 页面 URL 不带 `/zh` 或 `/en` 前缀。
 - 首页、归档、标签、关于、友链等公共页面同时渲染中文和英文区块，通过 `html[data-locale]` 显示当前语言。
-- 文章详情页按文章文件 slug 生成无前缀路径，语言切换时根据 `translationKey` 跳转到对应译文文章。
+- 文章详情页按文章文件 slug 生成无前缀路径，语言切换时通过 `getTranslatedPost(post, posts, targetLocale)` 根据 `translationKey` 跳转到对应译文文章；没有译文时不跳转，只切换 `html[data-locale]` 和 `localStorage.locale`，并显示 `ui.{locale}.article.translationUnavailable` 提示。
 - 文章列表通过 `getPublishedPosts(locale)` 按 frontmatter 的 `lang` 过滤。
 - 搜索索引输出所有文章，客户端按当前 `data-locale` 过滤结果。
 

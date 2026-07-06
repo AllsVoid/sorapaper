@@ -48,6 +48,9 @@ const config = {
         title: "你好，我写前端、设计与生活",
         description: "一个记录想法、实验和日常的小花园。持续构建，持续学习，也持续写作。",
         chips: ["Astro", "前端", "笔记"]
+      },
+      article: {
+        translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。"
       }
     },
     en: {
@@ -63,6 +66,9 @@ const config = {
         title: "Hi, I write about frontend, design and life",
         description: "A digital garden of thoughts, experiments and little by little. Building in public, learning out loud.",
         chips: ["Astro", "Frontend", "Notes"]
+      },
+      article: {
+        translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here."
       }
     }
   }
