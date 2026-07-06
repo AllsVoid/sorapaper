@@ -34,6 +34,9 @@ export interface LocaleUiConfig {
     back: string;
     updated: string;
     translationUnavailable: string;
+    postNavigation: string;
+    previousPost: string;
+    nextPost: string;
     copyright: string;
     browseArchive: string;
   };

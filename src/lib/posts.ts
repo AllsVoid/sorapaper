@@ -41,6 +41,15 @@ export function getTranslatedPost(post: BlogPost, posts: BlogPost[], targetLocal
   return posts.find((item) => item.data.lang === targetLocale && item.data.translationKey === post.data.translationKey);
 }
 
+export function getAdjacentPosts(posts: BlogPost[], currentPost: BlogPost) {
+  const currentIndex = posts.findIndex((post) => post.id === currentPost.id);
+
+  return {
+    previousPost: currentIndex > 0 ? posts[currentIndex - 1] : undefined,
+    nextPost: currentIndex >= 0 ? posts[currentIndex + 1] : undefined
+  };
+}
+
 export function getReadingTime(body = "", locale: Locale = defaultLocale) {
   const wordsPerMinute = 320;
   const chineseChars = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;

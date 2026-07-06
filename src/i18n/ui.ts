@@ -34,6 +34,9 @@ export const defaultUi = {
       back: "返回",
       updated: "更新于",
       translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。",
+      postNavigation: "相邻文章",
+      previousPost: "上一篇",
+      nextPost: "下一篇",
       copyright: "使用 SoraPaper 写作。转载时请保留原文链接。",
       browseArchive: "浏览归档"
     },
@@ -89,6 +92,9 @@ export const defaultUi = {
       back: "Back",
       updated: "Updated",
       translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here.",
+      postNavigation: "Adjacent posts",
+      previousPost: "Previous",
+      nextPost: "Next",
       copyright: "Written with SoraPaper. Please keep the original link when reposting.",
       browseArchive: "Browse archive"
     },

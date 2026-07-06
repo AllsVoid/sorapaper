@@ -50,7 +50,10 @@ const config = {
         chips: ["Astro", "前端", "笔记"]
       },
       article: {
-        translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。"
+        translationUnavailable: "当前文章暂无对应译文，语言切换会保留在当前页面。",
+        postNavigation: "相邻文章",
+        previousPost: "上一篇",
+        nextPost: "下一篇"
       }
     },
     en: {
@@ -68,7 +71,10 @@ const config = {
         chips: ["Astro", "Frontend", "Notes"]
       },
       article: {
-        translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here."
+        translationUnavailable: "This post is not available in the other language yet. Switching language will keep you here.",
+        postNavigation: "Adjacent posts",
+        previousPost: "Previous",
+        nextPost: "Next"
       }
     }
   }

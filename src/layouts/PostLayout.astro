@@ -11,10 +11,12 @@ interface Props {
   locale: Locale;
   alternatePath?: string;
   alternates?: Partial<Record<Locale, string>>;
+  previousPost?: BlogPost;
+  nextPost?: BlogPost;
   headings: { depth: number; slug: string; text: string }[];
 }
 
-const { post, locale, alternatePath, alternates, headings } = Astro.props;
+const { post, locale, alternatePath, alternates, previousPost, nextPost, headings } = Astro.props;
 const t = getUi(locale);
 ---
 
@@ -49,14 +51,31 @@ const t = getUi(locale);
       </div>
       {post.data.toc ? <TableOfContents headings={headings} /> : <div></div>}
     </div>
+    {(previousPost || nextPost) && (
+      <nav class="post-nav" aria-label={t.article.postNavigation}>
+        {previousPost ? (
+          <a class="post-nav-card glass previous" href={getPostHref(previousPost)}>
+            <span>{t.article.previousPost}</span>
+            <strong>{previousPost.data.title}</strong>
+          </a>
+        ) : (
+          <div aria-hidden="true"></div>
+        )}
+        {nextPost && (
+          <a class="post-nav-card glass next" href={getPostHref(nextPost)}>
+            <span>{t.article.nextPost}</span>
+            <strong>{nextPost.data.title}</strong>
+          </a>
+        )}
+      </nav>
+    )}
     <footer class="post-footer">
       <p>{t.article.copyright}</p>
       <a href={localizePath(locale, "/archive/")}>{t.article.browseArchive} →</a>
     </footer>
   </article>
-</BaseLayout>
 
-<script>
+  <script>
   const translationToast = document.querySelector("[data-translation-toast]");
   const postLocale = translationToast?.getAttribute("data-post-locale");
 
@@ -82,7 +101,9 @@ const t = getUi(locale);
     const locale = event instanceof CustomEvent ? event.detail?.locale : undefined;
     syncTranslationToast(locale);
   });
-</script>
+  </script>
+</BaseLayout>
+
 
 <style>
   .article-grid {
@@ -141,9 +162,47 @@ const t = getUi(locale);
     }
   }
 
-  .post-footer {
+  .post-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
     width: min(100%, var(--article));
     margin: 1.2rem auto 0;
+  }
+
+  .post-nav-card {
+    display: grid;
+    min-height: 7.5rem;
+    align-content: center;
+    gap: 0.55rem;
+    border-radius: var(--radius-lg);
+    padding: 1.1rem;
+  }
+
+  .post-nav-card:hover {
+    border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+    transform: translateY(-1px);
+  }
+
+  .post-nav-card span {
+    color: var(--muted);
+    font-size: 0.86rem;
+  }
+
+  .post-nav-card strong {
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: clamp(1.08rem, 2vw, 1.28rem);
+    line-height: 1.35;
+  }
+
+  .post-nav-card.next {
+    text-align: right;
+  }
+
+  .post-footer {
+    width: min(100%, var(--article));
+    margin: 1rem auto 0;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
@@ -171,6 +230,20 @@ const t = getUi(locale);
   }
 
   @media (max-width: 640px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav > div:empty {
+      display: none;
+    }
+
+    .post-nav-card,
+    .post-nav-card.next {
+      min-height: auto;
+      text-align: left;
+    }
+
     .translation-toast {
       right: 1rem;
       bottom: 1rem;

@@ -76,7 +76,7 @@ npm run preview
 - `src/content.config.ts`：文章和友链的 Content Collections schema。
 - `src/content/blog`：示例文章，支持 `.md` 和 `.mdx`。
 - `src/content/friends`：友链内容。
-- `src/lib/posts.ts`：文章查询、排序、slug、阅读时间、标签和归档工具函数。
+- `src/lib/posts.ts`：文章查询、排序、slug、阅读时间、标签、归档、译文查找和相邻文章工具函数。
 - `src/i18n`：语言配置、路径工具和界面文案翻译表。
 - `src/layouts`：页面骨架，主要是全站布局和文章布局。
 - `src/components`：可复用 UI 组件。
@@ -251,7 +251,7 @@ tags: ["Framework", "Frontend"]
 - 页面 URL 不带 `/zh` 或 `/en` 前缀。
 - 首页、归档、标签、关于、友链等公共页面同时渲染中文和英文区块，通过 `html[data-locale]` 显示当前语言。
 - 文章详情页按文章文件 slug 生成无前缀路径，语言切换时通过 `getTranslatedPost(post, posts, targetLocale)` 根据 `translationKey` 跳转到对应译文文章；没有译文时不跳转，只切换 `html[data-locale]` 和 `localStorage.locale`，并显示 `ui.{locale}.article.translationUnavailable` 提示。
-- 文章列表通过 `getPublishedPosts(locale)` 按 frontmatter 的 `lang` 过滤。
+- 文章列表通过 `getPublishedPosts(locale)` 按 frontmatter 的 `lang` 过滤。文章页使用同语言文章列表和 `getAdjacentPosts(posts, currentPost)` 生成上一篇/下一篇导航。
 - 搜索索引输出所有文章，客户端按当前 `data-locale` 过滤结果。
 
 路径工具：
