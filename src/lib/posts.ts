@@ -22,6 +22,19 @@ export function getPostHref(post: BlogPost) {
   return `/posts/${getPostSlug(post)}/`;
 }
 
+export function getPostAlternates(post: BlogPost, posts: BlogPost[]) {
+  const alternates = new Map<Locale, string>();
+  const relatedPosts = post.data.translationKey
+    ? posts.filter((item) => item.data.translationKey === post.data.translationKey)
+    : [post];
+
+  for (const relatedPost of relatedPosts) {
+    alternates.set(relatedPost.data.lang, getPostHref(relatedPost));
+  }
+
+  return Object.fromEntries(alternates) as Partial<Record<Locale, string>>;
+}
+
 export function getReadingTime(body = "", locale: Locale = defaultLocale) {
   const wordsPerMinute = 320;
   const chineseChars = body.match(/[\u4e00-\u9fa5]/g)?.length ?? 0;

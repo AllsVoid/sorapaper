@@ -2,7 +2,7 @@
 import { render } from "astro:content";
 import PostLayout from "@/layouts/PostLayout.astro";
 import { locales } from "@/i18n/config";
-import { getPostHref, getPostSlug, getPublishedPosts } from "@/lib/posts";
+import { getPostAlternates, getPostHref, getPostSlug, getPublishedPosts } from "@/lib/posts";
 
 export async function getStaticPaths() {
   const paths: Array<{
@@ -24,13 +24,15 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const locale = post.data.lang;
 const targetLocale = locale === "zh" ? "en" : "zh";
+const allPosts = await getPublishedPosts();
 const translatedPost = post.data.translationKey
-  ? (await getPublishedPosts(targetLocale)).find((item) => item.data.translationKey === post.data.translationKey)
+  ? allPosts.find((item) => item.data.lang === targetLocale && item.data.translationKey === post.data.translationKey)
   : undefined;
-const alternatePath = translatedPost ? getPostHref(translatedPost) : "/";
+const alternatePath = translatedPost ? getPostHref(translatedPost) : undefined;
+const alternates = getPostAlternates(post, allPosts);
 const { Content, headings } = await render(post);
 ---
 
-<PostLayout post={post} locale={locale} alternatePath={alternatePath} headings={headings}>
+<PostLayout post={post} locale={locale} alternatePath={alternatePath} alternates={alternates} headings={headings}>
   <Content />
 </PostLayout>

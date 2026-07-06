@@ -69,7 +69,7 @@ npm run preview
 
 关键目录职责：
 
-- `sorapaper.ts`：用户统一配置入口，包括站点信息、作者、功能开关、Now 卡片和多语言页面文案。
+- `sorapaper.ts`：用户统一配置入口，包括站点信息、默认 Open Graph 图片、作者、功能开关、Now 卡片和多语言页面文案。
 - `src/config/theme.ts`：内部默认主题配置，会被 `sorapaper.ts` 强覆盖。
 - `src/i18n/ui.ts`：内部默认本地化界面文案，会被 `sorapaper.ts.ui` 强覆盖。
 - `src/styles/global.css`：全局样式和视觉 token，是视觉一致性的核心文件。
@@ -113,6 +113,8 @@ flowchart TD
 - `/friends/`：友链页。
 - `/rss.xml`：RSS 输出。
 - `/search.json`：静态搜索索引，客户端按当前语言过滤。
+
+SEO 输出集中在 `src/layouts/BaseLayout.astro`：普通页面输出 canonical、Open Graph、Twitter Card 和默认分享图；文章页通过 `PostLayout.astro` 传入 article metadata，输出 `og:type=article`、发布时间、更新时间、标签和基于 `translationKey` 的 `hreflang` alternate links。RSS、搜索索引和 sitemap 仍使用无语言前缀的 clean routes。
 
 组件分层：
 

@@ -49,9 +49,9 @@ toc: true
 
 ## Theme Configuration
 
-Edit the root `sorapaper.ts` file for site metadata, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
+Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
 
-Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins.
+Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image; article covers override it when present.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
 

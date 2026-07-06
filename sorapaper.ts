@@ -5,6 +5,7 @@ const config = {
     name: "SoraPaper",
     description: "A soft, readable Astro theme for long-form writing.",
     url: "https://example.com",
+    ogImage: "/covers/sky.svg",
     defaultLocale: "zh",
     locales: ["zh", "en"]
   },

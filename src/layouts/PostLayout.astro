@@ -2,7 +2,7 @@
 import ArticleHeader from "@/components/ArticleHeader.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import type { BlogPost } from "@/lib/posts";
+import { getPostHref, type BlogPost } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
@@ -10,14 +10,31 @@ interface Props {
   post: BlogPost;
   locale: Locale;
   alternatePath?: string;
+  alternates?: Partial<Record<Locale, string>>;
   headings: { depth: number; slug: string; text: string }[];
 }
 
-const { post, locale, alternatePath, headings } = Astro.props;
+const { post, locale, alternatePath, alternates, headings } = Astro.props;
 const t = getUi(locale);
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description} locale={locale} alternatePath={alternatePath}>
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  locale={locale}
+  alternatePath={alternatePath}
+  seo={{
+    type: "article",
+    canonicalPath: getPostHref(post),
+    image: post.data.cover?.src,
+    alternates,
+    article: {
+      publishedTime: post.data.pubDate,
+      modifiedTime: post.data.updatedDate,
+      tags: post.data.tags
+    }
+  }}
+>
   <article class="container">
     <ArticleHeader post={post} locale={locale} />
     <div class="article-grid">

@@ -6,21 +6,51 @@ import { themeConfig } from "@/config/theme";
 import { defaultLocale, type Locale } from "@/i18n/config";
 import "@/styles/global.css";
 
+type SeoType = "website" | "article";
+
+interface SeoConfig {
+  type?: SeoType;
+  canonicalPath?: string;
+  image?: string;
+  alternates?: Partial<Record<Locale, string>>;
+  article?: {
+    publishedTime: Date;
+    modifiedTime?: Date;
+    tags?: string[];
+  };
+}
+
 interface Props {
   title?: string;
   description?: string;
   locale?: Locale;
   alternatePath?: string;
+  seo?: SeoConfig;
 }
 
 const {
   title = themeConfig.name,
   description = themeConfig.description,
   locale = defaultLocale,
-  alternatePath
+  alternatePath,
+  seo = {}
 } = Astro.props;
 
 const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfig.name}`;
+const seoType = seo.type ?? "website";
+const siteUrl = themeConfig.site.url.endsWith("/") ? themeConfig.site.url : `${themeConfig.site.url}/`;
+const canonicalUrl = new URL(seo.canonicalPath ?? Astro.url.pathname, siteUrl).toString();
+const imageUrl = new URL(seo.image ?? themeConfig.site.ogImage, siteUrl).toString();
+const alternateEntries = Object.entries(seo.alternates ?? {}) as Array<[Locale, string]>;
+const xDefaultPath = seo.alternates?.[defaultLocale] ?? seo.alternates?.[locale] ?? seo.canonicalPath ?? Astro.url.pathname;
+
+function getOgLocale(value: Locale) {
+  return value === "zh" ? "zh_CN" : "en_US";
+}
+
+function getHrefLang(value: Locale) {
+  return value === "zh" ? "zh-CN" : "en";
+}
 ---
 
 <!doctype html>
@@ -29,9 +59,32 @@ const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfi
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="canonical" href={canonicalUrl} />
+    {alternateEntries.map(([alternateLocale, href]) => (
+      <link rel="alternate" hreflang={getHrefLang(alternateLocale)} href={new URL(href, siteUrl).toString()} />
+    ))}
+    {alternateEntries.length > 0 && <link rel="alternate" hreflang="x-default" href={new URL(xDefaultPath, siteUrl).toString()} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={seoType} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content={themeConfig.name} />
+    <meta property="og:locale" content={getOgLocale(locale)} />
+    {alternateEntries.filter(([alternateLocale]) => alternateLocale !== locale).map(([alternateLocale]) => (
+      <meta property="og:locale:alternate" content={getOgLocale(alternateLocale)} />
+    ))}
+    <meta property="og:image" content={imageUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    {seoType === "article" && seo.article && (
+      <>
+        <meta property="article:published_time" content={seo.article.publishedTime.toISOString()} />
+        <meta property="article:modified_time" content={(seo.article.modifiedTime ?? seo.article.publishedTime).toISOString()} />
+        {seo.article.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
+      </>
+    )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{pageTitle}</title>
     <script is:inline>
