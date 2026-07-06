@@ -18,7 +18,8 @@ const nav = [
   { zh: ui.zh.nav.archive, en: ui.en.nav.archive, href: "/archive/" },
   { zh: ui.zh.nav.tags, en: ui.en.nav.tags, href: "/tags/" },
   { zh: ui.zh.nav.about, en: ui.en.nav.about, href: "/about/" },
-  { zh: ui.zh.nav.friends, en: ui.en.nav.friends, href: "/friends/" }
+  { zh: ui.zh.nav.friends, en: ui.en.nav.friends, href: "/friends/" },
+  { zh: "RSS", en: "RSS", href: "/rss.xml" }
 ];
 ---
 
@@ -38,8 +39,22 @@ const nav = [
   </nav>
 
   <div class="actions">
-    <button class="scheme" type="button" aria-label="Change color scheme" data-scheme-toggle>◌</button>
-    <button class="search" type="button" aria-label={t.search.ariaOpen} data-search-trigger>⌕</button>
+    <button class="scheme" type="button" aria-label="Change color scheme" data-scheme-toggle>
+      <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+        <path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5c0-1.35-.96-2.28-2.22-2.28h-1.06c-.7 0-1.18-.55-1.18-1.16 0-.32.12-.62.34-.86.4-.44.33-1.15-.18-1.46A8.45 8.45 0 0 0 12 3.5Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.65"/>
+        <circle cx="8.35" cy="10" r="1.05" fill="currentColor"/>
+        <circle cx="11.25" cy="7.45" r="1.05" fill="currentColor"/>
+        <circle cx="7.95" cy="14" r="1.05" fill="currentColor"/>
+        <circle cx="12.25" cy="16.4" r="1.05" fill="currentColor"/>
+      </svg>
+    </button>
+    <button class="search" type="button" aria-label={t.search.ariaOpen} data-search-trigger>
+      <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+        <path d="m16.7 16.7 3.3 3.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+        <circle cx="10.9" cy="10.9" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M8.35 9.45c.55-1.05 1.52-1.7 2.72-1.82" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/>
+      </svg>
+    </button>
     <button class="language" type="button" aria-label="Switch language" data-locale-toggle data-alternate-path={alternatePath ?? ""}>
       <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" aria-hidden="true">
         <path d="m476-80 182-480h84L924-80h-84l-43-122H603L560-80h-84ZM160-200l-56-56 202-202q-35-35-63.5-80T190-640h84q20 39 40 68t48 58q33-33 68.5-92.5T484-720H40v-80h280v-80h80v80h280v80H564q-21 72-63 148t-83 116l96 98-30 82-122-125-202 201Zm468-72h144l-72-204-72 204Z" />
@@ -152,6 +167,12 @@ const nav = [
 
   .language {
     padding: 0;
+  }
+
+  .search svg,
+  .scheme svg,
+  .language svg {
+    display: block;
   }
 
   .language svg {
