@@ -10,7 +10,7 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Built-in i18n structure for Chinese and English without visible locale prefixes.
 - Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
 - Homepage hero, latest posts, profile sidebar, tags and now card.
-- Archive, tag index, tag detail, about and friends pages.
+- Archive, tag index, tag detail, about, friends and travel pages.
 - Article layout with metadata, reading time, floating TOC, reading progress and previous/next post navigation.
 - Zero-dependency localized static search using `/search.json`.
 - RSS and sitemap-ready configuration.

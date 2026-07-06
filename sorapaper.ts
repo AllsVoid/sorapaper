@@ -41,7 +41,8 @@ const config = {
         archive: "归档",
         tags: "标签",
         about: "关于",
-        friends: "友链"
+        friends: "友链",
+        travel: "游记"
       },
       hero: {
         eyebrow: "欢迎来到我的空间",
@@ -62,7 +63,8 @@ const config = {
         archive: "Archive",
         tags: "Tags",
         about: "About",
-        friends: "Friends"
+        friends: "Friends",
+        travel: "Travel"
       },
       hero: {
         eyebrow: "Welcome to my space",

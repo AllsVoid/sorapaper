@@ -10,7 +10,8 @@ export const defaultUi = {
       archive: "归档",
       tags: "标签",
       about: "关于",
-      friends: "友链"
+      friends: "友链",
+      travel: "游记"
     },
     hero: {
       eyebrow: "欢迎来到我的空间",
@@ -48,7 +49,11 @@ export const defaultUi = {
       taggedDescription: "这个标签下收录的文章。",
       aboutTitle: "关于",
       friendsTitle: "网络花园里的邻居",
-      friendsDescription: "一些值得访问的链接。"
+      friendsDescription: "一些值得访问的链接。",
+      travelTitle: "游记",
+      travelDescription: "未来会在这里记录旅行路线、城市印象和地图足迹。",
+      travelEmptyTitle: "旅行地图即将展开",
+      travelEmptyDescription: "这个页面暂时独立于博客系统，后续可以接入地图、地点数据和旅行记录服务。"
     },
     search: {
       label: "搜索文章",
@@ -68,7 +73,8 @@ export const defaultUi = {
       archive: "Archive",
       tags: "Tags",
       about: "About",
-      friends: "Friends"
+      friends: "Friends",
+      travel: "Travel"
     },
     hero: {
       eyebrow: "Welcome to my space",
@@ -106,7 +112,11 @@ export const defaultUi = {
       taggedDescription: "Posts collected under this tag.",
       aboutTitle: "About",
       friendsTitle: "Neighbors in the web garden",
-      friendsDescription: "A small collection of links worth visiting."
+      friendsDescription: "A small collection of links worth visiting.",
+      travelTitle: "Travel",
+      travelDescription: "A future home for routes, city notes and map-based travel records.",
+      travelEmptyTitle: "The travel map will unfold here",
+      travelEmptyDescription: "This page is separate from the blog system, ready for maps, place data and a dedicated travel service later."
     },
     search: {
       label: "Search posts",

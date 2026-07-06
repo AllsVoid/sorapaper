@@ -11,7 +11,7 @@ export type DeepPartial<T> = T extends Primitive
 export type LocaleCode = "zh" | "en";
 
 export interface LocaleUiConfig {
-  nav: Record<"home" | "archive" | "tags" | "about" | "friends", string>;
+  nav: Record<"home" | "archive" | "tags" | "about" | "friends" | "travel", string>;
   hero: {
     eyebrow: string;
     title: string;
@@ -49,6 +49,10 @@ export interface LocaleUiConfig {
     aboutTitle: string;
     friendsTitle: string;
     friendsDescription: string;
+    travelTitle: string;
+    travelDescription: string;
+    travelEmptyTitle: string;
+    travelEmptyDescription: string;
   };
   search: {
     label: string;
