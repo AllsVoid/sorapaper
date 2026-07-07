@@ -1,5 +1,6 @@
 ---
 import ArticleHeader from "@/components/ArticleHeader.astro";
+import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getPostHref, type BlogPost } from "@/lib/posts";
@@ -74,6 +75,7 @@ const t = getUi(locale);
       <a href={localizePath(locale, "/archive/")}>{t.article.browseArchive} →</a>
     </footer>
   </article>
+  <LivePhotoLoader />
 
   <script>
   const translationToast = document.querySelector("[data-translation-toast]");

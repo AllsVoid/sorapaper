@@ -224,9 +224,16 @@ Markdown 扩展：
 - 文章支持 `:::details[标题]` 折叠块，默认输出原生 `<details>` / `<summary>`；可用 `{open=true}` 默认展开。
 - 文章支持 `::::tabs` 包裹多个 `:::tab[标题]`，输出纯 CSS 标签页，不依赖客户端 JavaScript。
 - 文章可以继续使用标准 Markdown 图片语法 `![alt](src)`。
-- 文章支持 `:::img{src="..." alt="..."}` 图片块，用于图注、缩放、链接、图片来源和实况图片占位；`scale` 表示相对正文宽度的百分比，默认 `100`，`live` 非空时输出实况图片数据标记。
+- 文章支持 `:::img{src="..." alt="..."}` 图片块，用于图注、缩放、链接、图片来源和实况图片；`scale` 表示相对正文宽度的百分比，默认 `100`。`live` 非空时，构建阶段输出静态图片 fallback 和 LivePhotosKit 初始化数据，文章页由 `LivePhotoLoader.astro` 按需加载 Apple LivePhotosKit JS。Live Photo 素材应使用同一实况照片导出的 JPEG + MOV 配对；已验证可播放素材中 JPEG 的 `Apple:MediaGroupUUID` 与 MOV 的 `Keys:ContentIdentifier` 一致，MOV 还包含 `NRT Metadata` / `mebx` 元数据轨道和 `StillImageTime`。
 - 扩展语法预览文章位于 `src/content/blog/markdown-extended-preview.md`，新增或调整扩展语法时同步更新。
 - 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README、预览文章与文章样式。
+
+Live Photo 元数据排查命令：
+
+```bash
+exiftool -a -G1 -s -MediaGroupUUID -ContentIdentifier -StillImageTime photo.jpg live.mov
+ffprobe -hide_banner -show_format -show_streams -of json live.mov
+```
 
 维护约定：
 

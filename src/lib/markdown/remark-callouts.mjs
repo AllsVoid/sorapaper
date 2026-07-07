@@ -11,6 +11,10 @@ const calloutLabels = {
 const calloutTypes = new Set(Object.keys(calloutLabels));
 const loadingValues = new Set(["lazy", "eager"]);
 const decodingValues = new Set(["async", "sync", "auto"]);
+const booleanAttributeValues = new Map([
+  ["true", "true"],
+  ["false", "false"]
+]);
 
 function escapeHtml(value) {
   return value
@@ -73,9 +77,30 @@ function getImageScale(node) {
   return Math.min(100, Math.max(1, scale));
 }
 
+function getImageRatio(node) {
+  const rawRatio = getStringAttribute(node, "ratio");
+  if (!rawRatio) return "16 / 9";
+
+  const ratio = rawRatio.replace(/\s+/g, "");
+  if (/^\d+(?:\.\d+)?\/\d+(?:\.\d+)?$/.test(ratio)) {
+    return ratio.replace("/", " / ");
+  }
+
+  return "16 / 9";
+}
+
 function getAllowedValue(node, key, allowedValues, fallback) {
   const value = getStringAttribute(node, key);
   return value && allowedValues.has(value) ? value : fallback;
+}
+
+function getBooleanAttribute(node, key) {
+  const value = node.attributes?.[key];
+  if (value === "" || value === true) return "true";
+  if (value === false) return "false";
+  if (typeof value !== "string") return undefined;
+
+  return booleanAttributeValues.get(value.trim().toLowerCase());
 }
 
 function transformImage(node) {
@@ -87,8 +112,12 @@ function transformImage(node) {
   const credit = getStringAttribute(node, "credit");
   const href = getStringAttribute(node, "href");
   const live = getStringAttribute(node, "live");
+  const liveControls = getBooleanAttribute(node, "liveControls");
+  const livePreload = getBooleanAttribute(node, "livePreload");
+  const photoTime = getStringAttribute(node, "photoTime");
   const title = getStringAttribute(node, "title");
   const scale = getImageScale(node);
+  const ratio = getImageRatio(node);
   const loading = getAllowedValue(node, "loading", loadingValues, "lazy");
   const decoding = getAllowedValue(node, "decoding", decodingValues, "async");
   const imageNode = {
@@ -104,26 +133,68 @@ function transformImage(node) {
       }
     }
   };
+  const livePlayerNode = live
+    ? {
+        type: "paragraph",
+        data: {
+          hName: "div",
+          hProperties: {
+            className: ["live-photo-frame"],
+            ...(alt ? { role: "img", "aria-label": alt } : {}),
+            "data-live-photo-frame": "true"
+          }
+        },
+        children: [
+          {
+            type: "paragraph",
+            data: {
+              hName: "div",
+              hProperties: {
+                className: ["live-photo-player"],
+                "data-live-photo": "true",
+                "data-live-photo-target": "true",
+                "data-photo-src": src,
+                "data-video-src": live,
+                ...(photoTime ? { "data-photo-time": photoTime } : {}),
+                ...(liveControls ? { "data-shows-native-controls": liveControls } : {}),
+                ...(livePreload ? { "data-proactively-loads-video": livePreload } : {})
+              }
+            },
+            children: []
+          },
+          {
+            ...imageNode,
+            data: {
+              hProperties: {
+                ...imageNode.data.hProperties,
+                className: ["image-block-media", "live-photo-fallback"]
+              }
+            }
+          }
+        ]
+      }
+    : undefined;
+  const baseMediaNode = livePlayerNode ?? imageNode;
   const mediaNode = href
     ? {
         type: "link",
         url: href,
-        children: [imageNode],
+        children: [baseMediaNode],
         data: {
           hProperties: {
             className: ["image-block-link"]
           }
-        }
       }
-    : imageNode;
+    }
+    : baseMediaNode;
 
   node.data = {
     hName: "figure",
     hProperties: {
       className: ["image-block", ...(live ? ["image-block-live"] : [])],
-      style: `--image-scale: ${scale}%;`,
+      style: `--image-scale: ${scale}%;${live ? ` --image-ratio: ${ratio};` : ""}`,
       "data-scale": String(scale),
-      ...(live ? { "data-live": "true", "data-live-src": live } : {})
+      ...(live ? { "data-live": "true", "data-live-src": live, "data-live-photo-src": src } : {})
     }
   };
 

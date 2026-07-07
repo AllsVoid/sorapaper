@@ -94,11 +94,15 @@ Images can use regular Markdown syntax or the `:::img` block when a caption, sca
 :::img{src="/covers/sky.svg" alt="Soft sky" caption="A quiet sky illustration." scale="80"}
 :::
 
-:::img{src="/photos/cat.jpg" live="/photos/cat-live.mov" alt="Cat" caption="A live photo placeholder."}
+:::img{src="/photos/cat.jpg" live="/photos/cat-live.mov" alt="Cat" caption="A Live Photo." ratio="4/3"}
 :::
 ```
 
-The `:::img` block requires `src`; `alt` should be provided for accessibility. Optional attributes include `caption`, `scale`, `live`, `href`, `loading`, `decoding`, `title` and `credit`. `scale` defaults to `100`, meaning the image block matches the article body width.
+The `:::img` block requires `src`; `alt` should be provided for accessibility. Optional attributes include `caption`, `scale`, `live`, `ratio`, `photoTime`, `liveControls`, `livePreload`, `href`, `loading`, `decoding`, `title` and `credit`. `scale` defaults to `100`, meaning the image block matches the article body width.
+
+When `live` is provided, SoraPaper keeps the still image as a fallback and progressively enhances the block with Apple LivePhotosKit JS on article pages. Use `src` for the still JPEG photo and `live` for the paired MOV video file exported from the same Live Photo. `ratio` defaults to `16/9`; set it when the media is portrait or square so the player has a stable size before JavaScript loads. `liveControls` and `livePreload` map to LivePhotosKit's native controls and proactive video loading options.
+
+For reliable playback, the JPEG and MOV should be a real Live Photo pair. In tested assets, the JPEG contains an Apple `MediaGroupUUID`, the MOV contains a QuickTime `ContentIdentifier`, and both values match.
 
 ## Theme Configuration
 

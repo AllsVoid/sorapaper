@@ -126,9 +126,13 @@ console.log(syntax);
 :::img{src="/covers/sky.svg" alt="柔和天空插画" caption="一张用于预览图片块的柔和天空插画。" scale="82" credit="SoraPaper"}
 :::
 
-带 `live` 地址的图片块会被标记为实况图片，当前只输出静态封面和数据标记，后续可继续接入播放交互。
+带 `live` 地址的图片块会保留静态封面作为 fallback，并在文章页按需加载 LivePhotosKit JS 播放配套视频。真实使用时，`src` 应指向静态照片，`live` 应指向同一张实况照片导出的 MOV 视频。
 
-:::img{src="/covers/sunset.svg" live="/covers/sunset.svg" alt="日落城市插画" caption="实况图片占位示例。" scale="68"}
+```md
+:::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
+:::
+```
+:::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
 :::
 
 ## 后续扩展区
