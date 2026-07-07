@@ -223,6 +223,8 @@ Markdown 扩展：
 - `tip` 是 `tips` 的兼容别名。
 - 文章支持 `:::details[标题]` 折叠块，默认输出原生 `<details>` / `<summary>`；可用 `{open=true}` 默认展开。
 - 文章支持 `::::tabs` 包裹多个 `:::tab[标题]`，输出纯 CSS 标签页，不依赖客户端 JavaScript。
+- 文章可以继续使用标准 Markdown 图片语法 `![alt](src)`。
+- 文章支持 `:::img{src="..." alt="..."}` 图片块，用于图注、缩放、链接、图片来源和实况图片占位；`scale` 表示相对正文宽度的百分比，默认 `100`，`live` 非空时输出实况图片数据标记。
 - 扩展语法预览文章位于 `src/content/blog/markdown-extended-preview.md`，新增或调整扩展语法时同步更新。
 - 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README、预览文章与文章样式。
 

@@ -86,6 +86,20 @@ Code content.
 ::::
 ```
 
+Images can use regular Markdown syntax or the `:::img` block when a caption, scale or live-photo source is needed:
+
+```md
+![Soft sky](/covers/sky.svg)
+
+:::img{src="/covers/sky.svg" alt="Soft sky" caption="A quiet sky illustration." scale="80"}
+:::
+
+:::img{src="/photos/cat.jpg" live="/photos/cat-live.mov" alt="Cat" caption="A live photo placeholder."}
+:::
+```
+
+The `:::img` block requires `src`; `alt` should be provided for accessibility. Optional attributes include `caption`, `scale`, `live`, `href`, `loading`, `decoding`, `title` and `credit`. `scale` defaults to `100`, meaning the image block matches the article body width.
+
 ## Theme Configuration
 
 Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.

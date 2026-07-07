@@ -111,6 +111,26 @@ console.log(syntax);
 :::
 ::::
 
+## 图片块
+
+普通图片仍然可以使用标准 Markdown 语法：
+
+```md
+![柔和天空](/covers/sky.svg)
+```
+
+![柔和天空](/covers/sky.svg)
+
+需要图注、缩放或实况图片资源时，可以使用 `:::img` 图片块。`scale` 表示图片整体相对正文宽度的百分比，默认是 `100`。
+
+:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="一张用于预览图片块的柔和天空插画。" scale="82" credit="SoraPaper"}
+:::
+
+带 `live` 地址的图片块会被标记为实况图片，当前只输出静态封面和数据标记，后续可继续接入播放交互。
+
+:::img{src="/covers/sunset.svg" live="/covers/sunset.svg" alt="日落城市插画" caption="实况图片占位示例。" scale="68"}
+:::
+
 ## 后续扩展区
 
 后续如果增加数学公式、Mermaid 或代码块增强等语法，可以继续在这里追加对应示例。

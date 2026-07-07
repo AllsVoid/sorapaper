@@ -40,6 +40,7 @@ Article page:
 - Body width should remain close to `--article`.
 - Floating TOC appears only on wide screens.
 - Code blocks, blockquotes and tables must remain readable in both themes.
+- Standard Markdown images and `:::img` image blocks should stay centered, responsive and visually quiet; image block scaling should remain relative to the article body width.
 - Markdown callouts must use a softly tinted title bar with a small standalone icon, keep the body on a plain article surface, distinguish note, info, tips, warning, success and error with restrained colors, and remain readable in both themes. Details and tabs should keep the same quiet article-surface treatment and work without client-side JavaScript.
 
 Archive and tags:

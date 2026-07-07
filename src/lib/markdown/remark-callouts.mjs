@@ -9,6 +9,8 @@ const calloutLabels = {
 };
 
 const calloutTypes = new Set(Object.keys(calloutLabels));
+const loadingValues = new Set(["lazy", "eager"]);
+const decodingValues = new Set(["async", "sync", "auto"]);
 
 function escapeHtml(value) {
   return value
@@ -53,6 +55,103 @@ function getDirectiveLabel(node, fallback) {
 function isOpenDetails(node) {
   const open = node.attributes?.open;
   return open === "" || open === true || open === "true";
+}
+
+function getStringAttribute(node, key) {
+  const value = node.attributes?.[key];
+  if (typeof value !== "string") return undefined;
+
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+function getImageScale(node) {
+  const rawScale = getStringAttribute(node, "scale");
+  const scale = Number(rawScale ?? 100);
+
+  if (!Number.isFinite(scale)) return 100;
+  return Math.min(100, Math.max(1, scale));
+}
+
+function getAllowedValue(node, key, allowedValues, fallback) {
+  const value = getStringAttribute(node, key);
+  return value && allowedValues.has(value) ? value : fallback;
+}
+
+function transformImage(node) {
+  const src = getStringAttribute(node, "src");
+  if (!src) return;
+
+  const alt = getStringAttribute(node, "alt") ?? "";
+  const caption = getStringAttribute(node, "caption");
+  const credit = getStringAttribute(node, "credit");
+  const href = getStringAttribute(node, "href");
+  const live = getStringAttribute(node, "live");
+  const title = getStringAttribute(node, "title");
+  const scale = getImageScale(node);
+  const loading = getAllowedValue(node, "loading", loadingValues, "lazy");
+  const decoding = getAllowedValue(node, "decoding", decodingValues, "async");
+  const imageNode = {
+    type: "image",
+    url: src,
+    alt,
+    title,
+    data: {
+      hProperties: {
+        className: ["image-block-media"],
+        loading,
+        decoding
+      }
+    }
+  };
+  const mediaNode = href
+    ? {
+        type: "link",
+        url: href,
+        children: [imageNode],
+        data: {
+          hProperties: {
+            className: ["image-block-link"]
+          }
+        }
+      }
+    : imageNode;
+
+  node.data = {
+    hName: "figure",
+    hProperties: {
+      className: ["image-block", ...(live ? ["image-block-live"] : [])],
+      style: `--image-scale: ${scale}%;`,
+      "data-scale": String(scale),
+      ...(live ? { "data-live": "true", "data-live-src": live } : {})
+    }
+  };
+
+  node.children = [mediaNode];
+
+  if (caption || credit) {
+    node.children.push({
+      type: "paragraph",
+      data: {
+        hName: "figcaption",
+        hProperties: {
+          className: ["image-block-caption"]
+        }
+      },
+      children: [
+        ...(caption ? [{ type: "text", value: caption }] : []),
+        ...(caption && credit ? [{ type: "text", value: " · " }] : []),
+        ...(credit
+          ? [
+              {
+                type: "text",
+                value: credit
+              }
+            ]
+          : [])
+      ]
+    });
+  }
 }
 
 function transformCallout(node) {
@@ -151,6 +250,11 @@ export default function remarkCallouts() {
 
       if (node.name === "details") {
         transformDetails(node);
+        return;
+      }
+
+      if (node.name === "img") {
+        transformImage(node);
         return;
       }
 
