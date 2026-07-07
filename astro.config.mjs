@@ -1,4 +1,5 @@
 import { defineConfig } from "astro/config";
+import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import remarkDirective from "remark-directive";
 import sitemap from "@astrojs/sitemap";
@@ -9,7 +10,9 @@ export default defineConfig({
   site: userConfig.site?.url ?? "https://example.com",
   integrations: [mdx(), sitemap()],
   markdown: {
-    remarkPlugins: [remarkDirective, remarkCallouts],
+    processor: unified({
+      remarkPlugins: [remarkDirective, remarkCallouts]
+    }),
     shikiConfig: {
       theme: "github-light"
     }
