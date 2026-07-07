@@ -215,6 +215,14 @@ toc: true
 ---
 ```
 
+Markdown 扩展：
+
+- 文章支持 `:::note`、`:::info`、`:::tips`、`:::warning`、`:::success` 和 `:::error` 提示块。
+- 提示块由 `remark-directive` 解析，并通过 `src/lib/markdown/remark-callouts.mjs` 转换为 `<aside class="callout callout-{type}">`。
+- 可使用 `:::warning[自定义标题]` 覆盖默认标题。
+- `tip` 是 `tips` 的兼容别名。
+- 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README 与文章样式。
+
 维护约定：
 
 - `title`、`description`、`pubDate` 是必填字段。

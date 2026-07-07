@@ -13,7 +13,8 @@
     "@astrojs/mdx": "latest",
     "@astrojs/rss": "latest",
     "@astrojs/sitemap": "latest",
-    "astro": "latest"
+    "astro": "latest",
+    "remark-directive": "^4.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "latest",

@@ -47,6 +47,22 @@ toc: true
 ---
 ```
 
+### Markdown Callouts
+
+SoraPaper supports directive-style callout blocks in Markdown and MDX posts. Use three colons, a supported type and optional title:
+
+```md
+:::info
+This is an informational note.
+:::
+
+:::warning[Heads up]
+This block uses a custom title.
+:::
+```
+
+Supported callout types are `note`, `info`, `tips`, `warning`, `success` and `error`. The alias `tip` renders as `tips`.
+
 ## Theme Configuration
 
 Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
