@@ -221,7 +221,10 @@ Markdown 扩展：
 - 提示块由 `remark-directive` 解析，并通过 `src/lib/markdown/remark-callouts.mjs` 转换为 `<aside class="callout callout-{type}">`。
 - 可使用 `:::warning[自定义标题]` 覆盖默认标题。
 - `tip` 是 `tips` 的兼容别名。
-- 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README 与文章样式。
+- 文章支持 `:::details[标题]` 折叠块，默认输出原生 `<details>` / `<summary>`；可用 `{open=true}` 默认展开。
+- 文章支持 `::::tabs` 包裹多个 `:::tab[标题]`，输出纯 CSS 标签页，不依赖客户端 JavaScript。
+- 扩展语法预览文章位于 `src/content/blog/markdown-extended-preview.md`，新增或调整扩展语法时同步更新。
+- 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README、预览文章与文章样式。
 
 维护约定：
 

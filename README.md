@@ -47,9 +47,11 @@ toc: true
 ---
 ```
 
-### Markdown Callouts
+### Markdown Extensions
 
-SoraPaper supports directive-style callout blocks in Markdown and MDX posts. Use three colons, a supported type and optional title:
+SoraPaper supports directive-style blocks in Markdown and MDX posts.
+
+Callouts use three colons, a supported type and optional title:
 
 ```md
 :::info
@@ -62,6 +64,27 @@ This block uses a custom title.
 ```
 
 Supported callout types are `note`, `info`, `tips`, `warning`, `success` and `error`. The alias `tip` renders as `tips`.
+
+Foldable details blocks use native `details` / `summary` semantics:
+
+```md
+:::details[More context]
+This content can be expanded by the reader.
+:::
+```
+
+Tabs use four colons around multiple `tab` directives:
+
+```md
+::::tabs
+:::tab[Preview]
+Preview content.
+:::
+:::tab[Code]
+Code content.
+:::
+::::
+```
 
 ## Theme Configuration
 
