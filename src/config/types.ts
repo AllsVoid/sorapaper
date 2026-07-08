@@ -101,6 +101,10 @@ export interface SoraPaperThemeConfig {
     analytics: boolean;
     viewTransitions: boolean;
   };
+  codeBlocks: {
+    copyButton: boolean;
+    lineNumbers: boolean;
+  };
   colorSchemes: string[];
 }
 

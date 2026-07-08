@@ -65,6 +65,29 @@ This block uses a custom title.
 
 Supported callout types are `note`, `info`, `tips`, `warning`, `success` and `error`. The alias `tip` renders as `tips`.
 
+Code blocks use Astro's Shiki highlighter and are wrapped in an Apple-style code window with optional file names, source links, copy buttons, line numbers, highlighted lines and diff lines:
+
+````md
+```js title="hello.js" url="https://example.com" linkText="View source" mark:1,3
+const greeting = "Hello";
+const name = "World";
+console.log(`${greeting}, ${name}!`);
+```
+
+```bash title="Terminal"
+pnpm install
+pnpm run dev
+pnpm run build
+```
+
+```diff title="example.diff"
+-const oldName = "Sora";
++const newName = "SoraPaper";
+```
+````
+
+Set `codeBlocks.lineNumbers` or `codeBlocks.copyButton` in `sorapaper.ts` to control the built-in code block chrome. Per-block line numbers can be hidden with `noLineNumbers` or `lineNumbers=false` in the code fence meta.
+
 Foldable details blocks use native `details` / `summary` semantics:
 
 ```md

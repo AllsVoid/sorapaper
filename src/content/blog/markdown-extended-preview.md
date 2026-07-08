@@ -111,6 +111,27 @@ console.log(syntax);
 :::
 ::::
 
+## 代码块
+
+代码块会自动渲染为 Apple 风格窗口。可以通过 fence meta 设置文件名、源链接、行高亮、diff 行。
+
+```js title="hello.js" url="https://example.com" linkText="查看源码" mark:1,3
+const greeting = "Hello";
+const name = "World";
+console.log(`${greeting}, ${name}!`);
+```
+
+```bash title="Terminal"
+pnpm install
+pnpm run dev
+pnpm run build
+```
+
+```diff title="example.diff"
+-const oldName = "Sora";
++const newName = "SoraPaper";
+```
+
 ## 图片块
 
 普通图片仍然可以使用标准 Markdown 语法：

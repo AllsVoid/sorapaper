@@ -33,6 +33,10 @@ const config = {
     analytics: false,
     viewTransitions: true
   },
+  codeBlocks: {
+    copyButton: true,
+    lineNumbers: true
+  },
   colorSchemes: ["paper", "sakura", "moon", "ocean"],
   ui: {
     zh: {

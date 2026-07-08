@@ -15,9 +15,10 @@ interface Props {
   previousPost?: BlogPost;
   nextPost?: BlogPost;
   headings: { depth: number; slug: string; text: string }[];
+  Content: any;
 }
 
-const { post, locale, alternatePath, alternates, previousPost, nextPost, headings } = Astro.props;
+const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
 const t = getUi(locale);
 ---
 
@@ -48,7 +49,7 @@ const t = getUi(locale);
     <div class="article-grid">
       <div></div>
       <div class="article-content glass">
-        <slot />
+        <Content />
       </div>
       {post.data.toc ? <TableOfContents headings={headings} /> : <div></div>}
     </div>
@@ -102,6 +103,27 @@ const t = getUi(locale);
   document.addEventListener("sorapaper:locale-change", (event) => {
     const locale = event instanceof CustomEvent ? event.detail?.locale : undefined;
     syncTranslationToast(locale);
+  });
+
+  document.querySelectorAll("[data-code-copy]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const code = button.getAttribute("data-code") ?? "";
+
+      try {
+        await navigator.clipboard.writeText(code);
+        button.setAttribute("data-copied", "true");
+        window.setTimeout(() => button.removeAttribute("data-copied"), 1600);
+      } catch {
+        button.removeAttribute("data-copied");
+      }
+    });
+  });
+
+  document.querySelectorAll("[data-code-expand]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const codeBlock = button.closest("[data-code-block]");
+      codeBlock?.classList.toggle("is-expanded");
+    });
   });
   </script>
 </BaseLayout>

@@ -35,6 +35,10 @@ export const defaultThemeConfig = {
     analytics: false,
     viewTransitions: true
   },
+  codeBlocks: {
+    copyButton: true,
+    lineNumbers: true
+  },
   colorSchemes: ["paper", "sakura", "moon", "ocean"]
 } satisfies SoraPaperThemeConfig;
 
