@@ -88,6 +88,16 @@ pnpm run build
 
 Set `codeBlocks.lineNumbers` or `codeBlocks.copyButton` in `sorapaper.ts` to control the built-in code block chrome. Per-block line numbers can be hidden with `noLineNumbers` or `lineNumbers=false` in the code fence meta.
 
+Math formulas are written with LaTeX syntax inside Markdown. Use single dollar signs for inline formulas and double dollar signs for block formulas:
+
+```md
+Inline formula: $E = mc^2$
+
+$$
+\int_0^1 x^2 dx = \frac{1}{3}
+$$
+```
+
 Foldable details blocks use native `details` / `summary` semantics:
 
 ```md
