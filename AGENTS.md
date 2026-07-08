@@ -314,6 +314,14 @@ Before editing:
 5. Identify compatibility and documentation impact.
 6. Avoid touching unrelated files.
 
+Before choosing whether to introduce a dependency for a new feature:
+
+1. If the feature is core to SoraPaper's writing, rendering, configuration, or reading experience, prefer owning the implementation when detailed control over performance, security, output, or UX matters. If a third-party package is still useful, wrap it behind a local adapter.
+2. If the feature is not core and a mature, maintained, widely used package exists, prefer that package over reimplementing complex behavior.
+3. If a custom implementation would have many edge cases or high correctness risk, prefer a proven package.
+4. If the package is too heavy, too invasive, poorly licensed, or mismatched with the static-first style, build a lighter local version or choose a smaller package.
+5. If the solution may be replaced later, hide the dependency behind a narrow adapter or helper boundary; otherwise keep direct usage centralized.
+
 During implementation:
 
 - keep changes focused;
