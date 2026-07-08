@@ -3,7 +3,7 @@ const metaValuePattern = (key) =>
   new RegExp(`(?:^|\\s)${key}(?:=|:)(?:"([^"]*)"|'([^']*)'|([^\\s]+))`, "i");
 
 function appendClass(node, className) {
-  const current = node.properties?.className;
+  const current = node.properties?.className ?? node.properties?.class;
   const next = Array.isArray(current)
     ? current
     : typeof current === "string"
@@ -16,6 +16,7 @@ function appendClass(node, className) {
     ...node.properties,
     className: next
   };
+  delete node.properties.class;
 }
 
 function visitParents(node, callback, ancestors = []) {

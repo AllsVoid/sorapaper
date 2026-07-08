@@ -332,20 +332,21 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   padding: 0;
 }
 
-.article-content .code-window .line {
-  display: block;
+.article-content .code-window .sorapaper-code-line {
+  display: inline-block;
+  width: 100%;
   min-height: 1.75em;
   padding-inline: 1.4rem;
 }
 
-.article-content .code-window .has-line-numbers .line {
-  display: grid;
+.article-content .code-window .has-line-numbers .sorapaper-code-line {
+  display: inline-grid;
   grid-template-columns: 3ch minmax(0, 1fr);
   column-gap: 1.1rem;
   padding-inline: 0.95rem 1.4rem;
 }
 
-.article-content .code-window .has-line-numbers .line::before {
+.article-content .code-window .has-line-numbers .sorapaper-code-line::before {
   content: attr(data-line);
   color: color-mix(in srgb, var(--muted) 56%, transparent);
   font-variant-numeric: tabular-nums;
@@ -353,25 +354,26 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   user-select: none;
 }
 
-.article-content .code-window .line.is-highlighted {
+.article-content .code-window .sorapaper-code-line.is-highlighted {
   background: color-mix(in srgb, var(--primary) 13%, transparent);
 }
 
-.article-content .code-window .line.is-inserted {
+.article-content .code-window .sorapaper-code-line.is-inserted {
   background: color-mix(in srgb, #28c840 14%, transparent);
 }
 
-.article-content .code-window .line.is-deleted {
+.article-content .code-window .sorapaper-code-line.is-deleted {
   background: color-mix(in srgb, #ff5f57 13%, transparent);
 }
 
-.article-content .code-window .line.has-command-prompt {
-  display: grid;
+.article-content .code-window .sorapaper-code-line.has-command-prompt {
+  display: inline-grid;
+  width: 100%;
   grid-template-columns: 2ch minmax(0, 1fr);
   column-gap: 0.8rem;
 }
 
-.article-content .code-window .has-line-numbers .line.has-command-prompt {
+.article-content .code-window .has-line-numbers .sorapaper-code-line.has-command-prompt {
   grid-template-columns: 3ch 2ch minmax(0, 1fr);
 }
 
@@ -388,11 +390,11 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   min-width: 0;
 }
 
-.article-content .code-window .has-line-numbers .line:not(.has-command-prompt) .code-line-content {
+.article-content .code-window .has-line-numbers .sorapaper-code-line:not(.has-command-prompt) .code-line-content {
   grid-column: 2;
 }
 
-.article-content .code-window .has-line-numbers .line.has-command-prompt .code-line-content {
+.article-content .code-window .has-line-numbers .sorapaper-code-line.has-command-prompt .code-line-content {
   grid-column: 3;
 }
 

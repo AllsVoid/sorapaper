@@ -35,7 +35,7 @@ const config = {
   },
   codeBlocks: {
     copyButton: true,
-    lineNumbers: true
+    lineNumbers: false
   },
   colorSchemes: ["paper", "sakura", "moon", "ocean"],
   ui: {
