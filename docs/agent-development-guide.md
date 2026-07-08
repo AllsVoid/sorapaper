@@ -311,6 +311,93 @@ Before editing:
 5. Identify compatibility and documentation impact.
 6. Avoid touching unrelated files.
 
+### Dependency Decision Flow
+
+Use this flow before deciding whether a new feature should rely on a third-party library or be implemented locally.
+
+Start: implement a new feature.
+
+1. Is this feature part of SoraPaper's core value?
+
+   Core value includes the content authoring model, Markdown extensions, article rendering, theme configuration, static-first output, reading experience, accessibility, SEO behavior and the calm visual system.
+
+   If yes:
+
+   - If the feature requires full control over implementation details, performance, security or user experience, prefer implementing it locally, or use a low-level library behind a local wrapper.
+   - If full control is not required, a third-party library is acceptable, but it must be wrapped behind a local adapter so the theme owns its public contract.
+
+   If no, continue.
+
+2. Is there a mature, actively maintained and widely used third-party library?
+
+   If yes:
+
+   - Prefer the third-party library.
+   - Check package size, dependency tree, license, release activity, security posture and Astro/static-site compatibility before adding it.
+
+   If no:
+
+   - Consider implementing the feature locally.
+   - Consider lowering the feature scope if the full feature would be costly or fragile.
+
+3. Would a local implementation be error-prone or have many edge cases?
+
+   Examples include parsing, syntax highlighting, diagrams, math rendering, date/time logic, sanitization, media metadata, search ranking and browser compatibility.
+
+   If yes:
+
+   - Prefer a proven library.
+   - Keep the integration narrow and test representative edge cases.
+
+   If no:
+
+   - A local implementation is acceptable, especially when it is small, readable and consistent with existing SoraPaper patterns.
+
+4. Is the third-party library too heavy, too invasive or unsuitable?
+
+   Unsuitable packages include packages that:
+
+   - add large client-side JavaScript for a small feature;
+   - require global runtime side effects;
+   - fight Astro's static-first architecture;
+   - force a second design system;
+   - have incompatible licensing;
+   - make SSR/build output unpredictable;
+   - are poorly maintained or have unresolved security issues.
+
+   If yes:
+
+   - Prefer a lightweight local implementation.
+   - Or choose a smaller/lower-level package.
+   - Or gate the feature behind a narrow boundary and lazy loading.
+
+   If no:
+
+   - Introducing the library is acceptable.
+
+5. Is the solution likely to be replaced later?
+
+   If yes:
+
+   - Introduce the library behind an adapter, wrapper component, build helper or local module.
+   - Keep package-specific APIs out of content schemas, public config and broad shared components.
+
+   If no:
+
+   - Direct usage is acceptable, but keep it centralized.
+   - Document the dependency's role and the reason it was chosen.
+
+Implementation requirements when adding a dependency:
+
+- Prefer existing dependencies and local helpers before adding a new package.
+- Add the dependency with the current package manager only.
+- Do not manually edit lockfiles.
+- Update README and development documentation when users or maintainers need to know about the feature.
+- Add examples to representative content when the feature affects Markdown or authoring.
+- Use lazy loading or build-time processing when possible.
+- Run `pnpm run check` and `pnpm exec astro build`.
+- Report package-size or build warnings honestly.
+
 During implementation:
 
 - keep changes focused;

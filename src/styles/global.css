@@ -225,6 +225,62 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   min-width: max-content;
 }
 
+.article-content .footnotes {
+  margin-top: 2.4em;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  line-height: 1.7;
+  padding-top: 1rem;
+}
+
+.article-content .footnotes h2 {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.article-content .footnotes .sr-only {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.article-content .footnotes ol {
+  margin-block: 0;
+  padding-left: 1.4rem;
+}
+
+.article-content .footnotes li {
+  padding-left: 0.25rem;
+}
+
+.article-content .footnotes li:target {
+  color: var(--text);
+}
+
+.article-content [data-footnote-ref],
+.article-content [data-footnote-backref] {
+  font-family: var(--font-sans);
+  text-decoration: none;
+}
+
+.article-content [data-footnote-ref] {
+  font-size: 0.78em;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.article-content [data-footnote-backref] {
+  margin-left: 0.35rem;
+  color: var(--primary);
+}
+
 .article-content .code-window {
   overflow: hidden;
   min-width: 0;

@@ -10,7 +10,7 @@ interface Props {
 }
 
 const { headings } = Astro.props;
-const visible = headings.filter((heading) => heading.depth > 1 && heading.depth < 4);
+const visible = headings.filter((heading) => heading.depth > 1 && heading.depth < 4 && heading.slug !== "footnote-label");
 ---
 
 {visible.length > 0 && (

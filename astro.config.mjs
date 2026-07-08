@@ -3,6 +3,7 @@ import { unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import rehypeKatex from "rehype-katex";
 import remarkDirective from "remark-directive";
+import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import sitemap from "@astrojs/sitemap";
 import { createShikiCodeBlockTransformer, rehypeCodeBlockFrames } from "./src/lib/markdown/code-blocks.mjs";
@@ -19,7 +20,7 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath, remarkDirective, remarkCallouts],
+      remarkPlugins: [remarkMath, remarkGfm, remarkDirective, remarkCallouts],
       rehypePlugins: [rehypeKatex, [rehypeCodeBlockFrames, codeBlocks]]
     }),
     shikiConfig: {

@@ -98,6 +98,14 @@ $$
 $$
 ```
 
+Footnotes use standard Markdown footnote syntax:
+
+```md
+Here is a note reference.[^1]
+
+[^1]: This is the footnote content.
+```
+
 Foldable details blocks use native `details` / `summary` semantics:
 
 ```md
