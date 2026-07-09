@@ -10,9 +10,10 @@ interface Props {
 }
 
 const { post, locale, featured = false } = Astro.props;
+const hasCover = Boolean(post.data.cover);
 ---
 
-<article class:list={["post-card", "glass", { featured }]}>
+<article class:list={["post-card", "glass", { featured, "without-cover": !hasCover }]}>
   {post.data.cover && (
     <a class="cover" href={getPostHref(post)} aria-label={post.data.title}>
       <img src={post.data.cover.src} alt={post.data.cover.alt} loading="lazy" />
@@ -47,6 +48,10 @@ const { post, locale, featured = false } = Astro.props;
     border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
   }
 
+  .post-card.without-cover {
+    grid-template-columns: 1fr;
+  }
+
   .cover {
     overflow: hidden;
     border-radius: calc(var(--radius-md) - 7px);
@@ -64,6 +69,10 @@ const { post, locale, featured = false } = Astro.props;
     display: grid;
     gap: 0.5rem;
     padding: 0.55rem 0.6rem 0.55rem 0;
+  }
+
+  .without-cover .content {
+    padding-left: 0.6rem;
   }
 
   .meta,
