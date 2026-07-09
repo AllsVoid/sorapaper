@@ -168,10 +168,51 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
 }
 
 .article-content :where(h2, h3, h4) {
+  position: relative;
   margin-top: 2.2em;
   margin-bottom: 0.75em;
   font-family: var(--font-sans);
   line-height: 1.3;
+  scroll-margin-top: 7rem;
+}
+
+.article-content .heading-anchor {
+  position: absolute;
+  top: 0.08em;
+  left: -1.45em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15em;
+  height: 1.15em;
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.82em;
+  line-height: 1;
+  opacity: 0;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.article-content .heading-anchor:hover,
+.article-content .heading-anchor:focus-visible,
+.article-content .heading-anchor[data-copied="true"] {
+  color: var(--primary);
+}
+
+.article-content :where(h2, h3, h4):hover .heading-anchor,
+.article-content :where(h2, h3, h4):focus-within .heading-anchor {
+  opacity: 1;
+  transform: translateX(-0.08rem);
+}
+
+.article-content .heading-anchor:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 62%, transparent);
+  outline-offset: 0.18rem;
 }
 
 .article-content :where(p, ul, ol, blockquote, pre, table),
@@ -820,6 +861,18 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
 @media (max-width: 760px) {
   .container {
     width: min(100% - 22px, var(--container));
+  }
+
+  .article-content .heading-anchor {
+    position: static;
+    margin-left: 0.35rem;
+    opacity: 0.56;
+    transform: none;
+  }
+
+  .article-content :where(h2, h3, h4):hover .heading-anchor,
+  .article-content :where(h2, h3, h4):focus-within .heading-anchor {
+    transform: none;
   }
 
   body {

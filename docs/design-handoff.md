@@ -42,6 +42,7 @@ Article page:
 - Code blocks should use the Apple-style window chrome, readable Shiki colors, accessible copy controls, optional line numbers, highlighted lines and restrained diff colors in both themes.
 - Math formulas should use KaTeX rendering, keep inline formulas aligned with surrounding text, and allow wide block formulas to scroll horizontally without widening the article.
 - Footnotes should remain quiet, readable and inside the article width, with clear back references and visible target states.
+- Heading anchors should stay subtle, appear on hover or focus on larger screens, remain keyboard accessible, and avoid shifting heading layout.
 - Standard Markdown images and `:::img` image blocks should stay centered, responsive and visually quiet; image block scaling should remain relative to the article body width. Live Photo blocks must keep a stable aspect ratio, show the still image without JavaScript, and only add subtle playback affordance.
 - Markdown callouts must use a softly tinted title bar with a small standalone icon, keep the body on a plain article surface, distinguish note, info, tips, warning, success and error with restrained colors, and remain readable in both themes. Details and tabs should keep the same quiet article-surface treatment and work without client-side JavaScript.
 

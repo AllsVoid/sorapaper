@@ -125,6 +125,34 @@ const t = getUi(locale);
       codeBlock?.classList.toggle("is-expanded");
     });
   });
+
+  document.querySelectorAll(".article-content h2[id], .article-content h3[id], .article-content h4[id]").forEach((heading) => {
+    if (!(heading instanceof HTMLHeadingElement) || heading.id === "footnote-label") return;
+    if (heading.querySelector("[data-heading-anchor]")) return;
+
+    const anchor = document.createElement("a");
+    anchor.className = "heading-anchor";
+    anchor.href = `#${heading.id}`;
+    anchor.setAttribute("aria-label", `Copy link to ${heading.textContent?.trim() ?? "this section"}`);
+    anchor.setAttribute("data-heading-anchor", "true");
+    anchor.textContent = "#";
+    heading.classList.add("has-heading-anchor");
+    heading.append(anchor);
+  });
+
+  document.querySelectorAll("[data-heading-anchor]").forEach((anchor) => {
+    anchor.addEventListener("click", async () => {
+      if (!(anchor instanceof HTMLAnchorElement) || !navigator.clipboard) return;
+
+      try {
+        await navigator.clipboard.writeText(anchor.href);
+        anchor.setAttribute("data-copied", "true");
+        window.setTimeout(() => anchor.removeAttribute("data-copied"), 1200);
+      } catch {
+        anchor.removeAttribute("data-copied");
+      }
+    });
+  });
   </script>
 </BaseLayout>
 

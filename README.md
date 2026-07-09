@@ -106,6 +106,8 @@ Here is a note reference.[^1]
 [^1]: This is the footnote content.
 ```
 
+Article headings automatically receive quiet anchor links. Hover or focus a heading to reveal the `#` link, then click it to jump to that section and copy the full section URL.
+
 Foldable details blocks use native `details` / `summary` semantics:
 
 ```md
