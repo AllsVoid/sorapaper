@@ -1,20 +1,13 @@
 ---
 import { themeConfig } from "@/config/theme";
-import { localizePath, type Locale } from "@/i18n/config";
+import type { Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
-interface TagItem {
-  name: string;
-  count: number;
-  slug: string;
-}
-
 interface Props {
-  tags: TagItem[];
   locale: Locale;
 }
 
-const { tags, locale } = Astro.props;
+const { locale } = Astro.props;
 const t = getUi(locale);
 
 const socialIconAliases: Record<string, string> = {
@@ -65,19 +58,6 @@ function getSocialIcon(link: { label: string; icon?: string }) {
         );
       })}
     </div>
-  </section>
-
-  <section class="panel glass">
-    <h2>{t.sidebar.tags}</h2>
-    <div class="tag-grid">
-      {tags.slice(0, 8).map((tag) => (
-        <a href={localizePath(locale, `/tags/${tag.slug}/`)}>
-          <span>{tag.name}</span>
-          <strong>{tag.count}</strong>
-        </a>
-      ))}
-    </div>
-    <a class="more" href={localizePath(locale, "/tags/")}>{t.sidebar.browseAllTags} →</a>
   </section>
 
   <section class="panel glass">
@@ -171,35 +151,6 @@ function getSocialIcon(link: { label: string; icon?: string }) {
     background: currentColor;
     -webkit-mask: var(--icon-url) center / contain no-repeat;
     mask: var(--icon-url) center / contain no-repeat;
-  }
-
-  .tag-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
-    margin: 1rem 0;
-  }
-
-  .tag-grid a {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    border-radius: 999px;
-    background: var(--tag);
-    color: var(--muted);
-    font-size: 0.84rem;
-    padding: 0.48rem 0.65rem;
-  }
-
-  .tag-grid strong {
-    color: var(--text);
-    font-size: 0.78rem;
-  }
-
-  .more {
-    color: var(--primary);
-    font-size: 0.9rem;
   }
 
   dl {

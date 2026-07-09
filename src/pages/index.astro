@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
-import { getAllTags, getPinnedPosts, getPublishedPosts } from "@/lib/posts";
+import { getPinnedPosts, getPublishedPosts } from "@/lib/posts";
 
 const localeData = await Promise.all(
   locales.map(async (locale) => {
@@ -16,8 +16,7 @@ const localeData = await Promise.all(
       locale,
       t: getUi(locale),
       posts,
-      featuredPosts,
-      tags: getAllTags(posts)
+      featuredPosts
     };
   })
 );
@@ -25,7 +24,7 @@ const localeData = await Promise.all(
 
 <BaseLayout>
   <div class="container">
-    {localeData.map(({ locale, t, posts, featuredPosts, tags }) => (
+    {localeData.map(({ locale, t, posts, featuredPosts }) => (
       <div data-lang={locale}>
         <HeroSection locale={locale} />
         <section class="home-grid">
@@ -40,7 +39,7 @@ const localeData = await Promise.all(
               ))}
             </div>
           </div>
-          <Sidebar tags={tags} locale={locale} />
+          <Sidebar locale={locale} />
         </section>
       </div>
     ))}

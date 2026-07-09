@@ -53,6 +53,7 @@ Archive and tags:
 
 - Keep card rhythm consistent with homepage posts.
 - Use soft page headers and generous spacing.
+- Tags page uses a weighted typography cloud: larger, stronger and more saturated words indicate higher post counts, while hover/focus can reveal the exact count.
 
 About and friends:
 
