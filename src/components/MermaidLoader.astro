@@ -1,0 +1,117 @@
+<script>
+  const mermaidBlocks = Array.from(document.querySelectorAll<HTMLElement>("[data-mermaid-block]"));
+
+  if (mermaidBlocks.length > 0) {
+    let renderRun = 0;
+    let renderTimer: number | undefined;
+
+    function getCssVar(styles: CSSStyleDeclaration, name: string, fallback: string) {
+      return styles.getPropertyValue(name).trim() || fallback;
+    }
+
+    function getMermaidConfig() {
+      const root = document.documentElement;
+      const styles = getComputedStyle(root);
+      const isDark = root.dataset.theme === "dark";
+      const text = getCssVar(styles, "--text", isDark ? "#f4f6ff" : "#27304a");
+      const muted = getCssVar(styles, "--muted", isDark ? "#aeb7d7" : "#6f7890");
+      const primary = getCssVar(styles, "--primary", isDark ? "#b7a8ff" : "#8b8cf6");
+      const secondary = getCssVar(styles, "--secondary", isDark ? "#82d4ff" : "#83c5f7");
+      const accent = getCssVar(styles, "--accent", isDark ? "#ffbfd8" : "#f2b8d1");
+      const surface = getCssVar(styles, "--surface-strong", isDark ? "rgba(31, 36, 61, 0.9)" : "rgba(255, 255, 255, 0.9)");
+      const border = getCssVar(styles, "--border", isDark ? "rgba(180, 188, 255, 0.15)" : "rgba(117, 125, 170, 0.16)");
+      const fontFamily = getCssVar(styles, "--font-sans", "ui-sans-serif, system-ui, sans-serif");
+
+      return {
+        startOnLoad: false,
+        securityLevel: "strict" as const,
+        theme: "base" as const,
+        fontFamily,
+        themeVariables: {
+          darkMode: isDark,
+          background: "transparent",
+          mainBkg: surface,
+          primaryColor: surface,
+          primaryTextColor: text,
+          primaryBorderColor: border,
+          lineColor: muted,
+          secondaryColor: secondary,
+          secondaryTextColor: text,
+          secondaryBorderColor: border,
+          tertiaryColor: accent,
+          tertiaryTextColor: text,
+          tertiaryBorderColor: border,
+          clusterBkg: surface,
+          clusterBorder: border,
+          nodeBorder: border,
+          nodeTextColor: text,
+          textColor: text,
+          titleColor: text,
+          edgeLabelBackground: surface,
+          actorBkg: surface,
+          actorBorder: border,
+          actorTextColor: text,
+          labelTextColor: text,
+          signalColor: text,
+          signalTextColor: text,
+          noteBkgColor: surface,
+          noteTextColor: text,
+          noteBorderColor: primary
+        },
+        flowchart: {
+          htmlLabels: false
+        },
+        sequence: {
+          useMaxWidth: true
+        }
+      };
+    }
+
+    async function renderMermaidBlocks() {
+      const mermaid = (await import("mermaid")).default;
+      renderRun += 1;
+      mermaid.initialize(getMermaidConfig());
+
+      for (const [index, block] of mermaidBlocks.entries()) {
+        const source = block.querySelector<HTMLElement>("[data-mermaid-source]")?.textContent?.trim();
+        const target = block.querySelector<HTMLElement>("[data-mermaid-render]");
+
+        if (!source || !target) continue;
+
+        try {
+          const { svg, bindFunctions } = await mermaid.render(`sorapaper-mermaid-${renderRun}-${index}`, source);
+          target.innerHTML = svg;
+          bindFunctions?.(target);
+          target.removeAttribute("aria-hidden");
+          block.classList.add("is-mermaid-rendered");
+          block.classList.remove("is-mermaid-error");
+        } catch {
+          target.innerHTML = "";
+          target.setAttribute("aria-hidden", "true");
+          block.classList.add("is-mermaid-error");
+          block.classList.remove("is-mermaid-rendered");
+        }
+      }
+    }
+
+    function scheduleRender() {
+      window.clearTimeout(renderTimer);
+      renderTimer = window.setTimeout(() => {
+        void renderMermaidBlocks();
+      }, 80);
+    }
+
+    void renderMermaidBlocks();
+
+    const observer = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme")) {
+        scheduleRender();
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-scheme"]
+    });
+  }
+</script>

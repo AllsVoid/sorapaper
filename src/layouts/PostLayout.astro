@@ -1,6 +1,7 @@
 ---
 import ArticleHeader from "@/components/ArticleHeader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
+import MermaidLoader from "@/components/MermaidLoader.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getPostHref, type BlogPost } from "@/lib/posts";
@@ -20,6 +21,7 @@ interface Props {
 
 const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
 const t = getUi(locale);
+const hasMermaid = post.body?.includes(":::mermaid") ?? false;
 ---
 
 <BaseLayout
@@ -77,6 +79,7 @@ const t = getUi(locale);
     </footer>
   </article>
   <LivePhotoLoader />
+  {hasMermaid && <MermaidLoader />}
 
   <script>
   const translationToast = document.querySelector("[data-translation-toast]");

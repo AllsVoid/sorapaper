@@ -98,6 +98,18 @@ $$
 $$
 ```
 
+Mermaid diagrams use the `:::mermaid` directive. The optional title appears above the diagram, and the original source remains visible if JavaScript is disabled or rendering fails:
+
+```md
+:::mermaid[Publishing flow]
+flowchart TD
+  Markdown[Markdown post] --> Build[Astro build]
+  Build --> Page[Static page]
+:::
+```
+
+SoraPaper uses the official Mermaid renderer only on article pages that contain Mermaid blocks. Mermaid runs with strict security settings, so static diagram syntax is supported while click handlers, unsafe HTML and interactive extensions are intentionally not part of the theme contract.
+
 Footnotes use standard Markdown footnote syntax:
 
 ```md

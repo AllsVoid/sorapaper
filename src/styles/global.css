@@ -723,6 +723,64 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   line-height: 1.6;
 }
 
+.article-content .mermaid-block {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-family: var(--font-sans);
+  margin-block: 1.35em;
+}
+
+.article-content .mermaid-caption {
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 12%, var(--border));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 5%, transparent), transparent 52%),
+    color-mix(in srgb, var(--primary) 9%, var(--surface-strong));
+  color: color-mix(in srgb, var(--primary) 78%, var(--text));
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0;
+  padding: 0.66rem 1rem;
+}
+
+.article-content .mermaid-render {
+  display: none;
+  overflow-x: auto;
+  padding: 1rem;
+  text-align: center;
+}
+
+.article-content .mermaid-render svg {
+  max-width: none;
+  height: auto;
+}
+
+.article-content .mermaid-source {
+  overflow-x: auto;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface-strong)) !important;
+  box-shadow: none;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.86rem;
+  line-height: 1.65;
+  margin: 0;
+  padding: 1rem;
+}
+
+.article-content .mermaid-block.is-mermaid-rendered .mermaid-render {
+  display: block;
+}
+
+.article-content .mermaid-block.is-mermaid-rendered .mermaid-source {
+  display: none;
+}
+
 .article-content .details-block,
 .article-content .tabs-block {
   overflow: hidden;

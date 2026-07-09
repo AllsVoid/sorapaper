@@ -16,6 +16,7 @@
     "@astrojs/sitemap": "latest",
     "astro": "latest",
     "katex": "^0.17.0",
+    "mermaid": "^11.16.0",
     "rehype-katex": "^7.0.1",
     "remark-directive": "^4.0.0",
     "remark-gfm": "^4.0.1",

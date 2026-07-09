@@ -180,6 +180,29 @@ $$
 :::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
 :::
 
-## 后续扩展区
+## Mermaid 图表
 
-后续如果增加 Mermaid 等语法，可以继续在这里追加对应示例。
+Mermaid 图表使用 `:::mermaid` 指令。标题是可选的；如果浏览器禁用 JavaScript 或图表解析失败，页面会保留源码作为 fallback。
+
+:::mermaid[文章渲染流程]
+flowchart TD
+  Markdown[Markdown 文章] --> Directive[remark-directive]
+  Directive --> Mermaid[remark-mermaid]
+  Mermaid --> Fallback[源码 fallback]
+  Fallback --> Loader[MermaidLoader]
+  Loader --> Diagram[SVG 图表]
+:::
+
+:::mermaid[时序图]
+sequenceDiagram
+    participant Alice
+    participant Bob
+    Alice->>John: Hello John, how are you?
+    loop HealthCheck
+        John->>John: Fight against hypochondria
+    end
+    Note right of John: Rational thoughts <br/>prevail!
+    John-->>Alice: Great!
+    John->>Bob: How about you?
+    Bob-->>John: Jolly good!
+:::

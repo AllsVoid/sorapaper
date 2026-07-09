@@ -227,6 +227,7 @@ Markdown 扩展：
 - 代码块由 Astro/Shiki 在构建时高亮，`src/lib/markdown/code-blocks.mjs` 负责解析 fence meta、标记行号/高亮/diff，并在 rehype 阶段包裹为 Apple 风格代码窗口。支持 `title="..."`、`url="..."`、`linkText="..."`、`mark:1,3-4`、`ins:1`、`del:2`、`noLineNumbers` 和 `lineNumbers=false`。
 - `sorapaper.ts` 的 `codeBlocks.copyButton` 和 `codeBlocks.lineNumbers` 控制默认复制按钮与行号显示；旧文章无需迁移，未写 meta 的代码块会显示语言名。
 - 数学公式由 `remark-math` 解析，并通过 `rehype-katex` 在构建时渲染。行内公式使用 `$E = mc^2$`，块级公式使用 `$$...$$`，公式内容为 LaTeX 数学语法。
+- Mermaid 图表使用 `:::mermaid[可选标题]` directive，由 `src/lib/markdown/remark-mermaid.mjs` 转换为带源码 fallback 的 `<figure class="mermaid-block">`；文章页仅在原文包含 `:::mermaid` 时挂载 `MermaidLoader.astro`，动态加载官方 `mermaid` 包并按当前 CSS token 渲染 SVG。Mermaid 使用 `securityLevel: "strict"`，主题只承诺静态图表语法，不支持点击事件、不安全 HTML 或交互扩展。
 - 脚注由 `remark-gfm` 解析，使用标准 Markdown footnote 语法：正文写 `[^1]`，底部写 `[^1]: 脚注内容`。脚注样式集中在 `src/styles/global.css` 的 `.footnotes` 和 `data-footnote-*` 选择器。
 - 文章的 `h2`、`h3` 和 `h4` 标题会复用 Astro 生成的稳定 `id`；文章页脚本在最终 DOM 中追加锚点链接，点击锚点会跳转并复制完整小节 URL。
 - 文章支持 `:::img{src="..." alt="..."}` 图片块，用于图注、缩放、链接、图片来源和实况图片；`scale` 表示相对正文宽度的百分比，默认 `100`。`live` 非空时，构建阶段输出静态图片 fallback 和 LivePhotosKit 初始化数据，文章页由 `LivePhotoLoader.astro` 按需加载 Apple LivePhotosKit JS。Live Photo 素材应使用同一实况照片导出的 JPEG + MOV 配对；已验证可播放素材中 JPEG 的 `Apple:MediaGroupUUID` 与 MOV 的 `Keys:ContentIdentifier` 一致，MOV 还包含 `NRT Metadata` / `mebx` 元数据轨道和 `StillImageTime`。
