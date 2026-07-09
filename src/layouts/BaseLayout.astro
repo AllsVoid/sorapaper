@@ -42,6 +42,7 @@ const seoType = seo.type ?? "website";
 const siteUrl = themeConfig.site.url.endsWith("/") ? themeConfig.site.url : `${themeConfig.site.url}/`;
 const canonicalUrl = new URL(seo.canonicalPath ?? Astro.url.pathname, siteUrl).toString();
 const imageUrl = new URL(seo.image ?? themeConfig.site.ogImage, siteUrl).toString();
+const imageType = imageUrl.endsWith(".svg") ? "image/svg+xml" : imageUrl.endsWith(".png") ? "image/png" : "image/jpeg";
 const alternateEntries = Object.entries(seo.alternates ?? {}) as Array<[Locale, string]>;
 const xDefaultPath = seo.alternates?.[defaultLocale] ?? seo.alternates?.[locale] ?? seo.canonicalPath ?? Astro.url.pathname;
 
@@ -75,6 +76,9 @@ function getHrefLang(value: Locale) {
       <meta property="og:locale:alternate" content={getOgLocale(alternateLocale)} />
     ))}
     <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:type" content={imageType} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />

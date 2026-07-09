@@ -32,6 +32,7 @@ Create posts in `src/content/blog` using Markdown or MDX:
 ---
 title: "Astro Theme Design Notes"
 description: "Readable writing with a soft visual system."
+excerpt: "A more editorial summary for post cards, search results, RSS and generated social images."
 lang: en
 translationKey: astro-theme-design
 pubDate: 2026-07-02
@@ -42,10 +43,13 @@ draft: false
 cover:
   src: "/covers/sky.svg"
   alt: "Soft sky illustration."
+ogImage: "/og/custom-card.png"
 pinned: true
 toc: true
 ---
 ```
+
+`description` is the stable SEO description. Optional `excerpt` is used for post cards, article intros, search results, RSS items and generated Open Graph images; when omitted, SoraPaper falls back to `description`. Optional `ogImage` lets a post override the generated social image.
 
 ### Markdown Extensions
 
@@ -163,7 +167,7 @@ For reliable playback, the JPEG and MOV should be a real Live Photo pair. In tes
 
 Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
 
-Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image; article covers override it when present.
+Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image. Blog posts automatically get generated Open Graph SVG cards at `/og/posts/{slug}.svg`; a post-level `ogImage` overrides the generated card.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
 

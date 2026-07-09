@@ -11,6 +11,7 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    excerpt: z.string().optional(),
     lang: z.enum(["zh", "en"]).default("en"),
     translationKey: z.string().optional(),
     pubDate: z.coerce.date(),
@@ -19,6 +20,7 @@ const blog = defineCollection({
     category: z.string().default("Notes"),
     draft: z.boolean().default(false),
     cover: imageMeta.optional(),
+    ogImage: z.string().optional(),
     series: z.string().optional(),
     toc: z.boolean().default(true),
     pinned: z.boolean().default(false)

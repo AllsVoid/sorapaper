@@ -1,6 +1,6 @@
 ---
 import type { BlogPost } from "@/lib/posts";
-import { formatDate, getReadingTime } from "@/lib/posts";
+import { formatDate, getPostSummary, getReadingTime } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
@@ -11,6 +11,7 @@ interface Props {
 
 const { post, locale } = Astro.props;
 const t = getUi(locale);
+const summary = getPostSummary(post);
 ---
 
 <header class="article-header">
@@ -20,7 +21,7 @@ const t = getUi(locale);
       {post.data.tags.map((tag) => <a class="pill" href={localizePath(locale, `/tags/${tag.toLowerCase()}/`)}>{tag}</a>)}
     </div>
     <h1>{post.data.title}</h1>
-    <p>{post.data.description}</p>
+    <p>{summary}</p>
     <div class="meta">
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
       <span>{getReadingTime(post.body, locale)}</span>

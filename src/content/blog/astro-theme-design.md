@@ -1,6 +1,7 @@
 ---
 title: "Build a Minimal Blog with Astro and Markdown"
 description: "How I built this blog with Astro, MDX, and a love for simplicity."
+excerpt: "A look at how SoraPaper keeps writing close to Astro content collections while using typed frontmatter, design tokens and Markdown extensions for a calm reading experience."
 lang: en
 translationKey: astro-theme-design
 pubDate: 2026-07-02

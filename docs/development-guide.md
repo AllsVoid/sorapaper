@@ -180,12 +180,14 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    excerpt: z.string().optional(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     category: z.string().default("Notes"),
     draft: z.boolean().default(false),
     cover: imageMeta.optional(),
+    ogImage: z.string().optional(),
     series: z.string().optional(),
     toc: z.boolean().default(true),
     pinned: z.boolean().default(false)
@@ -198,7 +200,8 @@ const blog = defineCollection({
 ```yaml
 ---
 title: "文章标题"
-description: "文章摘要，会显示在列表、SEO 和搜索结果中"
+description: "稳定的 SEO 描述，会用于页面 meta description"
+excerpt: "更自然的展示摘要，会优先显示在列表、搜索、RSS 和自动生成的 OG 图中"
 lang: zh
 translationKey: astro-theme-design
 pubDate: 2026-07-02
@@ -209,6 +212,7 @@ draft: false
 cover:
   src: "/covers/sky.svg"
   alt: "封面图描述"
+ogImage: "/og/custom-card.png"
 series: "Astro Theme"
 pinned: true
 toc: true
@@ -244,10 +248,12 @@ ffprobe -hide_banner -show_format -show_streams -of json live.mov
 维护约定：
 
 - `title`、`description`、`pubDate` 是必填字段。
+- `excerpt` 是可选展示摘要；首页卡片、文章头部、搜索结果、RSS 和自动生成的 OG 图会优先使用它，没有时回退到 `description`。
 - `lang` 当前支持 `zh` 和 `en`，用于文章过滤、搜索索引和 RSS 输出。
 - 同一篇文章的不同语言版本应使用相同的 `translationKey`，便于后续实现文章互译跳转。
 - `draft: true` 的文章不会进入列表和详情路由。
 - `cover.alt` 必须可读，避免空 alt 描述用于重要封面。
+- 文章默认生成 `/og/posts/{slug}.svg` Open Graph 图片；`ogImage` 可手动覆盖自动生成图，未指定时文章页会使用生成图。
 - 标签命名要统一，例如不要混用 `frontend`、`Frontend`、`front-end`。
 - `toc: false` 可用于短文或无标题层级文章。
 

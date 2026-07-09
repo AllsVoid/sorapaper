@@ -1,6 +1,6 @@
 import rss from "@astrojs/rss";
 import { themeConfig } from "@/config/theme";
-import { getPostHref, getPublishedPosts } from "@/lib/posts";
+import { getPostHref, getPostSummary, getPublishedPosts } from "@/lib/posts";
 
 export async function GET(context: { site: URL }) {
   const posts = await getPublishedPosts();
@@ -11,7 +11,7 @@ export async function GET(context: { site: URL }) {
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,
-      description: post.data.description,
+      description: getPostSummary(post),
       pubDate: post.data.pubDate,
       link: getPostHref(post)
     }))

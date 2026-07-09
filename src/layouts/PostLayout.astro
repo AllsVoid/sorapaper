@@ -4,7 +4,7 @@ import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import MermaidLoader from "@/components/MermaidLoader.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getPostHref, type BlogPost } from "@/lib/posts";
+import { getPostHref, getPostOgImageHref, type BlogPost } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
@@ -22,6 +22,7 @@ interface Props {
 const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
 const t = getUi(locale);
 const hasMermaid = post.body?.includes(":::mermaid") ?? false;
+const ogImage = post.data.ogImage ?? getPostOgImageHref(post);
 ---
 
 <BaseLayout
@@ -32,7 +33,7 @@ const hasMermaid = post.body?.includes(":::mermaid") ?? false;
   seo={{
     type: "article",
     canonicalPath: getPostHref(post),
-    image: post.data.cover?.src,
+    image: ogImage,
     alternates,
     article: {
       publishedTime: post.data.pubDate,

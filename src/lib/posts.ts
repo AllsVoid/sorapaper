@@ -22,6 +22,14 @@ export function getPostHref(post: BlogPost) {
   return `/posts/${getPostSlug(post)}/`;
 }
 
+export function getPostSummary(post: BlogPost) {
+  return post.data.excerpt ?? post.data.description;
+}
+
+export function getPostOgImageHref(post: BlogPost) {
+  return `/og/posts/${getPostSlug(post)}.svg`;
+}
+
 export function getPostAlternates(post: BlogPost, posts: BlogPost[]) {
   const alternates = new Map<Locale, string>();
   const relatedPosts = post.data.translationKey

@@ -1,4 +1,4 @@
-import { getPostHref, getPublishedPosts } from "@/lib/posts";
+import { getPostHref, getPostSummary, getPublishedPosts } from "@/lib/posts";
 
 export async function GET() {
   const posts = await getPublishedPosts();
@@ -7,7 +7,8 @@ export async function GET() {
     JSON.stringify(
       posts.map((post) => ({
         title: post.data.title,
-        description: post.data.description,
+        description: getPostSummary(post),
+        excerpt: post.data.excerpt,
         tags: post.data.tags,
         href: getPostHref(post),
         lang: post.data.lang

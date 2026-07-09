@@ -1,6 +1,7 @@
 ---
 title: "用 Astro 和 Markdown 构建极简博客"
 description: "记录如何用 Astro、MDX 和简洁设计构建 SoraPaper 主题。"
+excerpt: "从内容集合、类型化 frontmatter、设计 token 到 Markdown 扩展，记录 SoraPaper 如何在静态优先的基础上保持柔和、可读和易维护。"
 lang: zh
 translationKey: astro-theme-design
 pubDate: 2026-07-02
