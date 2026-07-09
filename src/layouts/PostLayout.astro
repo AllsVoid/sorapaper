@@ -2,9 +2,10 @@
 import ArticleHeader from "@/components/ArticleHeader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import MermaidLoader from "@/components/MermaidLoader.astro";
+import PostShare from "@/components/PostShare.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getPostHref, getPostOgImageHref, type BlogPost } from "@/lib/posts";
+import { getPostHref, getPostOgImagePngHref, type BlogPost } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
@@ -22,7 +23,7 @@ interface Props {
 const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
 const t = getUi(locale);
 const hasMermaid = post.body?.includes(":::mermaid") ?? false;
-const ogImage = post.data.ogImage ?? getPostOgImageHref(post);
+const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 ---
 
 <BaseLayout
@@ -48,7 +49,9 @@ const ogImage = post.data.ogImage ?? getPostOgImageHref(post);
     </div>
   )}
   <article class="container">
-    <ArticleHeader post={post} locale={locale} />
+    <ArticleHeader post={post} locale={locale}>
+      <PostShare post={post} locale={locale} />
+    </ArticleHeader>
     <div class="article-grid">
       <div></div>
       <div class="article-content glass">

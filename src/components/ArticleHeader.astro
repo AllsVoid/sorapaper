@@ -43,6 +43,7 @@ const summary = getPostSummary(post);
           {t.article.updated} {formatDate(post.data.updatedDate, locale)}
         </span>
       )}
+      <slot />
     </div>
   </div>
 </header>
@@ -91,6 +92,7 @@ const summary = getPostSummary(post);
   }
 
   .meta {
+    align-items: center;
     margin-top: 1.1rem;
     color: var(--muted);
     font-size: 0.92rem;

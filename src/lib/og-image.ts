@@ -92,13 +92,13 @@ export function renderPostOgImage(post: BlogPost) {
     </filter>
   </defs>
   <style>
-    .brand { fill: #27304a; font: 700 38px Georgia, "Noto Serif SC", serif; }
-    .eyebrow { fill: #6f7890; font: 500 26px Inter, system-ui, sans-serif; }
-    .title { fill: #27304a; font: 700 76px Georgia, "Noto Serif SC", serif; letter-spacing: -1px; }
-    .summary { fill: #6f7890; font: 400 28px Inter, "Noto Sans SC", system-ui, sans-serif; }
-    .tag { fill: #6d6de8; font: 700 22px Inter, "Noto Sans SC", system-ui, sans-serif; }
+    .brand { fill: #27304a; font: 700 38px "Noto Sans SC", sans-serif; }
+    .eyebrow { fill: #6f7890; font: 400 26px "Noto Sans SC", sans-serif; }
+    .title { fill: #27304a; font: 700 76px "Noto Sans SC", sans-serif; letter-spacing: -1px; }
+    .summary { fill: #6f7890; font: 400 28px "Noto Sans SC", sans-serif; }
+    .tag { fill: #6d6de8; font: 700 22px "Noto Sans SC", sans-serif; }
     .pill { fill: rgba(139, 140, 246, 0.12); stroke: rgba(139, 140, 246, 0.25); }
-    .small { fill: #8b8cf6; font: 700 22px Inter, system-ui, sans-serif; }
+    .small { fill: #8b8cf6; font: 700 22px "Noto Sans SC", sans-serif; }
   </style>
   <rect width="1200" height="630" fill="url(#bg)" />
   <circle cx="1030" cy="120" r="210" fill="#83c5f7" opacity="0.22" />

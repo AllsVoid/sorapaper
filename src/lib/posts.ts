@@ -30,6 +30,10 @@ export function getPostOgImageHref(post: BlogPost) {
   return `/og/posts/${getPostSlug(post)}.svg`;
 }
 
+export function getPostOgImagePngHref(post: BlogPost) {
+  return `/og/posts/${getPostSlug(post)}.png`;
+}
+
 export function getPostAlternates(post: BlogPost, posts: BlogPost[]) {
   const alternates = new Map<Locale, string>();
   const relatedPosts = post.data.translationKey

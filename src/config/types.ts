@@ -33,6 +33,18 @@ export interface LocaleUiConfig {
   article: {
     back: string;
     updated: string;
+    share: string;
+    shareDescription: string;
+    copyLink: string;
+    copied: string;
+    nativeShare: string;
+    downloadSvg: string;
+    downloadPng: string;
+    shareToX: string;
+    shareToWeibo: string;
+    shareToTelegram: string;
+    wechat: string;
+    wechatHint: string;
     translationUnavailable: string;
     postNavigation: string;
     previousPost: string;

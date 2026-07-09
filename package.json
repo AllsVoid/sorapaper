@@ -14,9 +14,12 @@
     "@astrojs/mdx": "latest",
     "@astrojs/rss": "latest",
     "@astrojs/sitemap": "latest",
+    "@expo-google-fonts/noto-sans-sc": "^0.4.3",
+    "@resvg/resvg-js": "^2.6.2",
     "astro": "latest",
     "katex": "^0.17.0",
     "mermaid": "^11.16.0",
+    "qrcode": "^1.5.4",
     "rehype-katex": "^7.0.1",
     "remark-directive": "^4.0.0",
     "remark-gfm": "^4.0.1",
@@ -24,6 +27,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "latest",
+    "@types/qrcode": "^1.5.6",
     "typescript": "latest"
   }
 }

@@ -253,7 +253,8 @@ ffprobe -hide_banner -show_format -show_streams -of json live.mov
 - 同一篇文章的不同语言版本应使用相同的 `translationKey`，便于后续实现文章互译跳转。
 - `draft: true` 的文章不会进入列表和详情路由。
 - `cover.alt` 必须可读，避免空 alt 描述用于重要封面。
-- 文章默认生成 `/og/posts/{slug}.svg` Open Graph 图片；`ogImage` 可手动覆盖自动生成图，未指定时文章页会使用生成图。
+- 文章默认生成 `/og/posts/{slug}.svg` 和 `/og/posts/{slug}.png` Open Graph 图片；`ogImage` 可手动覆盖元信息使用的图片，未指定时文章页会使用 PNG 生成图。
+- 文章页分享面板位于 `src/components/PostShare.astro`，支持复制链接、系统分享、下载 SVG/PNG、分享到 X/微博/Telegram，以及微信二维码。微信自定义分享需要 JS-SDK、签名接口和可信域名，不作为静态主题默认能力。
 - 标签命名要统一，例如不要混用 `frontend`、`Frontend`、`front-end`。
 - `toc: false` 可用于短文或无标题层级文章。
 
