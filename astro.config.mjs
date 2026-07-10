@@ -8,7 +8,9 @@ import remarkMath from "remark-math";
 import sitemap from "@astrojs/sitemap";
 import { createShikiCodeBlockTransformer, rehypeCodeBlockFrames } from "./src/lib/markdown/code-blocks.mjs";
 import remarkCallouts from "./src/lib/markdown/remark-callouts.mjs";
+import remarkEncrypted from "./src/lib/markdown/remark-encrypted.mjs";
 import remarkMermaid from "./src/lib/markdown/remark-mermaid.mjs";
+import rehypeEncrypted from "./src/lib/markdown/rehype-encrypted.mjs";
 import userConfig from "./sorapaper.ts";
 
 const codeBlocks = {
@@ -30,8 +32,8 @@ export default defineConfig({
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath, remarkGfm, remarkDirective, remarkCallouts, remarkMermaid],
-      rehypePlugins: [rehypeKatex, [rehypeCodeBlockFrames, codeBlocks]]
+      remarkPlugins: [remarkMath, remarkGfm, remarkDirective, remarkCallouts, remarkMermaid, remarkEncrypted],
+      rehypePlugins: [rehypeKatex, [rehypeCodeBlockFrames, codeBlocks], rehypeEncrypted]
     }),
     shikiConfig: {
       theme: "github-light",

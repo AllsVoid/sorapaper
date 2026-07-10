@@ -12,6 +12,7 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Homepage hero, latest posts, profile sidebar, tags and now card.
 - Archive, tag index, tag detail, about, friends and travel pages.
 - Article layout with metadata, reading time, floating TOC, reading progress and previous/next post navigation.
+- Build-time encrypted Markdown blocks unlocked in the browser with a passphrase.
 - Zero-dependency localized static search using `/search.json`.
 - RSS and sitemap-ready configuration.
 
@@ -68,6 +69,24 @@ This block uses a custom title.
 ```
 
 Supported callout types are `note`, `info`, `tips`, `warning`, `success` and `error`. The alias `tip` renders as `tips`.
+
+Encrypted blocks use the `:::encrypted` directive. The block body is rendered to HTML during the Astro build, encrypted with AES-256-GCM, and replaced by an unlock form in the generated page:
+
+````md
+:::encrypted[Private note]{password="your-passphrase"}
+This paragraph, lists, code blocks and other rendered Markdown inside the block are encrypted in the final HTML.
+:::
+````
+
+Readers unlock the block by entering the same `password` value in the page form. The password is used only during the build and is not written to the generated HTML. For a safer setup where the password does not live in Markdown source, omit `password` and provide the passphrase at build time with one of these environment variables:
+
+```bash
+SORAPAPER_ENCRYPTION_KEYS='{"diary":"your-passphrase","default":"another-passphrase"}'
+SORAPAPER_ENCRYPTION_KEY_DIARY="your-passphrase"
+SORAPAPER_ENCRYPTION_KEY="fallback-for-default-key"
+```
+
+Encrypted blocks protect the generated static HTML, RSS and search index from containing the block body. They do not protect the source Markdown file, repository history, build logs or anyone who has the passphrase. If `password` is written in Markdown, anyone with source access can read it. Avoid putting sensitive headings inside encrypted blocks, because generated table-of-contents data may expose heading text before the block is unlocked.
 
 Code blocks use Astro's Shiki highlighter and are wrapped in an Apple-style code window with optional file names, source links, copy buttons, line numbers, highlighted lines and diff lines:
 

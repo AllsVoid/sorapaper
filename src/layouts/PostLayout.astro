@@ -1,5 +1,6 @@
 ---
 import ArticleHeader from "@/components/ArticleHeader.astro";
+import EncryptedBlockLoader from "@/components/EncryptedBlockLoader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import MermaidLoader from "@/components/MermaidLoader.astro";
 import PostShare from "@/components/PostShare.astro";
@@ -23,6 +24,7 @@ interface Props {
 const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
 const t = getUi(locale);
 const hasMermaid = post.body?.includes(":::mermaid") ?? false;
+const hasEncryptedBlocks = post.body?.includes(":::encrypted") ?? false;
 const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 ---
 
@@ -84,6 +86,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
   </article>
   <LivePhotoLoader />
   {hasMermaid && <MermaidLoader />}
+  {hasEncryptedBlocks && <EncryptedBlockLoader />}
 
   <script>
   const translationToast = document.querySelector("[data-translation-toast]");
@@ -112,53 +115,85 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
     syncTranslationToast(locale);
   });
 
-  document.querySelectorAll("[data-code-copy]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const code = button.getAttribute("data-code") ?? "";
+  function enhanceCodeCopy(root = document) {
+    root.querySelectorAll("[data-code-copy]").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.codeCopyBound === "true") return;
+      button.dataset.codeCopyBound = "true";
 
-      try {
-        await navigator.clipboard.writeText(code);
-        button.setAttribute("data-copied", "true");
-        window.setTimeout(() => button.removeAttribute("data-copied"), 1600);
-      } catch {
-        button.removeAttribute("data-copied");
-      }
+      button.addEventListener("click", async () => {
+        const code = button.getAttribute("data-code") ?? "";
+
+        try {
+          await navigator.clipboard.writeText(code);
+          button.setAttribute("data-copied", "true");
+          window.setTimeout(() => button.removeAttribute("data-copied"), 1600);
+        } catch {
+          button.removeAttribute("data-copied");
+        }
+      });
     });
-  });
+  }
 
-  document.querySelectorAll("[data-code-expand]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const codeBlock = button.closest("[data-code-block]");
-      codeBlock?.classList.toggle("is-expanded");
+  function enhanceCodeExpand(root = document) {
+    root.querySelectorAll("[data-code-expand]").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.codeExpandBound === "true") return;
+      button.dataset.codeExpandBound = "true";
+
+      button.addEventListener("click", () => {
+        const codeBlock = button.closest("[data-code-block]");
+        codeBlock?.classList.toggle("is-expanded");
+      });
     });
-  });
+  }
 
-  document.querySelectorAll(".article-content h2[id], .article-content h3[id], .article-content h4[id]").forEach((heading) => {
-    if (!(heading instanceof HTMLHeadingElement) || heading.id === "footnote-label") return;
-    if (heading.querySelector("[data-heading-anchor]")) return;
+  function enhanceHeadingAnchors(root = document) {
+    root.querySelectorAll(".article-content h2[id], .article-content h3[id], .article-content h4[id], h2[id], h3[id], h4[id]").forEach((heading) => {
+      if (!(heading instanceof HTMLHeadingElement) || heading.id === "footnote-label") return;
+      if (!heading.closest(".article-content")) return;
+      if (heading.querySelector("[data-heading-anchor]")) return;
 
-    const anchor = document.createElement("a");
-    anchor.className = "heading-anchor";
-    anchor.href = `#${heading.id}`;
-    anchor.setAttribute("aria-label", `Copy link to ${heading.textContent?.trim() ?? "this section"}`);
-    anchor.setAttribute("data-heading-anchor", "true");
-    anchor.textContent = "#";
-    heading.classList.add("has-heading-anchor");
-    heading.append(anchor);
-  });
-
-  document.querySelectorAll("[data-heading-anchor]").forEach((anchor) => {
-    anchor.addEventListener("click", async () => {
-      if (!(anchor instanceof HTMLAnchorElement) || !navigator.clipboard) return;
-
-      try {
-        await navigator.clipboard.writeText(anchor.href);
-        anchor.setAttribute("data-copied", "true");
-        window.setTimeout(() => anchor.removeAttribute("data-copied"), 1200);
-      } catch {
-        anchor.removeAttribute("data-copied");
-      }
+      const anchor = document.createElement("a");
+      anchor.className = "heading-anchor";
+      anchor.href = `#${heading.id}`;
+      anchor.setAttribute("aria-label", `Copy link to ${heading.textContent?.trim() ?? "this section"}`);
+      anchor.setAttribute("data-heading-anchor", "true");
+      anchor.textContent = "#";
+      heading.classList.add("has-heading-anchor");
+      heading.append(anchor);
     });
+
+    root.querySelectorAll("[data-heading-anchor]").forEach((anchor) => {
+      if (!(anchor instanceof HTMLAnchorElement) || anchor.dataset.headingAnchorBound === "true") return;
+      anchor.dataset.headingAnchorBound = "true";
+
+      anchor.addEventListener("click", async () => {
+        if (!navigator.clipboard) return;
+
+        try {
+          await navigator.clipboard.writeText(anchor.href);
+          anchor.setAttribute("data-copied", "true");
+          window.setTimeout(() => anchor.removeAttribute("data-copied"), 1200);
+        } catch {
+          anchor.removeAttribute("data-copied");
+        }
+      });
+    });
+  }
+
+  function enhanceArticleContent(root = document) {
+    enhanceCodeCopy(root);
+    enhanceCodeExpand(root);
+    enhanceHeadingAnchors(root);
+  }
+
+  enhanceArticleContent();
+  document.addEventListener("sorapaper:content-unlocked", (event) => {
+    const root = event instanceof CustomEvent ? event.detail?.root : undefined;
+    if (root && typeof root.querySelectorAll === "function") {
+      enhanceArticleContent(root);
+    } else {
+      enhanceArticleContent();
+    }
   });
   </script>
 </BaseLayout>

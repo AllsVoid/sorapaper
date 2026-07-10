@@ -29,6 +29,9 @@ importers:
       astro:
         specifier: latest
         version: 7.0.6(@astrojs/markdown-remark@7.2.1)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.2)(@types/node@24.13.2)(yaml@2.9.0)
+      hast-util-to-html:
+        specifier: ^9.0.5
+        version: 9.0.5
       katex:
         specifier: ^0.17.0
         version: 0.17.0

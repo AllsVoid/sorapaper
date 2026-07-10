@@ -111,6 +111,24 @@ console.log(syntax);
 :::
 ::::
 
+## 加密块写法
+
+加密块使用 `:::encrypted` 和 `:::` 包围内容。`password` 是页面解锁时要输入的密码，构建后不会写入最终 HTML。
+
+````md
+:::encrypted[私密笔记]{password="密码提示"}
+这段内容会在构建后以密文形式进入页面，并在浏览器中输入密码后解锁。
+
+```ts
+const secret = "encrypted at build time";
+```
+:::
+````
+
+:::encrypted[私密笔记]{password="密码提示"}
+这段内容会在构建后以密文形式进入页面，并在浏览器中输入密码后解锁。
+:::
+
 ## 代码块
 
 代码块会自动渲染为 Apple 风格窗口。可以通过 fence meta 设置文件名、源链接、行高亮、diff 行。

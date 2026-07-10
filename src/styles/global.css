@@ -623,6 +623,167 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   margin-top: 0.42rem;
 }
 
+.article-content .encrypted-block {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed color-mix(in srgb, var(--primary) 38%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-strong) 42%, transparent);
+  font-family: var(--font-sans);
+  line-height: 1.35;
+  margin: 1.35em auto;
+  padding: 1.45rem 1.25rem;
+  vertical-align: middle;
+}
+
+.article-content .encrypted-block-inner {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 20%, var(--border));
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--primary) 8%, transparent), transparent 62%),
+    var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  padding: 0.42rem 0.48rem 0.42rem 0.78rem;
+}
+
+.article-content .encrypted-block-header {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.article-content .encrypted-block-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--primary) 78%, var(--text));
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.article-content .encrypted-block-title::before {
+  width: 0.9rem;
+  height: 0.9rem;
+  background: currentColor;
+  content: "";
+  flex: 0 0 auto;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a1.4 1.4 0 0 0-.7 2.6V18h1.4v-1.4A1.4 1.4 0 0 0 12 14Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 0 0-6 0v2Zm3 4a1.4 1.4 0 0 0-.7 2.6V18h1.4v-1.4A1.4 1.4 0 0 0 12 14Z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.article-content .encrypted-block-hint {
+  overflow: hidden;
+  max-width: min(18rem, 34vw);
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: 0;
+  text-overflow: ellipsis;
+}
+
+.article-content .encrypted-block-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin: 0;
+}
+
+.article-content .encrypted-block-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: transparent;
+  font-size: 0;
+}
+
+.article-content .encrypted-block input {
+  width: min(11rem, 32vw);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.86rem;
+  line-height: 1;
+  padding: 0.48rem 0.72rem;
+}
+
+.article-content .encrypted-block input:focus-visible,
+.article-content .encrypted-block button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 54%, transparent);
+  outline-offset: 0.16rem;
+}
+
+.article-content .encrypted-block button {
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface-strong));
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.5rem 0.78rem;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.article-content .encrypted-block button:hover {
+  border-color: color-mix(in srgb, var(--primary) 54%, var(--border));
+  transform: translateY(-1px);
+}
+
+.article-content .encrypted-block button:disabled {
+  cursor: progress;
+  opacity: 0.72;
+  transform: none;
+}
+
+.article-content .encrypted-block-status {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .article-content .encrypted-block {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .article-content .encrypted-block-inner {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    border-radius: var(--radius-md);
+    padding: 0.62rem;
+  }
+
+  .article-content .encrypted-block-hint {
+    max-width: 100%;
+  }
+
+  .article-content .encrypted-block-form {
+    width: 100%;
+  }
+
+  .article-content .encrypted-block input {
+    width: 100%;
+    flex: 1 1 auto;
+  }
+}
+
 .article-content p > img {
   margin-inline: auto;
   border: 1px solid var(--border);
