@@ -2,6 +2,7 @@
 import type { BlogPost } from "@/lib/posts";
 import { formatDate, getPostHref, getPostSummary, getReadingTime } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
+import { withBase } from "@/lib/paths";
 
 interface Props {
   post: BlogPost;
@@ -17,7 +18,7 @@ const summary = getPostSummary(post);
 <article class:list={["post-card", "glass", { featured, "without-cover": !hasCover }]}>
   {post.data.cover && (
     <a class="cover" href={getPostHref(post)} aria-label={post.data.title}>
-      <img src={post.data.cover.src} alt={post.data.cover.alt} loading="lazy" />
+      <img src={withBase(post.data.cover.src)} alt={post.data.cover.alt} loading="lazy" />
     </a>
   )}
   <div class="content">

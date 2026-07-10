@@ -1,5 +1,6 @@
 ---
 import { ui } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 ---
 
 <dialog class="search-dialog glass" data-search-dialog>
@@ -21,7 +22,7 @@ import { ui } from "@/i18n/ui";
   </div>
 </dialog>
 
-<script is:inline define:vars={{ emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
+<script is:inline define:vars={{ searchIndexPath: withBase("/search.json"), emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
   const dialog = document.querySelector("[data-search-dialog]");
   const input = document.querySelector("[data-search-input]");
   const results = document.querySelector("[data-search-results]");
@@ -62,7 +63,7 @@ import { ui } from "@/i18n/ui";
 
   const loadIndex = async () => {
     if (index.length > 0) return;
-    const response = await fetch("/search.json");
+    const response = await fetch(searchIndexPath);
     index = await response.json();
   };
 

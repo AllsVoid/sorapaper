@@ -2,6 +2,7 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 
 export type BlogPost = CollectionEntry<"blog">;
 
@@ -19,7 +20,7 @@ export function getPostSlug(post: BlogPost) {
 }
 
 export function getPostHref(post: BlogPost) {
-  return `/posts/${getPostSlug(post)}/`;
+  return withBase(`/posts/${getPostSlug(post)}/`);
 }
 
 export function getPostSummary(post: BlogPost) {
@@ -27,11 +28,11 @@ export function getPostSummary(post: BlogPost) {
 }
 
 export function getPostOgImageHref(post: BlogPost) {
-  return `/og/posts/${getPostSlug(post)}.svg`;
+  return withBase(`/og/posts/${getPostSlug(post)}.svg`);
 }
 
 export function getPostOgImagePngHref(post: BlogPost) {
-  return `/og/posts/${getPostSlug(post)}.png`;
+  return withBase(`/og/posts/${getPostSlug(post)}.png`);
 }
 
 export function getPostAlternates(post: BlogPost, posts: BlogPost[]) {

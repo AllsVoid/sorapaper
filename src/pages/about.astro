@@ -3,12 +3,13 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { themeConfig } from "@/config/theme";
 import { locales } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 ---
 
 <BaseLayout title="About" description={themeConfig.description}>
   <section class="container about">
     <div class="intro glass">
-      <img src={themeConfig.author.avatar} alt="" width="112" height="112" />
+      <img src={withBase(themeConfig.author.avatar)} alt="" width="112" height="112" />
       <div>
         {locales.map((locale) => {
           const t = getUi(locale);

@@ -4,6 +4,7 @@ import SiteHeader from "@/components/SiteHeader.astro";
 import ScrollProgress from "@/components/ScrollProgress.astro";
 import { themeConfig } from "@/config/theme";
 import { defaultLocale, type Locale } from "@/i18n/config";
+import { absoluteUrl, withBase } from "@/lib/paths";
 import "katex/dist/katex.min.css";
 import "@/styles/global.css";
 
@@ -39,12 +40,12 @@ const {
 
 const pageTitle = title === themeConfig.name ? title : `${title} · ${themeConfig.name}`;
 const seoType = seo.type ?? "website";
-const siteUrl = themeConfig.site.url.endsWith("/") ? themeConfig.site.url : `${themeConfig.site.url}/`;
-const canonicalUrl = new URL(seo.canonicalPath ?? Astro.url.pathname, siteUrl).toString();
-const imageUrl = new URL(seo.image ?? themeConfig.site.ogImage, siteUrl).toString();
+const canonicalUrl = absoluteUrl(seo.canonicalPath ?? Astro.url.pathname);
+const imageUrl = absoluteUrl(seo.image ?? themeConfig.site.ogImage);
 const imageType = imageUrl.endsWith(".svg") ? "image/svg+xml" : imageUrl.endsWith(".png") ? "image/png" : "image/jpeg";
 const alternateEntries = Object.entries(seo.alternates ?? {}) as Array<[Locale, string]>;
 const xDefaultPath = seo.alternates?.[defaultLocale] ?? seo.alternates?.[locale] ?? seo.canonicalPath ?? Astro.url.pathname;
+const faviconPath = withBase("/favicon.svg");
 
 function getOgLocale(value: Locale) {
   return value === "zh" ? "zh_CN" : "en_US";
@@ -63,9 +64,9 @@ function getHrefLang(value: Locale) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="canonical" href={canonicalUrl} />
     {alternateEntries.map(([alternateLocale, href]) => (
-      <link rel="alternate" hreflang={getHrefLang(alternateLocale)} href={new URL(href, siteUrl).toString()} />
+      <link rel="alternate" hreflang={getHrefLang(alternateLocale)} href={absoluteUrl(href)} />
     ))}
-    {alternateEntries.length > 0 && <link rel="alternate" hreflang="x-default" href={new URL(xDefaultPath, siteUrl).toString()} />}
+    {alternateEntries.length > 0 && <link rel="alternate" hreflang="x-default" href={absoluteUrl(xDefaultPath)} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={seoType} />
@@ -90,7 +91,7 @@ function getHrefLang(value: Locale) {
         {seo.article.tags?.map((tag) => <meta property="article:tag" content={tag} />)}
       </>
     )}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={faviconPath} />
     <title>{pageTitle}</title>
     <script is:inline>
       const theme = localStorage.getItem("theme");

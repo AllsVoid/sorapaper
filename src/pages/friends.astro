@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 
 const friends = await getCollection("friends");
 ---
@@ -21,7 +22,7 @@ const friends = await getCollection("friends");
         <div class="friends">
           {friends.map((friend) => (
             <a class="friend glass" href={friend.data.href} target="_blank" rel="noreferrer">
-              <img src={friend.data.avatar ?? "/avatar.svg"} alt="" width="58" height="58" />
+              <img src={withBase(friend.data.avatar ?? "/avatar.svg")} alt="" width="58" height="58" />
               <div>
                 <h2>{friend.data.name}</h2>
                 <p>{friend.data.description}</p>

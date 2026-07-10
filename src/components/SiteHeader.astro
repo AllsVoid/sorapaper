@@ -4,6 +4,7 @@ import SearchDialog from "@/components/SearchDialog.astro";
 import { themeConfig } from "@/config/theme";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi, ui } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 
 interface Props {
   locale: Locale;
@@ -25,8 +26,8 @@ const nav = [
 ---
 
 <header class="site-header container glass">
-  <a class="brand" href="/" aria-label={`${themeConfig.name} ${t.nav.home}`}>
-    <img src="/favicon.svg" alt="" width="34" height="34" />
+  <a class="brand" href={localizePath(locale)} aria-label={`${themeConfig.name} ${t.nav.home}`}>
+    <img src={withBase("/favicon.svg")} alt="" width="34" height="34" />
     <span>Sora<span>Paper</span></span>
   </a>
 

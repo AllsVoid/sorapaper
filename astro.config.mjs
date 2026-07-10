@@ -16,8 +16,17 @@ const codeBlocks = {
   lineNumbers: userConfig.codeBlocks?.lineNumbers ?? true
 };
 
+function normalizeBase(base = "/") {
+  const normalized = base.trim();
+  if (!normalized || normalized === "/") return "/";
+  return `/${normalized.replace(/^\/+|\/+$/g, "")}`;
+}
+
+const base = normalizeBase(userConfig.site?.base);
+
 export default defineConfig({
   site: userConfig.site?.url ?? "https://example.com",
+  base,
   integrations: [mdx(), sitemap()],
   markdown: {
     processor: unified({

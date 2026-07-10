@@ -1,7 +1,7 @@
 ---
 import PostCard from "@/components/PostCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { locales } from "@/i18n/config";
+import { locales, localizePath } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 import { getAllTags, getPublishedPosts } from "@/lib/posts";
 
@@ -31,7 +31,7 @@ const localeData = await Promise.all(
   {localeData.map(({ locale, t, posts }) => (
     <section class="container page" data-lang={locale}>
       <header>
-        <a class="pill" href="/tags/">← {t.nav.tags}</a>
+        <a class="pill" href={localizePath(locale, "/tags/")}>← {t.nav.tags}</a>
         <h1>#{tag}</h1>
         <p class="muted">{posts.length} {t.pages.taggedDescription}</p>
       </header>

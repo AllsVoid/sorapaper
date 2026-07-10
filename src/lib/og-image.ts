@@ -1,5 +1,6 @@
 import { themeConfig } from "@/config/theme";
 import { formatDate, getPostSummary, type BlogPost } from "@/lib/posts";
+import { absoluteUrl } from "@/lib/paths";
 
 const width = 1200;
 const height = 630;
@@ -73,7 +74,7 @@ export function renderPostOgImage(post: BlogPost) {
   const summaryLines = wrapText(getPostSummary(post), post.data.lang === "zh" ? 34 : 58, 2);
   const date = formatDate(post.data.pubDate, post.data.lang);
   const category = post.data.category;
-  const cover = post.data.cover?.src;
+  const cover = post.data.cover ? absoluteUrl(post.data.cover.src) : undefined;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(post.data.title)}">

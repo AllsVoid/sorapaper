@@ -2,6 +2,7 @@
 import { themeConfig } from "@/config/theme";
 import type { Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
 
 interface Props {
   locale: Locale;
@@ -44,7 +45,7 @@ function getSocialIcon(link: { label: string; icon?: string }) {
 
 <aside class="sidebar">
   <section class="profile glass">
-    <img src={themeConfig.author.avatar} alt="" width="92" height="92" />
+    <img src={withBase(themeConfig.author.avatar)} alt="" width="92" height="92" />
     <h2>{themeConfig.author.name}</h2>
     <p class="title">{themeConfig.author.title}</p>
     <p>{themeConfig.author.bio}</p>
@@ -53,7 +54,7 @@ function getSocialIcon(link: { label: string; icon?: string }) {
         const icon = getSocialIcon(link);
         return (
           <a href={link.href} aria-label={link.label} title={link.label}>
-            <span class="social-icon" style={`--icon-url: url("/assets/social/${icon}.svg")`}></span>
+            <span class="social-icon" style={`--icon-url: url("${withBase(`/assets/social/${icon}.svg`)}")`}></span>
           </a>
         );
       })}

@@ -86,6 +86,7 @@ export interface SoraPaperThemeConfig {
     name: string;
     description: string;
     url: string;
+    base: string;
     ogImage: string;
     defaultLocale: LocaleCode;
     locales: LocaleCode[];

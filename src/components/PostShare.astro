@@ -4,6 +4,7 @@ import { getUi } from "@/i18n/ui";
 import type { Locale } from "@/i18n/config";
 import type { BlogPost } from "@/lib/posts";
 import { getPostHref, getPostOgImageHref, getPostOgImagePngHref, getPostSummary, getPostSlug } from "@/lib/posts";
+import { absoluteUrl } from "@/lib/paths";
 
 interface Props {
   post: BlogPost;
@@ -12,11 +13,10 @@ interface Props {
 
 const { post, locale } = Astro.props;
 const t = getUi(locale).article;
-const siteUrl = themeConfig.site.url.endsWith("/") ? themeConfig.site.url : `${themeConfig.site.url}/`;
 const svgPath = getPostOgImageHref(post);
 const pngPath = getPostOgImagePngHref(post);
-const postUrl = new URL(getPostHref(post), siteUrl).toString();
-const shareImageUrl = new URL(post.data.ogImage ?? pngPath, siteUrl).toString();
+const postUrl = absoluteUrl(getPostHref(post));
+const shareImageUrl = absoluteUrl(post.data.ogImage ?? pngPath);
 const shareText = `${post.data.title} · ${themeConfig.name}`;
 const shareSummary = getPostSummary(post);
 const fileName = `sorapaper-${getPostSlug(post)}`;

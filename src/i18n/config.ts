@@ -1,4 +1,5 @@
 import { themeConfig } from "@/config/theme";
+import { withBase, withoutBase } from "@/lib/paths";
 
 export const locales = ["zh", "en"] as const;
 
@@ -21,11 +22,11 @@ export function getLocaleFromParams(params: Record<string, string | undefined>) 
 
 export function localizePath(_locale: Locale, path = "/") {
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return normalized;
+  return withBase(normalized);
 }
 
 export function switchLocalePath(targetLocale: Locale, currentPath: string) {
-  const url = new URL(currentPath, "https://example.com");
+  const url = new URL(withoutBase(currentPath), "https://example.com");
   url.searchParams.set("lang", targetLocale);
-  return `${url.pathname}${url.search}`;
+  return withBase(`${url.pathname}${url.search}`);
 }

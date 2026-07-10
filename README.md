@@ -169,6 +169,17 @@ Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, a
 
 Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image. Blog posts automatically get generated Open Graph cards at `/og/posts/{slug}.svg` and `/og/posts/{slug}.png`; a post-level `ogImage` overrides the generated card used in metadata.
 
+Set `site.base` when deploying under a subdirectory. For example, GitHub Pages project sites usually need:
+
+```ts
+site: {
+  url: "https://username.github.io",
+  base: "/repo-name"
+}
+```
+
+Use `base: "/"` for root-domain deployments. SoraPaper applies this base path to internal links, public assets, RSS, sitemap metadata, search index requests and generated Open Graph image URLs.
+
 Article pages include a quiet share panel. Readers can copy the canonical link, use the native system share sheet when supported, download the generated SVG or PNG card, share the link to X, Weibo or Telegram, and scan a WeChat QR code. WeChat custom in-app share metadata still requires the official WeChat JS-SDK and a signed server endpoint, so the theme uses a QR fallback by default.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.

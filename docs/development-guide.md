@@ -77,6 +77,7 @@ npm run preview
 - `src/content/blog`：示例文章，支持 `.md` 和 `.mdx`。
 - `src/content/friends`：友链内容。
 - `src/lib/posts.ts`：文章查询、排序、slug、阅读时间、标签、归档、译文查找和相邻文章工具函数。
+- `src/lib/paths.ts`：统一处理 `site.base`、站内链接、public 资源路径和绝对 URL。
 - `src/i18n`：语言配置、路径工具和界面文案翻译表。
 - `src/layouts`：页面骨架，主要是全站布局和文章布局。
 - `src/components`：可复用 UI 组件。
@@ -114,7 +115,9 @@ flowchart TD
 - `/rss.xml`：RSS 输出。
 - `/search.json`：静态搜索索引，客户端按当前语言过滤。
 
-SEO 输出集中在 `src/layouts/BaseLayout.astro`：普通页面输出 canonical、Open Graph、Twitter Card 和默认分享图；文章页通过 `PostLayout.astro` 传入 article metadata，输出 `og:type=article`、发布时间、更新时间、标签和基于 `translationKey` 的 `hreflang` alternate links。RSS、搜索索引和 sitemap 仍使用无语言前缀的 clean routes。
+路由本身保持无可见语言前缀。部署到子目录时，通过 `sorapaper.ts` 的 `site.base` 和 Astro `base` 输出到类似 `/repo-name/` 的路径。新增站内链接或 public 资源引用时，使用 `localizePath()`、`withBase()` 或 `absoluteUrl()`，不要直接写死根路径。
+
+SEO 输出集中在 `src/layouts/BaseLayout.astro`：普通页面输出 canonical、Open Graph、Twitter Card 和默认分享图；文章页通过 `PostLayout.astro` 传入 article metadata，输出 `og:type=article`、发布时间、更新时间、标签和基于 `translationKey` 的 `hreflang` alternate links。RSS、搜索索引和 sitemap 使用 clean routes，并通过路径工具补齐 base path。
 
 组件分层：
 
@@ -289,9 +292,10 @@ tags: ["Framework", "Frontend"]
 
 路径工具：
 
-- `localizePath(locale, path)`：保留内部链接为无前缀路径，参数用于兼容调用位置。
+- `localizePath(locale, path)`：生成无语言前缀但包含 `site.base` 的内部链接，参数用于兼容调用位置。
 - `switchLocalePath(targetLocale, currentPath)`：生成带 `?lang=` 的兼容切换链接，主要用于非 JS fallback。
 - `getLocaleFromParams(Astro.params)`：保留给未来动态语言路由兼容，当前主要使用 `localStorage.locale`。
+- `withBase(path)` 和 `absoluteUrl(path)`：用于 public 资源、RSS、sitemap、OG 图和分享链接，避免子目录部署时路径丢失 base。
 
 新增语言时需要：
 
