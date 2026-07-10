@@ -118,6 +118,7 @@ const nav = [
     gap: 0.65rem;
     font-weight: 700;
     letter-spacing: -0.02em;
+    min-width: max-content;
   }
 
   .brand span span {
@@ -134,6 +135,7 @@ const nav = [
     color: var(--muted);
     font-size: 0.92rem;
     padding: 0.62rem 0.88rem;
+    white-space: nowrap;
   }
 
   .nav a:hover {
@@ -180,7 +182,7 @@ const nav = [
     fill: currentColor;
   }
 
-  @media (max-width: 780px) {
+  @media (max-width: 900px) {
     .site-header {
       grid-template-columns: 1fr auto;
     }
@@ -191,6 +193,11 @@ const nav = [
       justify-content: flex-start;
       overflow-x: auto;
       padding-bottom: 0.1rem;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar {
+      display: none;
     }
   }
 </style>

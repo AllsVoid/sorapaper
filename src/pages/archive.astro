@@ -1,9 +1,31 @@
 ---
-import PostCard from "@/components/PostCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
-import { getArchiveGroups, getPublishedPosts } from "@/lib/posts";
+import { formatDate, getArchiveGroups, getPostHref, getPostSummary, getPublishedPosts, type BlogPost } from "@/lib/posts";
+
+function formatTimelineMonth(date: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale === "zh" ? "zh-CN" : "en", {
+    month: "short"
+  }).format(date);
+}
+
+function getTimelineMonthGroups(posts: BlogPost[]) {
+  const groups = new Map<string, { date: Date; posts: BlogPost[] }>();
+
+  for (const post of posts) {
+    const key = `${post.data.pubDate.getFullYear()}-${post.data.pubDate.getMonth()}`;
+    const group = groups.get(key);
+
+    if (group) {
+      group.posts.push(post);
+    } else {
+      groups.set(key, { date: post.data.pubDate, posts: [post] });
+    }
+  }
+
+  return [...groups.entries()].map(([key, group]) => ({ key, ...group }));
+}
 
 const localeData = await Promise.all(
   locales.map(async (locale) => {
@@ -25,9 +47,40 @@ const localeData = await Promise.all(
       <div class="groups">
         {groups.map(([year, yearPosts]) => (
           <section class="year">
-            <h2>{year}</h2>
-            <div class="posts">
-              {yearPosts.map((post) => <PostCard post={post} locale={locale} />)}
+            <div class="year-marker">
+              <span>{year}</span>
+            </div>
+            <div class="timeline">
+              {getTimelineMonthGroups(yearPosts).map(({ key, date, posts: monthPosts }) => (
+                <div class="timeline-entry">
+                  <time class="entry-date" datetime={date.toISOString()}>{formatTimelineMonth(date, locale)}</time>
+                  <span class="entry-node" aria-hidden="true"></span>
+                  <div class="month-posts" data-month={key}>
+                    {monthPosts.map((post) => (
+                      <article class:list={["timeline-item", "glass", { "without-cover": !post.data.cover }]}>
+                        {post.data.cover && (
+                          <a class="thumb" href={getPostHref(post)} aria-label={post.data.title}>
+                            <img src={post.data.cover.src} alt={post.data.cover.alt} loading="lazy" />
+                          </a>
+                        )}
+                        <div class="content">
+                          <div class="meta">
+                            <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
+                            {post.data.category && <span>{post.data.category}</span>}
+                          </div>
+                          <h3><a href={getPostHref(post)}>{post.data.title}</a></h3>
+                          <p>{getPostSummary(post)}</p>
+                          {post.data.tags.length > 0 && (
+                            <div class="tags">
+                              {post.data.tags.slice(0, 3).map((tag) => <a href={`/tags/${tag.toLowerCase()}/`}>{tag}</a>)}
+                            </div>
+                          )}
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </section>
         ))}
@@ -56,18 +109,222 @@ const localeData = await Promise.all(
 
   .groups {
     display: grid;
-    gap: 2rem;
-    width: min(100%, 880px);
-    margin: 2rem auto 0;
+    gap: 2.4rem;
+    width: min(100%, 840px);
+    margin: 2.4rem auto 0;
   }
 
-  .year h2 {
-    margin: 0 0 1rem;
+  .year {
+    display: grid;
+    grid-template-columns: clamp(4.8rem, 13vw, 6.2rem) minmax(0, 1fr);
+    gap: clamp(2.5rem, 4vw, 3.2rem);
+    align-items: start;
+    position: relative;
+  }
+
+  .year-marker {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    color: var(--primary);
+    font-family: var(--font-serif);
+    font-size: clamp(1.5rem, 3vw, 2.3rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .timeline {
+    --rail-x: 5.15rem;
+    position: relative;
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .timeline::before {
+    position: absolute;
+    top: 1.25rem;
+    bottom: 1.25rem;
+    left: var(--rail-x);
+    width: 1px;
+    background: linear-gradient(to bottom, color-mix(in srgb, var(--primary) 38%, transparent), color-mix(in srgb, var(--border) 80%, transparent));
+    content: "";
+  }
+
+  .timeline-entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.8rem 1.8rem minmax(0, 1fr);
+    gap: 0.45rem;
+    align-items: start;
+    min-width: 0;
+  }
+
+  .entry-date {
+    padding-top: 0.78rem;
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .entry-node {
+    position: relative;
+    min-height: 2.4rem;
+  }
+
+  .entry-node::before {
+    position: absolute;
+    top: 0.86rem;
+    left: 50%;
+    z-index: 1;
+    width: 0.58rem;
+    height: 0.58rem;
+    border: 3px solid color-mix(in srgb, var(--primary) 28%, var(--surface-strong));
+    border-radius: 999px;
+    background: var(--surface-strong);
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 8%, transparent);
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .month-posts {
+    display: grid;
+    gap: 0.85rem;
+    min-width: 0;
+  }
+
+  .timeline-item {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 6.75rem) minmax(0, 1fr);
+    gap: 0.9rem;
+    min-width: 0;
+    border-radius: var(--radius-md);
+    padding: 0.62rem;
+    transition: border-color 180ms ease, transform 180ms ease;
+  }
+
+  .timeline-item.without-cover {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .timeline-item:hover {
+    border-color: color-mix(in srgb, var(--primary) 36%, var(--border));
+    transform: translateY(-2px);
+  }
+
+  .thumb {
+    overflow: hidden;
+    border-radius: calc(var(--radius-md) - 8px);
+    background: var(--tag);
+  }
+
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    min-height: 7.5rem;
+    object-fit: cover;
+  }
+
+  .content {
+    display: grid;
+    align-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+    padding: 0.18rem 0.25rem 0.18rem 0;
+  }
+
+  .without-cover .content {
+    padding-left: 0.25rem;
+  }
+
+  .meta,
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    font-size: 1.02rem;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  h3 a {
+    overflow-wrap: anywhere;
+  }
+
+  h3 a:hover {
     color: var(--primary);
   }
 
-  .posts {
-    display: grid;
-    gap: 1rem;
+  p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    -webkit-line-clamp: 2;
+  }
+
+  .tags a {
+    border-radius: 999px;
+    background: var(--tag);
+    color: var(--primary);
+    padding: 0.18rem 0.48rem;
+  }
+
+  @media (max-width: 900px) {
+    .year {
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+
+    .year-marker {
+      justify-content: flex-start;
+    }
+
+    .timeline {
+      --rail-x: 5.15rem;
+    }
+
+    .timeline-item {
+      grid-template-columns: 88px minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 520px) {
+    .timeline {
+      --rail-x: 3.95rem;
+    }
+
+    .timeline-entry {
+      grid-template-columns: 3rem 1.2rem minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+
+    .entry-date {
+      font-size: 0.72rem;
+    }
+
+    .timeline-item {
+      grid-template-columns: 1fr;
+    }
+
+    .thumb img {
+      max-height: 11rem;
+    }
   }
 </style>

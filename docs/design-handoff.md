@@ -51,7 +51,7 @@ Article page:
 
 Archive and tags:
 
-- Keep card rhythm consistent with homepage posts.
+- Archive should use a compact timeline layout instead of homepage post cards, with year markers, optional thumbnails, concise metadata and clipped summaries.
 - Use soft page headers and generous spacing.
 - Tags page uses a weighted typography cloud: larger, stronger and more saturated words indicate higher post counts, while hover/focus can reveal the exact count.
 
