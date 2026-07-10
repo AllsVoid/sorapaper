@@ -202,15 +202,33 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 <style>
   .article-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--article)) minmax(0, 1fr);
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, var(--article))
+      minmax(0, var(--article-aside));
+    gap: var(--article-gap);
     align-items: start;
   }
 
   article.container {
-    --article: 920px;
-    --article-aside: 220px;
-    --article-gap: 1.4rem;
-    --container: calc(var(--article) + (var(--article-aside) + var(--article-gap)) * 2);
+    --article: clamp(42rem, 58vw, 58rem);
+    --article-aside: clamp(10rem, 14vw, 14rem);
+    --article-gap: clamp(0.9rem, 1.4vw, 1.4rem);
+    --container: 80vw;
+  }
+
+  :global(.article-header) {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, var(--article))
+      minmax(0, var(--article-aside));
+    gap: var(--article-gap);
+  }
+
+  :global(.article-header .back),
+  :global(.article-header .inner) {
+    grid-column: 2;
   }
 
   .article-content {
@@ -223,8 +241,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 
   .article-grid :global(.toc) {
     justify-self: start;
-    width: min(var(--article-aside), calc(100% - var(--article-gap)));
-    margin-left: var(--article-gap);
+    width: min(100%, var(--article-aside));
   }
 
   .translation-toast {
@@ -328,8 +345,16 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
   }
 
   @media (max-width: 1080px) {
+    article.container {
+      --container: 100%;
+    }
+
     .article-grid {
       grid-template-columns: 1fr;
+    }
+
+    :global(.article-header) {
+      display: block;
     }
 
     .article-grid > div:first-child,

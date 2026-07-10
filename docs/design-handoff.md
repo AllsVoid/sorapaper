@@ -26,6 +26,11 @@ The default card treatment is `glass`: translucent surface, subtle border, blur 
 
 ## Page Requirements
 
+Global layout:
+
+- Main page containers should use the shared `--container` token and adapt to the viewport, targeting about 80% of desktop screen width instead of fixed pixel caps.
+- Small screens may use near-full-width containers to preserve readability and avoid overly narrow content.
+
 Homepage:
 
 - Sticky glass navigation.

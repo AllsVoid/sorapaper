@@ -23,8 +23,8 @@
   --radius-xl: 36px;
   --shadow-card: 0 18px 48px rgba(80, 90, 130, 0.13);
   --shadow-soft: 0 10px 28px rgba(80, 90, 130, 0.08);
-  --container: 1180px;
-  --article: 760px;
+  --container: 80vw;
+  --article: var(--container);
 }
 
 :root[data-theme="dark"] {
@@ -1078,6 +1078,10 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
 }
 
 @media (max-width: 760px) {
+  :root {
+    --container: calc(100vw - 22px);
+  }
+
   .container {
     width: min(100% - 22px, var(--container));
   }

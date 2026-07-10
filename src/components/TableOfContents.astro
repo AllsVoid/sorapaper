@@ -25,11 +25,26 @@ const visible = headings.filter((heading) => heading.depth > 1 && heading.depth 
 <style>
   .toc {
     position: sticky;
-    top: 7rem;
+    top: 10vh;
     display: grid;
+    max-height: 80vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
     gap: 0.55rem;
     border-radius: var(--radius-md);
     padding: 1rem;
+  }
+
+  .toc::-webkit-scrollbar {
+    display: none;
+  }
+
+  @supports (height: 100dvh) {
+    .toc {
+      top: 10dvh;
+      max-height: 80dvh;
+    }
   }
 
   strong {

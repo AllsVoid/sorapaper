@@ -49,8 +49,8 @@ const localeData = await Promise.all(
 <style>
   .home-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 310px;
-    gap: 1.2rem;
+    grid-template-columns: minmax(0, 1fr) minmax(clamp(15rem, 24vw, 19.5rem), 0.34fr);
+    gap: clamp(1rem, 1.6vw, 1.4rem);
     align-items: start;
   }
 
