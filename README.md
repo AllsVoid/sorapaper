@@ -178,7 +178,20 @@ Images can use regular Markdown syntax or the `:::img` block when a caption, sca
 :::
 ```
 
-The `:::img` block requires `src`; `alt` should be provided for accessibility. Optional attributes include `caption`, `scale`, `live`, `ratio`, `photoTime`, `liveControls`, `livePreload`, `href`, `loading`, `decoding`, `title` and `credit`. `scale` defaults to `100`, meaning the image block matches the article body width.
+The `:::img` block requires `src`; `alt` should be provided for accessibility. Optional attributes include `caption`, `scale`, `live`, `ratio`, `photoTime`, `liveControls`, `livePreload`, `href`, `loading`, `decoding`, `title`, `credit` and `rounded`. `scale` defaults to `100`, meaning the image block matches the article body width.
+
+Galleries reuse the existing `:::img` block. Use four colons for the outer directive so each nested image can close independently:
+
+```md
+::::gallery[Travel notes]{layout="carousel" rounded="true"}
+:::img{src="/photos/one.jpg" alt="Mountain view" caption="Morning"}
+:::
+:::img{src="/photos/two.jpg" live="/photos/two.mov" alt="Lake view" caption="A Live Photo" ratio="4/3"}
+:::
+::::
+```
+
+`layout="carousel"` (the default) shows one full-width image at a time. `layout="stack"` presents the active image as the front card with the adjacent images tucked behind it. Both layouts support previous/next controls, clickable position dots, arrow keys, touch or pointer swipes, and horizontal wheel gestures. Nested `:::img` attributes—including captions, links, credits and Live Photo sources—continue to work. Without JavaScript, all images remain visible in document order. `rounded="true"` is the default; set `rounded="false"` on either `:::gallery` or an individual `:::img` block for square corners.
 
 When `live` is provided, SoraPaper keeps the still image as a fallback and progressively enhances the block with Apple LivePhotosKit JS on article pages. Use `src` for the still JPEG photo and `live` for the paired MOV video file exported from the same Live Photo. `ratio` defaults to `16/9`; set it when the media is portrait or square so the player has a stable size before JavaScript loads. `liveControls` and `livePreload` map to LivePhotosKit's native controls and proactive video loading options.
 

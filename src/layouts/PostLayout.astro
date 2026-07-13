@@ -1,6 +1,7 @@
 ---
 import ArticleHeader from "@/components/ArticleHeader.astro";
 import EncryptedBlockLoader from "@/components/EncryptedBlockLoader.astro";
+import GalleryLoader from "@/components/GalleryLoader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import MermaidLoader from "@/components/MermaidLoader.astro";
 import PostShare from "@/components/PostShare.astro";
@@ -26,6 +27,7 @@ interface Props {
 const { post, locale, alternatePath, alternates, previousPost, nextPost, seriesPosts = [], headings, Content } = Astro.props;
 const t = getUi(locale);
 const hasMermaid = post.body?.includes(":::mermaid") ?? false;
+const hasGalleries = post.body?.includes(":::gallery") ?? false;
 const hasEncryptedBlocks = post.body?.includes(":::encrypted") ?? false;
 const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 ---
@@ -89,6 +91,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
     </footer>
   </article>
   <LivePhotoLoader />
+  {hasGalleries && <GalleryLoader />}
   {hasMermaid && <MermaidLoader />}
   {hasEncryptedBlocks && <EncryptedBlockLoader />}
 
@@ -370,7 +373,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
     }
 
     .article-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     :global(.article-header) {
@@ -383,6 +386,8 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
 
     .article-content {
       grid-column: auto;
+      min-width: 0;
+      width: 100%;
       order: 1;
     }
 

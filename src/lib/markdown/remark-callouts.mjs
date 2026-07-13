@@ -116,6 +116,7 @@ function transformImage(node) {
   const livePreload = getBooleanAttribute(node, "livePreload");
   const photoTime = getStringAttribute(node, "photoTime");
   const title = getStringAttribute(node, "title");
+  const rounded = getBooleanAttribute(node, "rounded") !== "false";
   const scale = getImageScale(node);
   const ratio = getImageRatio(node);
   const loading = getAllowedValue(node, "loading", loadingValues, "lazy");
@@ -191,9 +192,15 @@ function transformImage(node) {
   node.data = {
     hName: "figure",
     hProperties: {
-      className: ["image-block", ...(live ? ["image-block-live"] : [])],
-      style: `--image-scale: ${scale}%;${live ? ` --image-ratio: ${ratio};` : ""}`,
+      className: [
+        "image-block",
+        rounded ? "image-block-rounded" : "image-block-square",
+        ...(node._soraPaperGalleryItem === true ? ["gallery-item"] : []),
+        ...(live ? ["image-block-live"] : [])
+      ],
+      style: `--image-scale: ${scale}%; --image-ratio: ${ratio};`,
       "data-scale": String(scale),
+      ...(node._soraPaperGalleryItem === true ? { "data-gallery-item": "true" } : {}),
       ...(live ? { "data-live": "true", "data-live-src": live, "data-live-photo-src": src } : {})
     }
   };
@@ -223,6 +230,53 @@ function transformImage(node) {
       ]
     });
   }
+}
+
+function transformGallery(node) {
+  const images = node.children?.filter(
+    (child) => child.type === "containerDirective" && child.name === "img"
+  ) ?? [];
+
+  if (images.length === 0) return;
+
+  const layout = getAllowedValue(node, "layout", new Set(["carousel", "stack"]), "carousel");
+  const title = getDirectiveLabel(node, "");
+  const rounded = getBooleanAttribute(node, "rounded") !== "false";
+
+  for (const image of images) {
+    image._soraPaperGalleryItem = true;
+  }
+
+  node.data = {
+    hName: "figure",
+    hProperties: {
+      className: ["gallery-block", `gallery-${layout}`, rounded ? "gallery-rounded" : "gallery-square"],
+      "data-gallery": "true",
+      "data-gallery-layout": layout,
+      "data-gallery-rounded": String(rounded),
+      tabindex: 0,
+      role: "group",
+      "aria-roledescription": "carousel",
+      "aria-label": title || "Image gallery"
+    }
+  };
+
+  const contentOpen = layout === "stack"
+    ? '<div class="gallery-stage">'
+    : '<div class="gallery-viewport"><div class="gallery-track">';
+  const contentClose = layout === "stack" ? "</div>" : "</div></div>";
+
+  node.children = [
+    {
+      type: "html",
+      value: `<button class="gallery-control gallery-previous" type="button" data-gallery-previous aria-label="Previous image">‹</button>${contentOpen}`
+    },
+    ...images,
+    {
+      type: "html",
+      value: `${contentClose}<button class="gallery-control gallery-next" type="button" data-gallery-next aria-label="Next image">›</button><div class="gallery-meta"><div class="gallery-dots" data-gallery-dots></div><span class="gallery-counter" data-gallery-counter aria-live="polite">1 / ${images.length}</span></div>${title ? `<figcaption class="gallery-caption">${escapeHtml(title)}</figcaption>` : ""}`
+    }
+  ];
 }
 
 function transformCallout(node) {
@@ -321,6 +375,11 @@ export default function remarkCallouts() {
 
       if (node.name === "details") {
         transformDetails(node);
+        return;
+      }
+
+      if (node.name === "gallery") {
+        transformGallery(node);
         return;
       }
 

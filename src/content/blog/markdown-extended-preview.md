@@ -198,6 +198,32 @@ $$
 :::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
 :::
 
+## 画廊
+
+画廊使用 `::::gallery` 包裹多个现有的 `:::img`。`layout="carousel"` 是普通轮播，`layout="stack"` 是扑克牌式堆叠切换；`rounded` 默认是 `true`，设为 `false` 时使用普通直角矩形；两者都支持按钮、圆点、键盘方向键、触控拖动和横向滚轮。
+
+### 普通轮播
+
+::::gallery[柔和场景轮播]{layout="carousel"}
+:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="天空"}
+:::
+:::img{src="/covers/sunset.svg" alt="粉紫色日落插画" caption="日落"}
+:::
+:::img{src="/covers/room.svg" alt="安静房间插画" caption="房间"}
+:::
+::::
+
+### 扑克牌式堆叠
+
+::::gallery[直角层叠场景图集]{layout="stack" rounded="false"}
+:::img{src="/covers/room.svg" alt="安静房间插画" caption="房间"}
+:::
+:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="天空"}
+:::
+:::img{src="/covers/sunset.svg" alt="粉紫色日落插画" caption="日落"}
+:::
+::::
+
 ## Mermaid 图表
 
 Mermaid 图表使用 `:::mermaid` 指令。标题是可选的；如果浏览器禁用 JavaScript 或图表解析失败，页面会保留源码作为 fallback。

@@ -790,6 +790,7 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   border-radius: var(--radius-lg);
   background: var(--surface-strong);
   box-shadow: var(--shadow-soft);
+  overflow: clip;
 }
 
 .article-content .image-block {
@@ -809,6 +810,12 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   border-radius: var(--radius-lg);
   background: var(--surface-strong);
   box-shadow: var(--shadow-soft);
+  overflow: clip;
+}
+
+.article-content .image-block-square .image-block-media,
+.article-content .image-block-square .live-photo-frame {
+  border-radius: 0;
 }
 
 .article-content .image-block-live {
@@ -882,6 +889,243 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   font-family: var(--font-sans);
   font-size: 0.9rem;
   line-height: 1.6;
+}
+
+.article-content .gallery-block {
+  --gallery-radius: var(--radius-lg);
+  position: relative;
+  width: 100%;
+  margin: 1.75em auto;
+  color: var(--muted);
+  font-family: var(--font-sans);
+  outline: none;
+  touch-action: pan-y;
+}
+
+.article-content .gallery-square {
+  --gallery-radius: 0px;
+}
+
+.article-content .gallery-block:not(.is-enhanced) {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.article-content .gallery-block:not(.is-enhanced) .gallery-meta,
+.article-content .gallery-block:not(.is-enhanced) .gallery-control {
+  display: none;
+}
+
+.article-content .gallery-item {
+  width: 100%;
+  margin: 0;
+}
+
+.article-content .gallery-item .image-block-media,
+.article-content .gallery-item .live-photo-frame {
+  border-radius: var(--gallery-radius);
+}
+
+.article-content .gallery-item .image-block-media {
+  aspect-ratio: var(--image-ratio, 16 / 9);
+  object-fit: cover;
+}
+
+.article-content .gallery-viewport {
+  overflow: hidden;
+  border-radius: var(--gallery-radius);
+}
+
+.article-content .gallery-track {
+  display: flex;
+  align-items: flex-start;
+  transform: translate3d(0, 0, 0);
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.article-content .gallery-carousel .gallery-item {
+  min-width: 100%;
+}
+
+.article-content .gallery-stack {
+  overflow: clip;
+}
+
+.article-content .gallery-stage {
+  position: relative;
+  height: clamp(18rem, 49vw, 31rem);
+  margin-inline: 2.5rem;
+  perspective: 80rem;
+}
+
+.article-content .gallery-stack .gallery-item {
+  position: absolute;
+  inset: 0;
+  width: min(78%, 40rem);
+  margin: 0 auto;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, 0, -2rem) scale(0.84);
+  transition:
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease,
+    filter 300ms ease;
+  will-change: transform, opacity;
+}
+
+.article-content .gallery-stack .gallery-item.is-active {
+  z-index: 5;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+.article-content .gallery-stack .gallery-item.is-previous {
+  z-index: 3;
+  opacity: 0.64;
+  filter: saturate(0.72);
+  transform: translate3d(-17%, 0.45rem, -1rem) rotate(-3.5deg) scale(0.91);
+}
+
+.article-content .gallery-stack .gallery-item.is-next {
+  z-index: 4;
+  opacity: 0.82;
+  filter: saturate(0.86);
+  transform: translate3d(17%, 0.25rem, -0.5rem) rotate(3deg) scale(0.94);
+}
+
+.article-content .gallery-stack .gallery-item:not(.is-active) .image-block-caption {
+  opacity: 0;
+}
+
+.article-content .gallery-control {
+  position: absolute;
+  top: calc(50% - 1.8rem);
+  z-index: 10;
+  display: none;
+  place-items: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-strong) 82%, transparent);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  cursor: pointer;
+  font: 500 1.8rem/1 var(--font-sans);
+  padding: 0 0 0.13rem;
+  backdrop-filter: blur(14px);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.article-content .gallery-block.is-enhanced .gallery-control {
+  display: grid;
+}
+
+.article-content .gallery-previous {
+  left: 0.75rem;
+}
+
+.article-content .gallery-next {
+  right: 0.75rem;
+}
+
+.article-content .gallery-control:hover {
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface-strong));
+  transform: translateY(-1px);
+}
+
+.article-content .gallery-control:focus-visible,
+.article-content .gallery-dot:focus-visible,
+.article-content .gallery-block:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 48%, transparent);
+  outline-offset: 3px;
+}
+
+.article-content .gallery-control:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.article-content .gallery-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.25rem;
+  margin-top: 0.8rem;
+}
+
+.article-content .gallery-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
+.article-content .gallery-dot {
+  width: 0.48rem;
+  height: 0.48rem;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 36%, transparent);
+  cursor: pointer;
+  padding: 0;
+  transition: width 180ms ease, background-color 180ms ease;
+}
+
+.article-content .gallery-dot.is-active {
+  width: 1.25rem;
+  background: var(--primary);
+}
+
+.article-content .gallery-counter {
+  position: absolute;
+  right: 0.2rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.article-content .gallery-caption {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .article-content .gallery-stage {
+    height: clamp(15rem, 74vw, 21rem);
+    margin-inline: 0.5rem;
+  }
+
+  .article-content .gallery-stack .gallery-item {
+    width: 82%;
+  }
+
+  .article-content .gallery-control {
+    top: calc(50% - 1.55rem);
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .article-content .gallery-previous {
+    left: 0.35rem;
+  }
+
+  .article-content .gallery-next {
+    right: 0.35rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .article-content .gallery-track,
+  .article-content .gallery-stack .gallery-item,
+  .article-content .gallery-control,
+  .article-content .gallery-dot {
+    transition: none;
+  }
 }
 
 .article-content .mermaid-block {

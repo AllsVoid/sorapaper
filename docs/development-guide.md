@@ -243,6 +243,7 @@ Markdown 扩展：
 - 脚注由 `remark-gfm` 解析，使用标准 Markdown footnote 语法：正文写 `[^1]`，底部写 `[^1]: 脚注内容`。脚注样式集中在 `src/styles/global.css` 的 `.footnotes` 和 `data-footnote-*` 选择器。
 - 文章的 `h2`、`h3` 和 `h4` 标题会复用 Astro 生成的稳定 `id`；文章页脚本在最终 DOM 中追加锚点链接，点击锚点会跳转并复制完整小节 URL。
 - 文章支持 `:::img{src="..." alt="..."}` 图片块，用于图注、缩放、链接、图片来源和实况图片；`scale` 表示相对正文宽度的百分比，默认 `100`。`live` 非空时，构建阶段输出静态图片 fallback 和 LivePhotosKit 初始化数据，文章页由 `LivePhotoLoader.astro` 按需加载 Apple LivePhotosKit JS。Live Photo 素材应使用同一实况照片导出的 JPEG + MOV 配对；已验证可播放素材中 JPEG 的 `Apple:MediaGroupUUID` 与 MOV 的 `Keys:ContentIdentifier` 一致，MOV 还包含 `NRT Metadata` / `mebx` 元数据轨道和 `StillImageTime`。
+- 文章支持 `::::gallery[可选标题]{layout="carousel" rounded="true"}` 包裹多个 `:::img` 图片块。`layout` 可选 `carousel`（默认普通轮播）或 `stack`（扑克牌式层叠）；文章页仅在原文包含 `:::gallery` 时挂载 `GalleryLoader.astro`，支持按钮、圆点、方向键、触控拖动和横向滚轮。`rounded` 默认是 `true`，设为 `false` 时 gallery 及其内部图片使用直角；独立 `:::img` 也支持同一属性。无 JavaScript 时所有图片按文档顺序显示，嵌套图片仍保留图注、链接、来源和 Live Photo 能力。
 - 扩展语法预览文章位于 `src/content/blog/markdown-extended-preview.md`，新增或调整扩展语法时同步更新。
 - 新增其他 `:::name` 扩展时，优先放在本地 remark 插件中，并同步更新 README、预览文章与文章样式。
 
