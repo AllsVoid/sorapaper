@@ -480,6 +480,7 @@ tags: ["Framework", "Frontend"]
 - 作者信息：`author`
 - Now 卡片：`now`
 - 功能开关：`featureFlags`
+- 文章许可协议：`article.license`，可选 `cc-by-4.0`（默认）或 `cc-by-nc-4.0`。
 - 导航文案。
 - 首页 Hero 文案。
 - 页面标题、搜索文案、文章页文案和页脚文案。

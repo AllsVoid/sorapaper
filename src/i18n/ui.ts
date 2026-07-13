@@ -53,6 +53,12 @@ export const defaultUi = {
       nextPost: "下一篇",
       seriesLabel: "文章系列",
       seriesProgress: "第 {current} 篇，共 {total} 篇",
+      licenseLabel: "许可协议",
+      licenseDescription: "本文采用 {license} 进行许可。",
+      licenses: {
+        "cc-by-4.0": "知识共享署名 4.0 国际许可协议",
+        "cc-by-nc-4.0": "知识共享署名—非商业性使用 4.0 国际许可协议"
+      },
       copyright: "使用 SoraPaper 写作。转载时请保留原文链接。",
       browseArchive: "浏览归档"
     },
@@ -135,6 +141,12 @@ export const defaultUi = {
       nextPost: "Next",
       seriesLabel: "Article series",
       seriesProgress: "Part {current} of {total}",
+      licenseLabel: "License",
+      licenseDescription: "This work is licensed under the {license}.",
+      licenses: {
+        "cc-by-4.0": "Creative Commons Attribution 4.0 International License",
+        "cc-by-nc-4.0": "Creative Commons Attribution-NonCommercial 4.0 International License"
+      },
       copyright: "Written with SoraPaper. Please keep the original link when reposting.",
       browseArchive: "Browse archive"
     },

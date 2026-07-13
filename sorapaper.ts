@@ -38,6 +38,9 @@ const config = {
     copyButton: true,
     lineNumbers: false
   },
+  article: {
+    license: "cc-by-4.0"
+  },
   colorSchemes: ["paper", "sakura", "moon", "ocean"],
   ui: {
     zh: {

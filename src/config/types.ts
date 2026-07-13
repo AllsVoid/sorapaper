@@ -9,6 +9,7 @@ export type DeepPartial<T> = T extends Primitive
       };
 
 export type LocaleCode = "zh" | "en";
+export type ArticleLicense = "cc-by-4.0" | "cc-by-nc-4.0";
 
 export interface LocaleUiConfig {
   nav: Record<"home" | "archive" | "tags" | "series" | "about" | "friends" | "travel", string>;
@@ -51,6 +52,9 @@ export interface LocaleUiConfig {
     nextPost: string;
     seriesLabel: string;
     seriesProgress: string;
+    licenseLabel: string;
+    licenseDescription: string;
+    licenses: Record<ArticleLicense, string>;
     copyright: string;
     browseArchive: string;
   };
@@ -123,6 +127,9 @@ export interface SoraPaperThemeConfig {
   codeBlocks: {
     copyButton: boolean;
     lineNumbers: boolean;
+  };
+  article: {
+    license: ArticleLicense;
   };
   colorSchemes: string[];
 }

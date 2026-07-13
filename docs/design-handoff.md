@@ -55,6 +55,7 @@ Article page:
 - Mermaid diagrams should render inside a quiet article-surface card, use existing color tokens for light and dark themes, keep wide diagrams scrollable within the article width, and preserve readable source fallback when JavaScript is unavailable or rendering fails.
 - Generated Open Graph images should reuse the SoraPaper visual language: soft gradients, glass-like card surfaces, readable title hierarchy, restrained decorative shapes and stable 1200x630 social-card dimensions.
 - The article share panel should stay compact and optional, use the same glass card language, keep buttons keyboard accessible, and provide a QR fallback for WeChat instead of assuming platform-specific JavaScript SDK access.
+- The article license notice should appear quietly at the end of the body, use the configured CC BY 4.0 or CC BY-NC 4.0 canonical license link, and remain readable in both themes and locales.
 
 Archive and tags:
 

@@ -203,6 +203,16 @@ Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, a
 
 Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image. Blog posts automatically get generated Open Graph cards at `/og/posts/{slug}.svg` and `/og/posts/{slug}.png`; a post-level `ogImage` overrides the generated card used in metadata.
 
+Article pages show a Creative Commons license at the end of the body. The default is CC BY 4.0; switch to the non-commercial variant in `sorapaper.ts`:
+
+```ts
+article: {
+  license: "cc-by-nc-4.0"
+}
+```
+
+Supported values are `cc-by-4.0` and `cc-by-nc-4.0`. Existing configurations that omit `article` continue to use CC BY 4.0.
+
 Set `site.base` when deploying under a subdirectory. For example, GitHub Pages project sites usually need:
 
 ```ts

@@ -1,5 +1,6 @@
 ---
 import ArticleHeader from "@/components/ArticleHeader.astro";
+import ArticleLicense from "@/components/ArticleLicense.astro";
 import EncryptedBlockLoader from "@/components/EncryptedBlockLoader.astro";
 import GalleryLoader from "@/components/GalleryLoader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
@@ -64,6 +65,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
       </div>
       <div class="article-content glass">
         <Content />
+        <ArticleLicense locale={locale} />
       </div>
       {post.data.toc ? <TableOfContents headings={headings} /> : <div></div>}
     </div>

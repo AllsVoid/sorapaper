@@ -40,6 +40,9 @@ export const defaultThemeConfig = {
     copyButton: true,
     lineNumbers: true
   },
+  article: {
+    license: "cc-by-4.0"
+  },
   colorSchemes: ["paper", "sakura", "moon", "ocean"]
 } satisfies SoraPaperThemeConfig;
 
