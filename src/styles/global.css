@@ -525,12 +525,48 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
 }
 
 .article-content blockquote {
-  border-left: 4px solid var(--primary);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 7%, transparent), transparent 56%),
+    var(--surface-strong);
+  box-shadow: var(--shadow-soft);
   color: var(--muted);
+  font-size: 0.92em;
+  line-height: 1.72;
   margin-inline: 0;
-  padding: 0.7rem 1rem;
+  padding: 0.9rem 1.15rem 0.9rem 3.15rem;
+}
+
+.article-content blockquote::before {
+  position: absolute;
+  top: 0.72rem;
+  left: 1rem;
+  color: color-mix(in srgb, var(--primary) 82%, var(--text));
+  content: "“";
+  font-family: Georgia, var(--font-serif);
+  font-size: 2.45rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.article-content blockquote :where(p, ul, ol) {
+  margin-block: 0.45rem;
+}
+
+.article-content blockquote > :first-child {
+  margin-top: 0;
+}
+
+.article-content blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.article-content blockquote blockquote {
+  font-size: 1em;
+  margin-block: 0.75rem;
 }
 
 .article-content .callout {
