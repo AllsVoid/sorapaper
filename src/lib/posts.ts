@@ -100,3 +100,39 @@ export function getArchiveGroups(posts: BlogPost[]) {
   }
   return [...groups.entries()].sort(([a], [b]) => Number(b) - Number(a));
 }
+
+export function getSeriesSlug(series: string) {
+  return series.trim().toLowerCase().replace(/\s+/g, "-").replace(/[\\/?#]+/g, "-").replace(/-+/g, "-");
+}
+
+export function getSeriesPosts(posts: BlogPost[], series: string) {
+  return posts
+    .filter((post) => post.data.series?.trim().toLowerCase() === series.trim().toLowerCase())
+    .sort((a, b) => {
+      const aOrder = a.data.seriesOrder;
+      const bOrder = b.data.seriesOrder;
+      if (aOrder !== undefined || bOrder !== undefined) {
+        if (aOrder === undefined) return 1;
+        if (bOrder === undefined) return -1;
+        if (aOrder !== bOrder) return aOrder - bOrder;
+      }
+      return a.data.pubDate.getTime() - b.data.pubDate.getTime();
+    });
+}
+
+export function getAllSeries(posts: BlogPost[]) {
+  const seriesMap = new Map<string, { name: string; posts: BlogPost[] }>();
+
+  for (const post of posts) {
+    const name = post.data.series?.trim();
+    if (!name) continue;
+    const slug = getSeriesSlug(name);
+    const entry = seriesMap.get(slug) ?? { name, posts: [] };
+    entry.posts.push(post);
+    seriesMap.set(slug, entry);
+  }
+
+  return [...seriesMap.entries()]
+    .map(([slug, entry]) => ({ slug, name: entry.name, posts: getSeriesPosts(entry.posts, entry.name) }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}

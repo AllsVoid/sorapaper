@@ -10,7 +10,7 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Built-in i18n structure for Chinese and English without visible locale prefixes.
 - Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
 - Homepage hero, latest posts, profile sidebar, tags and now card.
-- Archive, tag index, tag detail, about, friends and travel pages.
+- Archive, tag index, tag detail, series index, series detail, about, friends and travel pages.
 - Article layout with metadata, reading time, floating TOC, reading progress and previous/next post navigation.
 - Build-time encrypted Markdown blocks unlocked in the browser with a passphrase.
 - Zero-dependency localized static search using `/search.json`.
@@ -40,6 +40,8 @@ pubDate: 2026-07-02
 updatedDate: 2026-07-03
 tags: ["Astro", "Design"]
 category: "Frontend"
+series: "Building SoraPaper"
+seriesOrder: 1
 draft: false
 cover:
   src: "/covers/sky.svg"
@@ -50,7 +52,7 @@ toc: true
 ---
 ```
 
-`description` is the stable SEO description. Optional `excerpt` is used for post cards, article intros, search results, RSS items and generated Open Graph images; when omitted, SoraPaper falls back to `description`. Optional `ogImage` lets a post override the generated social image.
+`series` groups connected posts, while optional `seriesOrder` fixes their intended reading order; posts without `seriesOrder` fall back to publication date. `description` is the stable SEO description. Optional `excerpt` is used for post cards, article intros, search results, RSS items and generated Open Graph images; when omitted, SoraPaper falls back to `description`. Optional `ogImage` lets a post override the generated social image.
 
 ### Markdown Extensions
 

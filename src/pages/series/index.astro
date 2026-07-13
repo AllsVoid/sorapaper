@@ -1,0 +1,50 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllSeries, getPublishedPosts } from "@/lib/posts";
+import { withBase } from "@/lib/paths";
+
+const localeData = await Promise.all(locales.map(async (locale) => ({
+  locale,
+  t: getUi(locale),
+  series: getAllSeries(await getPublishedPosts(locale))
+})));
+---
+
+<BaseLayout title="Series" description="Browse connected posts in reading order.">
+  {localeData.map(({ locale, t, series }) => (
+    <section class="container page" data-lang={locale}>
+      <header>
+        <span class="pill">{t.nav.series}</span>
+        <h1>{t.pages.seriesTitle}</h1>
+        <p class="muted">{t.pages.seriesDescription}</p>
+      </header>
+      {series.length > 0 ? (
+        <div class="series-grid">
+          {series.map((item) => (
+            <a class="series-card glass" href={withBase(`/series/${item.slug}/`)}>
+              <span>{item.posts.length} {t.pages.seriesPosts}</span>
+              <h2>{item.name}</h2>
+              <p>{item.posts[0]?.data.description}</p>
+            </a>
+          ))}
+        </div>
+      ) : <p class="empty glass">{t.pages.seriesEmpty}</p>}
+    </section>
+  ))}
+</BaseLayout>
+
+<style>
+  .page { padding: 3.2rem 0 0; }
+  header, .series-grid, .empty { width: min(100%, var(--article)); margin-inline: auto; }
+  h1 { margin: 1rem 0 0.6rem; font-family: var(--font-serif); font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.05; }
+  .series-grid { display: grid; gap: 1rem; margin-top: 2rem; }
+  .series-card { display: block; border-radius: var(--radius-lg); padding: 1.25rem; }
+  .series-card:hover { border-color: color-mix(in srgb, var(--primary) 38%, var(--border)); transform: translateY(-1px); }
+  .series-card span, .series-card p { color: var(--muted); }
+  .series-card span { font-size: 0.82rem; }
+  .series-card h2 { margin: 0.35rem 0; font-family: var(--font-serif); }
+  .series-card p { margin: 0; line-height: 1.65; }
+  .empty { margin-top: 2rem; border-radius: var(--radius-lg); padding: 1.25rem; }
+</style>

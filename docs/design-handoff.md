@@ -44,6 +44,7 @@ Article page:
 - Centered title, description, tags, date and reading time.
 - Body width should remain close to `--article`.
 - Floating TOC appears only on wide screens.
+- Article series navigation uses a sticky, internally scrollable left sidebar on wide screens, hides its scrollbar, clamps long post titles to two lines with full text on hover or focus, and moves below the article body on smaller screens.
 - Code blocks should use the Apple-style window chrome, readable Shiki colors, accessible copy controls, optional line numbers, highlighted lines and restrained diff colors in both themes.
 - Math formulas should use KaTeX rendering, keep inline formulas aligned with surrounding text, and allow wide block formulas to scroll horizontally without widening the article.
 - Footnotes should remain quiet, readable and inside the article width, with clear back references and visible target states.
@@ -77,6 +78,7 @@ Posts are defined in `src/content.config.ts`. Required fields are `title`, `desc
 - `draft`
 - `cover`
 - `series`
+- `seriesOrder`
 - `toc`
 - `pinned`
 

@@ -22,6 +22,7 @@ const blog = defineCollection({
     cover: imageMeta.optional(),
     ogImage: z.string().optional(),
     series: z.string().optional(),
+    seriesOrder: z.number().int().positive().optional(),
     toc: z.boolean().default(true),
     pinned: z.boolean().default(false)
   })

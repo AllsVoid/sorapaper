@@ -45,6 +45,7 @@ const config = {
         home: "首页",
         archive: "归档",
         tags: "标签",
+        series: "系列",
         about: "关于",
         friends: "友链",
         travel: "游记"
@@ -67,6 +68,7 @@ const config = {
         home: "Home",
         archive: "Archive",
         tags: "Tags",
+        series: "Series",
         about: "About",
         friends: "Friends",
         travel: "Travel"

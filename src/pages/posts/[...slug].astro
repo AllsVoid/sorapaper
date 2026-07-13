@@ -8,6 +8,7 @@ import {
   getPostHref,
   getPostSlug,
   getPublishedPosts,
+  getSeriesPosts,
   getTranslatedPost
 } from "@/lib/posts";
 
@@ -37,6 +38,7 @@ const translatedPost = getTranslatedPost(post, allPosts, targetLocale);
 const alternatePath = translatedPost ? getPostHref(translatedPost) : undefined;
 const alternates = getPostAlternates(post, allPosts);
 const { previousPost, nextPost } = getAdjacentPosts(localePosts, post);
+const seriesPosts = post.data.series ? getSeriesPosts(localePosts, post.data.series) : [];
 const { Content, headings } = await render(post);
 ---
 
@@ -47,6 +49,7 @@ const { Content, headings } = await render(post);
   alternates={alternates}
   previousPost={previousPost}
   nextPost={nextPost}
+  seriesPosts={seriesPosts}
   headings={headings}
   Content={Content}
 />

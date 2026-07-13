@@ -110,6 +110,8 @@ flowchart TD
 - `/archive/`：归档页，按年份分组。
 - `/tags/`：标签总览。
 - `/tags/[tag]/`：标签详情页。
+- `/series/`：系列总览。
+- `/series/[series]/`：按阅读顺序展示系列文章。
 - `/about/`：关于页。
 - `/friends/`：友链页。
 - `/rss.xml`：RSS 输出。
@@ -192,6 +194,7 @@ const blog = defineCollection({
     cover: imageMeta.optional(),
     ogImage: z.string().optional(),
     series: z.string().optional(),
+    seriesOrder: z.number().int().positive().optional(),
     toc: z.boolean().default(true),
     pinned: z.boolean().default(false)
   })
@@ -217,6 +220,7 @@ cover:
   alt: "封面图描述"
 ogImage: "/og/custom-card.png"
 series: "Astro Theme"
+seriesOrder: 1
 pinned: true
 toc: true
 ---

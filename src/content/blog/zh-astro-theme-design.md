@@ -8,6 +8,8 @@ pubDate: 2026-07-02
 updatedDate: 2026-07-02
 tags: ["Astro", "前端", "设计"]
 category: "前端"
+series: "构建 SoraPaper"
+seriesOrder: 1
 draft: false
 cover:
   src: "/covers/sky.svg"

@@ -8,6 +8,8 @@ pubDate: 2026-07-02
 updatedDate: 2026-07-02
 tags: ["Astro", "Frontend", "Design"]
 category: "Frontend"
+series: "Building SoraPaper"
+seriesOrder: 1
 draft: false
 cover:
   src: "/covers/sky.svg"

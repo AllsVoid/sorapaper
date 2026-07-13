@@ -4,6 +4,7 @@ import EncryptedBlockLoader from "@/components/EncryptedBlockLoader.astro";
 import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
 import MermaidLoader from "@/components/MermaidLoader.astro";
 import PostShare from "@/components/PostShare.astro";
+import SeriesNavigation from "@/components/SeriesNavigation.astro";
 import TableOfContents from "@/components/TableOfContents.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getPostHref, getPostOgImagePngHref, type BlogPost } from "@/lib/posts";
@@ -17,11 +18,12 @@ interface Props {
   alternates?: Partial<Record<Locale, string>>;
   previousPost?: BlogPost;
   nextPost?: BlogPost;
+  seriesPosts?: BlogPost[];
   headings: { depth: number; slug: string; text: string }[];
   Content: any;
 }
 
-const { post, locale, alternatePath, alternates, previousPost, nextPost, headings, Content } = Astro.props;
+const { post, locale, alternatePath, alternates, previousPost, nextPost, seriesPosts = [], headings, Content } = Astro.props;
 const t = getUi(locale);
 const hasMermaid = post.body?.includes(":::mermaid") ?? false;
 const hasEncryptedBlocks = post.body?.includes(":::encrypted") ?? false;
@@ -55,7 +57,9 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
       <PostShare post={post} locale={locale} />
     </ArticleHeader>
     <div class="article-grid">
-      <div></div>
+      <div class="series-aside">
+        {post.data.series && seriesPosts.length > 0 && <SeriesNavigation post={post} posts={seriesPosts} locale={locale} />}
+      </div>
       <div class="article-content glass">
         <Content />
       </div>
@@ -244,6 +248,22 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
     width: min(100%, var(--article-aside));
   }
 
+  .series-aside {
+    position: sticky;
+    top: 10vh;
+    align-self: start;
+    justify-self: end;
+    max-height: 80vh;
+    width: min(100%, var(--article-aside));
+  }
+
+  @supports (height: 100dvh) {
+    .series-aside {
+      top: 10dvh;
+      max-height: 80dvh;
+    }
+  }
+
   .translation-toast {
     position: fixed;
     right: max(1rem, calc((100vw - var(--container)) / 2));
@@ -357,13 +377,22 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
       display: block;
     }
 
-    .article-grid > div:first-child,
     .article-grid > div:last-child {
       display: none;
     }
 
     .article-content {
       grid-column: auto;
+      order: 1;
+    }
+
+    .series-aside {
+      position: static;
+      justify-self: stretch;
+      max-height: none;
+      width: min(100%, var(--article));
+      margin: 0 auto;
+      order: 2;
     }
   }
 
