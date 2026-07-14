@@ -1164,6 +1164,49 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   }
 }
 
+.article-content .media-embed {
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--primary) 5%, transparent), transparent 42%),
+    var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  color: var(--text);
+  font-family: var(--font-sans);
+  margin-block: 1.45em;
+}
+
+.article-content .media-embed-frame {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: color-mix(in srgb, var(--primary) 4%, var(--surface-strong));
+}
+
+.article-content .media-embed-music .media-embed-frame {
+  height: var(--media-embed-height, 152px);
+}
+
+.article-content .media-embed-video .media-embed-frame {
+  aspect-ratio: 16 / 9;
+}
+
+.article-content .media-embed iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  .article-content .media-embed {
+    border-radius: var(--radius-sm);
+  }
+}
+
 .article-content .mermaid-block {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));

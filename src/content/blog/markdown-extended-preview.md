@@ -237,6 +237,30 @@ $$
 :::
 ::::
 
+## 音乐与视频
+
+媒体引用推荐使用标准叶子 directive，通过统一的 `provider` 和 `ref` 指定平台与平台原生引用。
+
+### 网易云音乐
+
+::music{provider="netease" ref="19723756"}
+
+### QQ 音乐
+
+::music{provider="qq" ref="0039MnYb0qxYhV"}
+
+### Spotify
+
+::music{provider="spotify" ref="track:11dFghVXANMlKmJXsNCbNl"}
+
+### Bilibili
+
+::video{provider="bilibili" ref="BV1B7411m7LV"}
+
+### YouTube
+
+::video{provider="youtube" ref="M7lc1UVf-VE"}
+
 ## Mermaid 图表
 
 Mermaid 图表使用 `:::mermaid` 指令。标题是可选的；如果浏览器禁用 JavaScript 或图表解析失败，页面会保留源码作为 fallback。
