@@ -128,20 +128,27 @@ Music and video embeds use standard leaf directives with a platform-neutral `pro
 ```md
 ::music{provider="netease" ref="19723756"}
 ::music{provider="qq" ref="0039MnYb0qxYhV"}
+::music{provider="netease" type="playlist" ref="60198"}
 ::music{provider="spotify" ref="track:11dFghVXANMlKmJXsNCbNl"}
 
 ::video{provider="bilibili" ref="BV1B7411m7LV"}
 ::video{provider="youtube" ref="M7lc1UVf-VE"}
 ```
 
-`ref` is the provider-native reference: a NetEase song ID, QQ Music `songmid`, Spotify `track:ID` / `album:ID` / `playlist:ID`, Bilibili `BV…` / `av…` / `ep…`, or a YouTube video ID. Complete page URLs remain available through `src` when copying a link is more convenient:
+`ref` is the provider-native reference: a NetEase ID, QQ Music ID, Spotify `track:ID` / `album:ID` / `playlist:ID`, Bilibili `BV…` / `av…` / `ep…`, or a YouTube video ID. NetEase and QQ Music default to `type="song"`; use `playlist`, `album` or `artist` when embedding another collection type. Complete page URLs remain available through `src` when copying a link is more convenient:
 
 ```md
 ::music{src="https://music.163.com/song?id=19723756"}
 ::video{src="https://www.youtube.com/watch?v=M7lc1UVf-VE" title="YouTube player demonstration"}
 ```
 
-The earlier `:::music URL:::` / `:::video URL:::` shorthand and empty container form remain supported for backward compatibility. Media references are parsed during the build and render allowlisted official iframes with lazy loading. Short links are intentionally unsupported because resolving them would make builds depend on third-party network redirects. Unsupported, malformed or incomplete references fail the build instead of emitting an arbitrary iframe.
+Local audio files placed under `public/` can use the same directive. `title` is required; `artist`, `cover` and inline `lyric` are optional:
+
+```md
+::music{provider="local" src="/media/song.mp3" title="Song title" artist="Artist" cover="/media/cover.webp"}
+```
+
+NetEase, QQ Music and local audio render with MetingJS and APlayer, loaded only on article pages containing music directives. Spotify and video providers continue to use lazy official iframes. The earlier `:::music URL:::` / `:::video URL:::` shorthand and empty container form remain supported for backward compatibility. Short links are intentionally unsupported because resolving them would make builds depend on third-party network redirects. Unsupported, malformed or incomplete references fail the build instead of emitting an arbitrary embed.
 
 Mermaid diagrams use the `:::mermaid` directive. The optional title appears above the diagram, and the original source remains visible if JavaScript is disabled or rendering fails:
 

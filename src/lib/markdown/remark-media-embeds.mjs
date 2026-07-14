@@ -1,8 +1,10 @@
 const mediaKinds = new Set(["music", "video"]);
 const spotifyTypes = new Set(["album", "artist", "episode", "playlist", "show", "track"]);
+const metingTypes = new Set(["album", "artist", "playlist", "song"]);
 
 const providerLabels = {
   bilibili: "Bilibili",
+  local: "本地音乐",
   netease: "网易云音乐",
   qq: "QQ 音乐",
   spotify: "Spotify",
@@ -45,13 +47,21 @@ function createResult(kind, provider, href, src, options = {}) {
 
 function parseNetease(value, url) {
   let id;
+  let type = "song";
 
-  const prefixed = value.match(/^netease:(\d+)$/i);
-  if (prefixed) id = prefixed[1];
+  const prefixed = value.match(/^netease:(?:(album|artist|playlist|song):)?(\d+)$/i);
+  if (prefixed) {
+    type = prefixed[1]?.toLowerCase() ?? type;
+    id = prefixed[2];
+  }
 
   if (!id && url && /(^|\.)music\.163\.com$/i.test(url.hostname)) {
-    const pathMatch = url.pathname.match(/\/song\/(\d+)/i);
-    id = url.searchParams.get("id") ?? getHashParams(url).get("id") ?? pathMatch?.[1];
+    const routeMatch = `${url.pathname}${url.hash}`.match(/\/(song|album|artist|playlist)(?:\/|\?[^#]*?id=)(\d+)/i);
+    id = url.searchParams.get("id") ?? getHashParams(url).get("id") ?? routeMatch?.[2];
+    if (routeMatch) {
+      type = routeMatch[1].toLowerCase();
+      id ??= routeMatch[2];
+    }
   }
 
   if (!id || !/^\d+$/.test(id)) return undefined;
@@ -59,33 +69,44 @@ function parseNetease(value, url) {
   return createResult(
     "music",
     "netease",
-    `https://music.163.com/song?id=${id}`,
-    `https://music.163.com/outchain/player?type=2&id=${id}&auto=0&height=66`,
-    { height: 86 }
+    `https://music.163.com/${type}?id=${id}`,
+    undefined,
+    { meting: { server: "netease", type, id } }
   );
 }
 
 function parseQqMusic(value, url) {
   let id;
-  let idType = "songmid";
+  let type = "song";
 
-  const prefixed = value.match(/^qq:([a-z\d]{6,32})$/i);
-  if (prefixed) id = prefixed[1];
+  const prefixed = value.match(/^qq:(?:(album|artist|playlist|song):)?([a-z\d]{6,32})$/i);
+  if (prefixed) {
+    type = prefixed[1]?.toLowerCase() ?? type;
+    id = prefixed[2];
+  }
 
   if (!id && url && /(^|\.)(?:y|i)\.qq\.com$/i.test(url.hostname)) {
-    const pathMatch = url.pathname.match(/\/(?:songDetail|song)\/([a-z\d]+)/i);
-    id = url.searchParams.get("songmid") ?? url.searchParams.get("songid") ?? pathMatch?.[1];
+    const pathMatch = url.pathname.match(/\/(songDetail|song|albumDetail|album|singer|playlist)\/([a-z\d]+)/i);
+    id = url.searchParams.get("songmid") ?? url.searchParams.get("songid") ?? pathMatch?.[2];
+    if (pathMatch) {
+      type = pathMatch[1].toLowerCase().includes("album")
+        ? "album"
+        : pathMatch[1].toLowerCase() === "singer"
+          ? "artist"
+          : pathMatch[1].toLowerCase() === "playlist"
+            ? "playlist"
+            : "song";
+      id ??= pathMatch[2];
+    }
   }
 
   if (!id || !/^[a-z\d]{6,32}$/i.test(id)) return undefined;
-  if (/^\d+$/.test(id)) idType = "songid";
-
   return createResult(
     "music",
     "qq",
-    `https://y.qq.com/n/ryqq/songDetail/${id}`,
-    `https://i.y.qq.com/n2/m/outchain/player/index.html?${idType}=${id}&songtype=0`,
-    { height: 86 }
+    `https://y.qq.com/n/ryqq/${type === "song" ? "songDetail" : type === "artist" ? "singer" : type}/${id}`,
+    undefined,
+    { meting: { server: "tencent", type, id } }
   );
 }
 
@@ -227,14 +248,53 @@ function getDirectiveValue(node) {
     const normalizedProvider = provider.trim().toLowerCase();
     const normalizedReference = reference.trim();
     if (!normalizedProvider || !normalizedReference) return undefined;
+    const requestedType = typeof node.attributes?.type === "string" ? node.attributes.type.trim().toLowerCase() : "";
+    const typePrefix = ["netease", "qq"].includes(normalizedProvider) && metingTypes.has(requestedType)
+      ? `${requestedType}:`
+      : "";
     return normalizedReference.toLowerCase().startsWith(`${normalizedProvider}:`)
       ? normalizedReference
-      : `${normalizedProvider}:${normalizedReference}`;
+      : `${normalizedProvider}:${typePrefix}${normalizedReference}`;
   }
 
   const attributeValue = node.attributes?.src ?? node.attributes?.url ?? node.attributes?.id;
   if (typeof attributeValue === "string" && attributeValue.trim()) return attributeValue.trim();
   return textContent(node);
+}
+
+function isSafeMediaUrl(value) {
+  if (typeof value !== "string" || !value.trim()) return false;
+
+  try {
+    const url = new URL(value.trim(), "https://sorapaper.local/");
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function parseLocalMusic(node) {
+  const provider = node.attributes?.provider;
+  if (node.name !== "music" || typeof provider !== "string" || provider.trim().toLowerCase() !== "local") return undefined;
+
+  const src = node.attributes.src?.trim();
+  const title = (node.attributes.title ?? node.attributes.name)?.trim();
+  const artist = node.attributes.artist?.trim() || "";
+  const cover = node.attributes.cover?.trim();
+  const lyric = node.attributes.lyric?.trim();
+
+  if (!isSafeMediaUrl(src) || !title || (cover && !isSafeMediaUrl(cover))) return undefined;
+
+  return createResult("music", "local", src, undefined, {
+    title,
+    meting: {
+      url: src,
+      name: title,
+      artist,
+      ...(cover ? { cover } : {}),
+      ...(lyric ? { lyric } : {})
+    }
+  });
 }
 
 function getSingleLineDirective(node) {
@@ -247,13 +307,54 @@ function getSingleLineDirective(node) {
 export function createMediaEmbedNode(embed, customTitle) {
   const isVideo = embed.kind === "video";
   const iframeTitle = customTitle?.trim() || embed.title;
+  const className = ["media-embed", `media-embed-${embed.kind}`, `media-provider-${embed.provider}`];
+
+  if (embed.meting) {
+    return {
+      type: "paragraph",
+      data: {
+        hName: "figure",
+        hProperties: {
+          className: [...className, "media-player"],
+          "data-media-provider": embed.provider,
+          "data-meting-player": "true"
+        }
+      },
+      children: [
+        {
+          type: "paragraph",
+          data: {
+            hName: "meting-js",
+            hProperties: {
+              ...embed.meting,
+              preload: "metadata",
+              mutex: "true",
+              "list-folded": "true"
+            }
+          },
+          children: []
+        },
+        {
+          type: "paragraph",
+          data: {
+            hName: "a",
+            hProperties: {
+              className: ["media-player-fallback"],
+              href: embed.href
+            }
+          },
+          children: [{ type: "text", value: `${iframeTitle} ↗` }]
+        }
+      ]
+    };
+  }
 
   return {
     type: "paragraph",
     data: {
       hName: "figure",
       hProperties: {
-        className: ["media-embed", `media-embed-${embed.kind}`, `media-provider-${embed.provider}`],
+        className,
         "data-media-provider": embed.provider
       }
     },
@@ -309,8 +410,17 @@ export default function remarkMediaEmbeds() {
 
         if (singleLine || isDirective) {
           const kind = singleLine?.kind ?? node.name;
+          const requestedProvider = isDirective && typeof node.attributes?.provider === "string"
+            ? node.attributes.provider.trim().toLowerCase()
+            : "";
+          const requestedType = isDirective && typeof node.attributes?.type === "string"
+            ? node.attributes.type.trim().toLowerCase()
+            : "";
+          if (["netease", "qq"].includes(requestedProvider) && requestedType && !metingTypes.has(requestedType)) {
+            failUnsupported(file, kind, `${requestedProvider}:${requestedType}`, node);
+          }
           const value = singleLine?.value ?? getDirectiveValue(node);
-          const embed = parseMediaEmbed(kind, value);
+          const embed = isDirective ? parseLocalMusic(node) ?? parseMediaEmbed(kind, value) : parseMediaEmbed(kind, value);
           if (!embed) failUnsupported(file, kind, value, node);
 
           const title = isDirective && typeof node.attributes?.title === "string" ? node.attributes.title : undefined;

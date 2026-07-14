@@ -243,11 +243,21 @@ $$
 
 ### 网易云音乐
 
-::music{provider="netease" ref="19723756"}
+::music{provider="netease" ref="2690549700"}
 
 ### QQ 音乐
 
-::music{provider="qq" ref="0039MnYb0qxYhV"}
+::music{provider="qq" ref="0024KfFh4NPjaf"}
+
+### 网易云歌单
+
+::music{provider="netease" type="playlist" ref="14334890278"}
+
+本地音乐可引用 `public/` 下的音频和封面文件：
+
+```md
+::music{provider="local" src="/media/song.mp3" title="本地音乐" artist="作者" cover="/media/cover.webp"}
+```
 
 ### Spotify
 

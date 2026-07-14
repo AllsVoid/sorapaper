@@ -1,0 +1,22 @@
+---
+import "aplayer/dist/APlayer.min.css";
+---
+
+<script>
+  const musicPlayers = document.querySelectorAll("[data-meting-player]");
+
+  if (musicPlayers.length > 0) {
+    async function loadMusicPlayers() {
+      try {
+        const { default: APlayer } = await import("aplayer");
+        const musicWindow = window as Window & typeof globalThis & { APlayer?: typeof APlayer };
+        musicWindow.APlayer = APlayer;
+        await import("meting/dist/Meting.min.js");
+      } catch {
+        musicPlayers.forEach((player) => player.classList.add("is-media-player-error"));
+      }
+    }
+
+    void loadMusicPlayers();
+  }
+</script>
