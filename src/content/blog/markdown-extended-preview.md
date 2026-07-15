@@ -1,17 +1,19 @@
 ---
-title: "Markdown 扩展语法预览"
-description: "用于预览 SoraPaper 当前支持的 Markdown 扩展语法。"
+title: "Markdown 扩展语法预览（一）：内容块与交互"
+description: "预览 SoraPaper 的引用、提示、折叠、标签页与加密内容块。"
 lang: zh
 translationKey: markdown-extended-preview
 pubDate: 2026-07-07
 tags: ["Markdown", "预览"]
 category: "主题功能"
+series: "Markdown 扩展语法预览"
+seriesOrder: 1
 draft: false
 pinned: false
 toc: true
 ---
 
-这篇文章用于集中预览 SoraPaper 的 Markdown 扩展语法。后续新增或调整扩展语法时，优先更新这篇文章，方便在真实文章页里检查渲染效果。
+这个系列用于预览 SoraPaper 当前支持的 Markdown 扩展语法。本篇集中展示适合组织文章内容和交互信息的块级组件。
 
 ## 引用块
 
@@ -140,160 +142,4 @@ const secret = "encrypted at build time";
 
 :::encrypted[私密笔记]{password="密码提示"}
 这段内容会在构建后以密文形式进入页面，并在浏览器中输入密码后解锁。
-:::
-
-## 代码块
-
-代码块会自动渲染为 Apple 风格窗口。可以通过 fence meta 设置文件名、源链接、行高亮、diff 行。
-
-```js title="hello.js" url="https://example.com" linkText="查看源码" mark:1,3
-const greeting = "Hello";
-const name = "World";
-console.log(`${greeting}, ${name}!`);
-```
-
-```bash title="Terminal"
-pnpm install
-pnpm run dev
-pnpm run build
-```
-
-```diff title="example.diff"
--const oldName = "Sora";
-+const newName = "SoraPaper";
-```
-
-## 数学公式
-
-行内公式使用单个美元符号，例如 $E = mc^2$，会和正文自然排在同一行。
-
-块级公式使用双美元符号：
-
-$$
-\int_0^1 x^2 dx = \frac{1}{3}
-$$
-
-## 脚注
-
-脚注适合放补充说明、引用来源或延伸阅读。正文里使用脚注引用[^syntax]，脚注内容会集中显示在文章底部。
-
-[^syntax]: 这是一个脚注示例，使用标准 Markdown footnote 语法。
-
-## 标题锚点
-
-二级到四级标题会自动带有锚点。将鼠标悬停在标题上，或用键盘聚焦标题旁的 `#`，即可复制当前小节链接。
-
-### 锚点子标题
-
-这个三级标题用于检查目录跳转、悬停显示和复制链接行为。
-
-## 图片块
-
-普通图片仍然可以使用标准 Markdown 语法：
-
-```md
-![柔和天空](/covers/sky.svg)
-```
-
-![柔和天空](/covers/sky.svg)
-
-需要图注、缩放或实况图片资源时，可以使用 `:::img` 图片块。`scale` 表示图片整体相对正文宽度的百分比，默认是 `100`。
-
-:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="一张用于预览图片块的柔和天空插画。" scale="82" credit="SoraPaper"}
-:::
-
-带 `live` 地址的图片块会保留静态封面作为 fallback，并在文章页按需加载 LivePhotosKit JS 播放配套视频。真实使用时，`src` 应指向静态照片，`live` 应指向同一张实况照片导出的 MOV 视频。
-
-```md
-:::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
-:::
-```
-:::img{src="/photos/livephoto-test.jpg" live="/photos/livephoto-test.mov" alt="实况照片测试素材" caption="实况图片测试示例。" scale="68" ratio="16/9" photoTime="0"}
-:::
-
-## 画廊
-
-画廊使用 `::::gallery` 包裹多个现有的 `:::img`。`layout="carousel"` 是普通轮播，`layout="stack"` 是扑克牌式堆叠切换；`rounded` 默认是 `true`，设为 `false` 时使用普通直角矩形；两者都支持按钮、圆点、键盘方向键、触控拖动和横向滚轮。
-
-### 普通轮播
-
-::::gallery[柔和场景轮播]{layout="carousel"}
-:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="天空"}
-:::
-:::img{src="/covers/sunset.svg" alt="粉紫色日落插画" caption="日落"}
-:::
-:::img{src="/covers/room.svg" alt="安静房间插画" caption="房间"}
-:::
-::::
-
-### 扑克牌式堆叠
-
-::::gallery[直角层叠场景图集]{layout="stack" rounded="false"}
-:::img{src="/covers/room.svg" alt="安静房间插画" caption="房间"}
-:::
-:::img{src="/covers/sky.svg" alt="柔和天空插画" caption="天空"}
-:::
-:::img{src="/covers/sunset.svg" alt="粉紫色日落插画" caption="日落"}
-:::
-::::
-
-## 音乐与视频
-
-媒体引用推荐使用标准叶子 directive，通过统一的 `provider` 和 `ref` 指定平台与平台原生引用。
-
-### 网易云音乐
-
-::music{provider="netease" ref="2690549700"}
-
-### QQ 音乐
-
-::music{provider="qq" ref="0024KfFh4NPjaf"}
-
-### 网易云歌单
-
-::music{provider="netease" type="playlist" ref="14334890278"}
-
-本地音乐可引用 `public/` 下的音频和封面文件：
-
-```md
-::music{provider="local" src="/media/song.mp3" title="本地音乐" artist="作者" cover="/media/cover.webp"}
-```
-
-### Spotify
-
-::music{provider="spotify" ref="track:11dFghVXANMlKmJXsNCbNl"}
-
-### Bilibili
-
-::video{provider="bilibili" ref="BV1B7411m7LV"}
-
-### YouTube
-
-::video{provider="youtube" ref="M7lc1UVf-VE"}
-
-## Mermaid 图表
-
-Mermaid 图表使用 `:::mermaid` 指令。标题是可选的；如果浏览器禁用 JavaScript 或图表解析失败，页面会保留源码作为 fallback。
-
-:::mermaid[文章渲染流程]
-flowchart TD
-  Markdown[Markdown 文章] --> Directive[remark-directive]
-  Directive --> Mermaid[remark-mermaid]
-  Mermaid --> Fallback[源码 fallback]
-  Fallback --> Loader[MermaidLoader]
-  Loader --> Diagram[SVG 图表]
-:::
-
-:::mermaid[时序图]
-sequenceDiagram
-    participant Alice
-    participant Bob
-    Alice->>John: Hello John, how are you?
-    loop HealthCheck
-        John->>John: Fight against hypochondria
-    end
-    Note right of John: Rational thoughts <br/>prevail!
-    John-->>Alice: Great!
-    John->>Bob: How about you?
-    Bob-->>John: Jolly good!
 :::
