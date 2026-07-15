@@ -22,7 +22,7 @@ SoraPaper 是一个内容优先的 Astro 博客主题。它的设计基准是：
 - 主题内部 i18n：默认支持中文和英文，无可见语言前缀。
 - MDX：允许文章中使用组件。
 - CSS variables：设计 token、明暗主题、多主题色。
-- 少量原生浏览器 JavaScript：搜索弹窗、主题切换、阅读进度条。
+- 少量原生浏览器 JavaScript：Pagefind 搜索弹窗、主题切换、阅读进度条。
 - RSS 和 sitemap Astro 集成。
 
 当前 `package.json` 脚本：
@@ -115,11 +115,11 @@ flowchart TD
 - `/about/`：关于页。
 - `/friends/`：友链页。
 - `/rss.xml`：RSS 输出。
-- `/search.json`：静态搜索索引，客户端按当前语言过滤。
+- Pagefind 在生产构建后生成 `/pagefind/` 静态搜索资产，客户端按当前语言过滤。
 
 路由本身保持无可见语言前缀。部署到子目录时，通过 `sorapaper.ts` 的 `site.base` 和 Astro `base` 输出到类似 `/repo-name/` 的路径。新增站内链接或 public 资源引用时，使用 `localizePath()`、`withBase()` 或 `absoluteUrl()`，不要直接写死根路径。
 
-SEO 输出集中在 `src/layouts/BaseLayout.astro`：普通页面输出 canonical、Open Graph、Twitter Card 和默认分享图；文章页通过 `PostLayout.astro` 传入 article metadata，输出 `og:type=article`、发布时间、更新时间、标签和基于 `translationKey` 的 `hreflang` alternate links。RSS、搜索索引和 sitemap 使用 clean routes，并通过路径工具补齐 base path。
+SEO 输出集中在 `src/layouts/BaseLayout.astro`：普通页面输出 canonical、Open Graph、Twitter Card 和默认分享图；文章页通过 `PostLayout.astro` 传入 article metadata，输出 `og:type=article`、发布时间、更新时间、标签和基于 `translationKey` 的 `hreflang` alternate links。RSS、Pagefind 搜索资产和 sitemap 使用 clean routes，并通过路径工具补齐 base path。
 
 组件分层：
 
@@ -428,20 +428,14 @@ tags: ["Framework", "Frontend"]
 
 组件：`src/components/SearchDialog.astro`
 
-索引：`src/pages/search.json.ts`
+索引：生产构建后生成的 `/pagefind/` 静态资产。
 
 机制：
 
-- `/search.json` 输出所有语言文章的标题、摘要、标签、链接和 `lang` 字段。
-- 客户端根据当前 `html[data-locale]` 过滤搜索结果。
-- 客户端打开搜索弹窗时懒加载 JSON。
-- 使用原生 `includes()` 做轻量过滤。
-
-后续升级：
-
-- 小站点继续使用当前实现。
-- 文章数量较多时可替换为 Pagefind。
-- 替换时保持 `SearchDialog` 对外入口不变，减少影响范围。
+- `PostLayout.astro` 将文章内容标记为 Pagefind 索引主体，并写入语言过滤字段。
+- 客户端打开搜索弹窗时懒加载 Pagefind API，并按当前 `html[data-locale]` 过滤结果。
+- Pagefind 提供全文索引、相关性排序与命中片段高亮。
+- 搜索始终启用，不通过 `featureFlags` 配置。
 
 ### 阅读进度条
 
@@ -542,15 +536,6 @@ src/lib/comments.ts
 
 并在 `themeConfig.featureFlags.comments` 控制启用。不要默认加载第三方脚本。
 
-### 新增 Pagefind 搜索
-
-建议步骤：
-
-1. 保留 `SearchDialog.astro` 作为 UI。
-2. 添加 Pagefind 构建脚本。
-3. 将搜索逻辑从 `/search.json` 切换到 Pagefind API，并保留按当前 locale 过滤的行为。
-4. 保留当前轻量搜索作为 fallback 或删除无用代码。
-
 ### 新增 Open Graph 图片
 
 建议创建专门的 OG 生成路由或脚本，不要把 OG 逻辑塞进文章页布局。OG 样式应复用主题 token。
@@ -594,11 +579,11 @@ npm run build
 
 检查：
 
-- 搜索索引是否能访问：`/search.json`。
+- 搜索索引是否能访问：`/pagefind/pagefind.js`。
 - 当前 `html[data-locale]` 是否符合预期。
 - 文章是否为草稿。
-- 搜索内容是否在标题、摘要或标签中。
-- 浏览器控制台是否有 JSON 解析或 fetch 错误。
+- 搜索内容是否在文章正文、标题或摘要中。
+- 浏览器控制台是否有 Pagefind 加载或查询错误。
 
 ### 主题切换闪烁
 
@@ -656,7 +641,7 @@ LLM 推荐排查顺序：
 - 文章页可打开，Markdown/MDX 渲染正常。
 - 归档页、标签页、关于页、友链页可打开。
 - `/rss.xml` 可访问。
-- `/search.json` 可访问。
+- `/pagefind/pagefind.js` 可访问。
 - 搜索弹窗可打开并返回结果。
 - 明暗模式可切换并持久化。
 - 主题色可切换并持久化。
@@ -685,7 +670,7 @@ LLM 推荐排查顺序：
 短期：
 
 - 锁定依赖版本并提交 lockfile。
-- 接入 Pagefind 或保留轻量搜索并补键盘快捷键。
+- 为搜索补键盘快捷键。
 - 给文章页补上一篇/下一篇。
 - 给 SEO 增加 canonical、Open Graph 图片和 Twitter Card。
 

@@ -57,7 +57,7 @@ const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
       {t.article.translationUnavailable}
     </div>
   )}
-  <article class="container">
+  <article class="container" data-pagefind-body data-pagefind-filter={`lang:${post.data.lang}`}>
     <ArticleHeader post={post} locale={locale}>
       <PostShare post={post} locale={locale} />
     </ArticleHeader>

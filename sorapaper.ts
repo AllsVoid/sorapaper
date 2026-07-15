@@ -29,7 +29,6 @@ const config = {
     working: "A new project"
   },
   featureFlags: {
-    search: true,
     comments: false,
     analytics: false,
     viewTransitions: true

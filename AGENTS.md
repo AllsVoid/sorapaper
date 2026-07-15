@@ -148,7 +148,7 @@ Current routes include:
 - `/about/`
 - `/friends/`
 - `/rss.xml`
-- `/search.json`
+- `/pagefind/`
 
 Language behavior:
 

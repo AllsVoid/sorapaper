@@ -83,7 +83,7 @@ export const defaultUi = {
     search: {
       label: "搜索文章",
       placeholder: "Astro、设计、生活...",
-      empty: "输入关键词搜索标题、摘要和标签。",
+      empty: "输入关键词搜索标题、摘要和正文。",
       noResults: "暂时没有匹配的文章。",
       ariaOpen: "搜索"
     },
@@ -171,7 +171,7 @@ export const defaultUi = {
     search: {
       label: "Search posts",
       placeholder: "Astro, design, life...",
-      empty: "Type to search titles, descriptions and tags.",
+      empty: "Type to search titles, descriptions and post content.",
       noResults: "No matching posts yet.",
       ariaOpen: "Search"
     },

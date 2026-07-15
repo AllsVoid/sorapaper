@@ -145,7 +145,7 @@ Current routes include:
 - `/about/`
 - `/friends/`
 - `/rss.xml`
-- `/search.json`
+- `/pagefind/`（production build generates static search assets）
 
 Language behavior:
 

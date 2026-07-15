@@ -13,7 +13,7 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Archive, tag index, tag detail, series index, series detail, about, friends and travel pages.
 - Article layout with metadata, reading time, floating TOC, reading progress and previous/next post navigation.
 - Build-time encrypted Markdown blocks unlocked in the browser with a passphrase.
-- Zero-dependency localized static search using `/search.json`.
+- Pagefind-powered localized static search.
 - RSS and sitemap-ready configuration.
 
 ## Commands
@@ -226,7 +226,7 @@ For reliable playback, the JPEG and MOV should be a real Live Photo pair. In tes
 
 ## Theme Configuration
 
-Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy.
+Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy. Pagefind-powered search is enabled by default and does not require configuration.
 
 Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image. Blog posts automatically get generated Open Graph cards at `/og/posts/{slug}.svg` and `/og/posts/{slug}.png`; a post-level `ogImage` overrides the generated card used in metadata.
 
@@ -249,7 +249,7 @@ site: {
 }
 ```
 
-Use `base: "/"` for root-domain deployments. SoraPaper applies this base path to internal links, public assets, RSS, sitemap metadata, search index requests and generated Open Graph image URLs.
+Use `base: "/"` for root-domain deployments. SoraPaper applies this base path to internal links, public assets, RSS, sitemap metadata, Pagefind search assets and generated Open Graph image URLs.
 
 Article pages include a quiet share panel. Readers can copy the canonical link, use the native system share sheet when supported, download the generated SVG or PNG card, share the link to X, Weibo or Telegram, and scan a WeChat QR code. WeChat custom in-app share metadata still requires the official WeChat JS-SDK and a signed server endpoint, so the theme uses a QR fallback by default.
 

@@ -97,7 +97,7 @@ Localized UI lives on clean routes without `/zh` or `/en` prefixes. The language
 - No horizontal scrolling at 375px viewport width.
 - Light and dark modes must both pass practical readability checks.
 - Search, RSS, archive, tag pages and post rendering should work without backend services.
-- Search and RSS should remain available on clean routes, e.g. `/search.json` and `/rss.xml`, with search results filtered by the current locale.
+- Search and RSS should remain available without backend services; Pagefind search assets are generated at `/pagefind/` and results are filtered by the current locale.
 - New visual components should not introduce hard-coded color palettes outside the token system.
 
 ## Optional Integrations

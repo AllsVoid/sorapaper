@@ -5,7 +5,7 @@ import { withBase } from "@/lib/paths";
 
 <dialog class="search-dialog glass" data-search-dialog>
   <form method="dialog">
-    <button type="submit" aria-label="Close search">×</button>
+    <button type="submit" aria-label="Close search">&times;</button>
   </form>
   <label>
     <span>
@@ -22,12 +22,13 @@ import { withBase } from "@/lib/paths";
   </div>
 </dialog>
 
-<script is:inline define:vars={{ searchIndexPath: withBase("/search.json"), emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
+<script is:inline define:vars={{ pagefindScriptPath: withBase("/pagefind/pagefind.js"), siteBase: withBase("/"), emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
   const dialog = document.querySelector("[data-search-dialog]");
   const input = document.querySelector("[data-search-input]");
   const results = document.querySelector("[data-search-results]");
   const triggers = document.querySelectorAll("[data-search-trigger]");
-  let index = [];
+  let pagefind;
+  let searchToken = 0;
 
   const getCurrentLocale = () => (document.documentElement.dataset.locale === "en" ? "en" : "zh");
   const getCopy = () => {
@@ -38,55 +39,96 @@ import { withBase } from "@/lib/paths";
     };
   };
 
-  const render = (items) => {
+  const setMessage = (message) => {
     if (!results) return;
-    const { emptyText, noResultsText } = getCopy();
-    if (!input?.value.trim()) {
-      results.innerHTML = `<p class="muted">${emptyText}</p>`;
-      return;
-    }
-    if (items.length === 0) {
-      results.innerHTML = `<p class="muted">${noResultsText}</p>`;
-      return;
-    }
-    results.innerHTML = items
-      .map(
-        (item) => `
-          <a class="result" href="${item.href}">
-            <strong>${item.title}</strong>
-            <span>${item.description}</span>
-          </a>
-        `
-      )
-      .join("");
+    results.replaceChildren();
+    const element = document.createElement("p");
+    element.className = "muted";
+    element.textContent = message;
+    results.append(element);
   };
 
-  const loadIndex = async () => {
-    if (index.length > 0) return;
-    const response = await fetch(searchIndexPath);
-    index = await response.json();
+  const normalizeUrl = (url) => {
+    if (!url || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) return url;
+    if (siteBase === "/" || url.startsWith(siteBase)) return url;
+    return url.startsWith("/") ? siteBase.replace(/\/$/, "") + url : url;
+  };
+
+  const renderResults = (items) => {
+    if (!results) return;
+    const { emptyText, noResultsText } = getCopy();
+
+    if (!input?.value.trim()) {
+      setMessage(emptyText);
+      return;
+    }
+
+    if (items.length === 0) {
+      setMessage(noResultsText);
+      return;
+    }
+
+    results.replaceChildren();
+    for (const item of items) {
+      const link = document.createElement("a");
+      link.className = "result";
+      link.href = normalizeUrl(item.url);
+
+      const title = document.createElement("strong");
+      title.textContent = item.meta?.title ?? link.href;
+
+      const excerpt = document.createElement("span");
+      excerpt.innerHTML = item.excerpt ?? "";
+
+      link.append(title, excerpt);
+      results.append(link);
+    }
+  };
+
+  const loadPagefind = async () => {
+    if (pagefind) return pagefind;
+    pagefind = await import(pagefindScriptPath);
+    await pagefind.options({ excerptLength: 24 });
+    return pagefind;
+  };
+
+  const search = async () => {
+    const query = input?.value.trim() ?? "";
+    const token = ++searchToken;
+    const { emptyText, noResultsText } = getCopy();
+
+    if (!query) {
+      setMessage(emptyText);
+      return;
+    }
+
+    try {
+      const pagefindSearch = await loadPagefind();
+      const response = await pagefindSearch.search(query, {
+        filters: {
+          lang: getCurrentLocale()
+        }
+      });
+      const items = await Promise.all(response.results.slice(0, 8).map((result) => result.data()));
+      if (token === searchToken) renderResults(items);
+    } catch {
+      if (token === searchToken) setMessage(noResultsText);
+    }
   };
 
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", async () => {
-      await loadIndex();
       const locale = getCurrentLocale();
       if (input) input.placeholder = locale === "en" ? input.dataset.placeholderEn ?? "" : input.dataset.placeholderZh ?? "";
-      render([]);
+      searchToken += 1;
+      setMessage(getCopy().emptyText);
       dialog?.showModal();
       input?.focus();
+      await loadPagefind().catch(() => undefined);
     });
   });
 
-  input?.addEventListener("input", () => {
-    const query = input.value.trim().toLowerCase();
-    const currentLocale = getCurrentLocale();
-    const matches = index
-      .filter((item) => item.lang === currentLocale)
-      .filter((item) => [item.title, item.description, item.tags.join(" ")].join(" ").toLowerCase().includes(query))
-      .slice(0, 8);
-    render(matches);
-  });
+  input?.addEventListener("input", search);
 </script>
 
 <style>
@@ -157,5 +199,12 @@ import { withBase } from "@/lib/paths";
     color: var(--muted);
     font-size: 0.9rem;
     line-height: 1.5;
+  }
+
+  :global(.result mark) {
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: inherit;
+    padding: 0 0.12em;
   }
 </style>

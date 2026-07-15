@@ -119,7 +119,6 @@ export interface SoraPaperThemeConfig {
     working: string;
   };
   featureFlags: {
-    search: boolean;
     comments: boolean;
     analytics: boolean;
     viewTransitions: boolean;
