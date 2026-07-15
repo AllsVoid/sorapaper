@@ -25,13 +25,24 @@ npm run build
 npm run preview
 ```
 
-## Cloudflare Pages
+## Cloudflare Workers
 
-Create a Pages project from the repository and use the repository root as the
-root directory. Configure the build command as `pnpm run build` and the build
-output directory as `dist`. The included `pnpm-workspace.yaml` explicitly lists
-the root package so Cloudflare's pnpm 10 dependency installation can use the
-committed lockfile.
+SoraPaper deploys to Cloudflare Workers as a static-assets site. Commit
+`wrangler.jsonc` and keep its `name` equal to the Worker name selected in the
+Cloudflare dashboard. For Workers Builds, leave the root directory blank and
+configure:
+
+```text
+Build command: pnpm run build
+Deploy command: npx wrangler deploy
+Preview deploy command: npx wrangler versions upload
+```
+
+The committed Wrangler configuration uploads `dist` and uses `404-page`
+handling. It avoids the automatic Astro SSR-adapter setup; add
+`@astrojs/cloudflare` only when the site needs on-demand rendering or
+Cloudflare runtime bindings. The included `pnpm-workspace.yaml` explicitly
+lists the root package for Cloudflare's pnpm 10 dependency installation.
 
 ## Content
 
