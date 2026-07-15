@@ -1,10 +1,9 @@
 ---
 import PostCard from "@/components/PostCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { locales } from "@/i18n/config";
+import { locales, localizePath } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 import { getAllSeries, getPublishedPosts } from "@/lib/posts";
-import { withBase } from "@/lib/paths";
 
 export async function getStaticPaths() {
   const series = new Map<string, string>();
@@ -32,7 +31,7 @@ const localeData = await Promise.all(locales.map(async (locale) => {
   {localeData.map(({ locale, t, item }) => (
     <section class="container page" data-lang={locale}>
       <header>
-        <a class="pill" href={withBase("/series/")}>← {t.nav.series}</a>
+        <a class="pill" href={localizePath(locale, "/series/")}>← {t.nav.series}</a>
         <h1>{item?.name ?? series}</h1>
         <p class="muted">{item ? `${item.posts.length} ${t.pages.seriesPosts}` : t.pages.seriesEmpty}</p>
       </header>
