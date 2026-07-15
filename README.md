@@ -25,6 +25,14 @@ npm run build
 npm run preview
 ```
 
+## Cloudflare Pages
+
+Create a Pages project from the repository and use the repository root as the
+root directory. Configure the build command as `pnpm run build` and the build
+output directory as `dist`. The included `pnpm-workspace.yaml` explicitly lists
+the root package so Cloudflare's pnpm 10 dependency installation can use the
+committed lockfile.
+
 ## Content
 
 Create posts in `src/content/blog` using Markdown or MDX:
