@@ -1,5 +1,6 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 const imageMeta = z.object({
   src: z.string(),
@@ -33,7 +34,7 @@ const friends = defineCollection({
   schema: z.object({
     name: z.string(),
     description: z.string(),
-    href: z.string().url(),
+    href: z.url(),
     avatar: z.string().optional(),
     tags: z.array(z.string()).default([])
   })
