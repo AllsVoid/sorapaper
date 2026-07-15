@@ -16,7 +16,7 @@ export async function getPinnedPosts(locale?: Locale) {
 }
 
 export function getPostSlug(post: BlogPost) {
-  return post.id.replace(/\.(md|mdx)$/i, "");
+  return post.data.slug ?? post.id.replace(/\.(md|mdx)$/i, "");
 }
 
 export function getPostHref(post: BlogPost) {
@@ -88,8 +88,19 @@ export function getAllTags(posts: BlogPost[]) {
     }
   }
   return [...tags.entries()]
-    .map(([name, count]) => ({ name, count, slug: name.toLowerCase() }))
+    .map(([name, count]) => ({ name, count, slug: getTagSlug(name) }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+}
+
+export function getTagSlug(tag: string) {
+  const normalized = tag.normalize("NFKC").trim().toLowerCase();
+  const slug = normalized
+    .replace(/[\s\\/?#%]+/g, "-")
+    .replace(/[^\p{L}\p{N}_-]+/gu, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return slug || [...normalized].map((character) => character.codePointAt(0)?.toString(16)).join("-");
 }
 
 export function getArchiveGroups(posts: BlogPost[]) {

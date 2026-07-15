@@ -3,7 +3,7 @@ import PostCard from "@/components/PostCard.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales, localizePath } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
-import { getAllTags, getPublishedPosts } from "@/lib/posts";
+import { getAllTags, getPublishedPosts, getTagSlug } from "@/lib/posts";
 
 export async function getStaticPaths() {
   const tags = new Map<string, string>();
@@ -20,7 +20,7 @@ const { tag } = Astro.props;
 const localeData = await Promise.all(
   locales.map(async (locale) => {
     const posts = (await getPublishedPosts(locale)).filter((post) =>
-      post.data.tags.some((item) => item.toLowerCase() === String(tag).toLowerCase())
+      post.data.tags.some((item) => getTagSlug(item) === Astro.params.tag)
     );
     return { locale, t: getUi(locale), posts };
   })

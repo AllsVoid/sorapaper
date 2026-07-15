@@ -1,10 +1,10 @@
 ---
 import { localizePath, type Locale } from "@/i18n/config";
+import { getTagSlug } from "@/lib/posts";
 
 interface TagItem {
   name: string;
   count: number;
-  slug: string;
 }
 
 interface Props {
@@ -34,7 +34,7 @@ function getWeight(count: number) {
 
     return (
       <a
-        href={localizePath(locale, `/tags/${tag.slug}/`)}
+        href={localizePath(locale, `/tags/${getTagSlug(tag.name)}/`)}
         style={`--weight: ${weight.toFixed(3)}; --font-weight: ${fontWeight}; --rhythm: ${rhythm};`}
         title={`${tag.name} (${tag.count})`}
         aria-label={`${tag.name}, ${tag.count} posts`}

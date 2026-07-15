@@ -1,6 +1,6 @@
 ---
 import type { BlogPost } from "@/lib/posts";
-import { formatDate, getPostHref, getPostSummary, getReadingTime } from "@/lib/posts";
+import { formatDate, getPostHref, getPostSummary, getReadingTime, getTagSlug } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { withBase } from "@/lib/paths";
 
@@ -24,7 +24,7 @@ const summary = getPostSummary(post);
   <div class="content">
     <div class="meta">
       <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, locale)}</time>
-      {post.data.tags[0] && <a class="tag" href={localizePath(locale, `/tags/${post.data.tags[0].toLowerCase()}/`)}>{post.data.tags[0]}</a>}
+      {post.data.tags[0] && <a class="tag" href={localizePath(locale, `/tags/${getTagSlug(post.data.tags[0])}/`)}>{post.data.tags[0]}</a>}
     </div>
     <h3><a href={getPostHref(post)}>{post.data.title}</a></h3>
     <p>{summary}</p>

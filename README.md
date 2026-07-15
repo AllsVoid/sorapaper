@@ -34,6 +34,7 @@ Create posts in `src/content/blog` using Markdown or MDX:
 title: "Astro Theme Design Notes"
 description: "Readable writing with a soft visual system."
 excerpt: "A more editorial summary for post cards, search results, RSS and generated social images."
+slug: "astro-theme-design" # Optional custom URL slug; must be unique
 lang: en
 translationKey: astro-theme-design
 pubDate: 2026-07-02
@@ -52,7 +53,7 @@ toc: true
 ---
 ```
 
-`series` groups connected posts, while optional `seriesOrder` fixes their intended reading order; posts without `seriesOrder` fall back to publication date. `description` is the stable SEO description. Optional `excerpt` is used for post cards, article intros, search results, RSS items and generated Open Graph images; when omitted, SoraPaper falls back to `description`. Optional `ogImage` lets a post override the generated social image.
+`series` groups connected posts, while optional `seriesOrder` fixes their intended reading order; posts without `seriesOrder` fall back to publication date. `description` is the stable SEO description. Optional `excerpt` is used for post cards, article intros, search results, RSS items and generated Open Graph images; when omitted, SoraPaper falls back to `description`. Optional `ogImage` lets a post override the generated social image. Optional `slug` overrides the filename-derived post URL and generated Open Graph image path; use a unique, URL-friendly value without leading or trailing slashes.
 
 ### Markdown Extensions
 

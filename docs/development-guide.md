@@ -186,6 +186,7 @@ const blog = defineCollection({
     title: z.string(),
     description: z.string(),
     excerpt: z.string().optional(),
+    slug: z.string().trim().min(1).optional(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
@@ -208,6 +209,7 @@ const blog = defineCollection({
 title: "文章标题"
 description: "稳定的 SEO 描述，会用于页面 meta description"
 excerpt: "更自然的展示摘要，会优先显示在列表、搜索、RSS 和自动生成的 OG 图中"
+slug: "astro-theme-design" # 可选：自定义文章 URL，必须唯一
 lang: zh
 translationKey: astro-theme-design
 pubDate: 2026-07-02
@@ -383,11 +385,11 @@ tags: ["Framework", "Frontend"]
 
 - `getPublishedPosts(locale)`：读取指定语言的非草稿文章，按发布时间倒序。
 - `getPinnedPosts(locale)`：返回指定语言的置顶文章。
-- `getPostSlug(post)`：从 content entry id 得到 slug。
+- `getPostSlug(post)`：优先使用 frontmatter 的 `slug`，否则从 content entry id 得到 slug。
 - `getPostHref(post)`：生成无语言前缀的文章链接。
 - `getReadingTime(body, locale)`：按中英文混合内容粗略计算本地化阅读时间。
 - `formatDate(date, locale)`：按当前语言格式化日期。
-- `getAllTags(posts)`：生成标签计数和 slug。
+- `getAllTags(posts)`：生成标签计数和路径安全 slug；`getTagSlug(tag)` 会保留中文等 Unicode 字母数字字符，并规范化路径敏感字符。
 - `getArchiveGroups(posts)`：按年份分组文章。
 
 常见扩展：
@@ -573,7 +575,7 @@ npm run build
 
 - 标签大小写是否混乱。
 - `getAllTags()` 生成的 slug 是否和链接一致。
-- 标签中是否包含特殊字符。当前使用 `encodeURIComponent(tag.toLowerCase())`，复杂标签可能需要更稳定的 slugify 策略。
+- 标签中是否包含仅由符号构成的内容；`getTagSlug()` 会将空白、路径分隔符、查询/锚点和其他路径敏感字符统一规范为连字符。
 
 ### 搜索无结果
 
