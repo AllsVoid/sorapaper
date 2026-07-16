@@ -41,7 +41,7 @@ const config = {
     license: "cc-by-4.0"
   },
   footer: {
-    startedAt: "2024-01-01T00:00:00+08:00",
+    startedAt: "2026-07-16T00:00:00+08:00",
     // Fill these after the corresponding registrations are approved.
     icp: {
       number: ""
@@ -49,8 +49,7 @@ const config = {
     publicSecurity: {
       number: "",
       href: "",
-      // Download the icon from the public security filing platform, then place it in public/.
-      icon: ""
+      icon: "/assets/beian-gongan.png"
     }
   },
   colorSchemes: ["paper", "sakura", "moon", "ocean"],

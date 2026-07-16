@@ -8,7 +8,7 @@ const startedAt = Number.isFinite(runtimeStart) && runtimeStart <= Date.now() ? 
 const icp = themeConfig.footer.icp?.number.trim();
 const publicSecurity = themeConfig.footer.publicSecurity;
 const hasPublicSecurity = Boolean(publicSecurity?.number.trim() && publicSecurity.href.trim());
-const publicSecurityIcon = publicSecurity?.icon?.trim();
+const publicSecurityIcon = publicSecurity?.icon?.trim() || "/assets/beian-gongan.png";
 const publicSecurityIconHref = publicSecurityIcon ? withBase(publicSecurityIcon) : undefined;
 
 function formatRuntime(start: number, footer: typeof ui.zh.footer) {

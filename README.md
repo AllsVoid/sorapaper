@@ -284,12 +284,12 @@ footer: {
   publicSecurity: {
     number: "京公网安备11010802000001号",
     href: "https://beian.mps.gov.cn/",
-    icon: "/assets/beian.png"
+    icon: "/assets/beian-gongan.png"
   }
 }
 ```
 
-The ICP number is linked to [MIIT filing](https://beian.miit.gov.cn/). For the public-security entry, use the exact registration link and icon supplied by the public-security filing platform; place the downloaded icon under `public/` and reference it with a public path such as `/assets/beian.png`. Both approved registration numbers should remain visible in the website footer.
+The ICP number is linked to [MIIT filing](https://beian.miit.gov.cn/). The default public-security icon is bundled at `public/assets/beian-gongan.png`; you may override `icon` with the version provided for your registration. Use the exact registration link supplied by the public-security filing platform. Both approved registration numbers should remain visible in the website footer.
 
 Article pages include a quiet share panel. Readers can copy the canonical link, use the native system share sheet when supported, download the generated SVG or PNG card, share the link to X, Weibo or Telegram, and scan a WeChat QR code. WeChat custom in-app share metadata still requires the official WeChat JS-SDK and a signed server endpoint, so the theme uses a QR fallback by default.
 
