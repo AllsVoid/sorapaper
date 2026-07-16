@@ -40,6 +40,19 @@ const config = {
   article: {
     license: "cc-by-4.0"
   },
+  footer: {
+    startedAt: "2024-01-01T00:00:00+08:00",
+    // Fill these after the corresponding registrations are approved.
+    icp: {
+      number: ""
+    },
+    publicSecurity: {
+      number: "",
+      href: "",
+      // Download the icon from the public security filing platform, then place it in public/.
+      icon: ""
+    }
+  },
   colorSchemes: ["paper", "sakura", "moon", "ocean"],
   ui: {
     zh: {

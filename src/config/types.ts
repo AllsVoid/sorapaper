@@ -85,6 +85,11 @@ export interface LocaleUiConfig {
   };
   footer: {
     builtWith: string;
+    runningSince: string;
+    runtimeDays: string;
+    runtimeHours: string;
+    runtimeMinutes: string;
+    runtimeSeconds: string;
   };
   readingTime: string;
 }
@@ -129,6 +134,17 @@ export interface SoraPaperThemeConfig {
   };
   article: {
     license: ArticleLicense;
+  };
+  footer: {
+    startedAt?: string;
+    icp?: {
+      number: string;
+    };
+    publicSecurity?: {
+      number: string;
+      href: string;
+      icon?: string;
+    };
   };
   colorSchemes: string[];
 }

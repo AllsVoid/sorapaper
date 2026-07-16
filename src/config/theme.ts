@@ -42,12 +42,13 @@ export const defaultThemeConfig = {
   article: {
     license: "cc-by-4.0"
   },
+  footer: {},
   colorSchemes: ["paper", "sakura", "moon", "ocean"]
 } satisfies SoraPaperThemeConfig;
 
 const mergedThemeConfig = mergeConfig(defaultThemeConfig, userConfig);
 
-export const themeConfig = {
+export const themeConfig: SoraPaperThemeConfig & { name: string; description: string } = {
   ...mergedThemeConfig,
   name: mergedThemeConfig.site.name,
   description: mergedThemeConfig.site.description

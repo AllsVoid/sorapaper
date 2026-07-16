@@ -88,7 +88,12 @@ export const defaultUi = {
       ariaOpen: "搜索"
     },
     footer: {
-      builtWith: "使用 Astro、柔和色彩和长文阅读理念构建。"
+      builtWith: "使用 Astro 构建。",
+      runningSince: "本站已经运行了 {time}",
+      runtimeDays: "{count} 天",
+      runtimeHours: "{count} 小时",
+      runtimeMinutes: "{count} 分钟",
+      runtimeSeconds: "{count} 秒"
     },
     readingTime: "{minutes} 分钟阅读"
   },
@@ -176,7 +181,12 @@ export const defaultUi = {
       ariaOpen: "Search"
     },
     footer: {
-      builtWith: "Built with Astro, quiet colors and long-form reading in mind."
+      builtWith: "Built with Astro.",
+      runningSince: "Running for {time}",
+      runtimeDays: "{count}d",
+      runtimeHours: "{count}h",
+      runtimeMinutes: "{count}m",
+      runtimeSeconds: "{count}s"
     },
     readingTime: "{minutes} min read"
   }

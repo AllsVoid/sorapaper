@@ -271,6 +271,26 @@ site: {
 
 Use `base: "/"` for root-domain deployments. SoraPaper applies this base path to internal links, public assets, RSS, sitemap metadata, Pagefind search assets and generated Open Graph image URLs.
 
+### Footer status and registrations
+
+Set `footer.startedAt` to show a live site-runtime counter in the footer. It is updated every second in the browser. ICP and public-security registration details are optional and are hidden until configured:
+
+```ts
+footer: {
+  startedAt: "2024-01-01T00:00:00+08:00",
+  icp: {
+    number: "京ICP备12345678号"
+  },
+  publicSecurity: {
+    number: "京公网安备11010802000001号",
+    href: "https://beian.mps.gov.cn/",
+    icon: "/assets/beian.png"
+  }
+}
+```
+
+The ICP number is linked to [MIIT filing](https://beian.miit.gov.cn/). For the public-security entry, use the exact registration link and icon supplied by the public-security filing platform; place the downloaded icon under `public/` and reference it with a public path such as `/assets/beian.png`. Both approved registration numbers should remain visible in the website footer.
+
 Article pages include a quiet share panel. Readers can copy the canonical link, use the native system share sheet when supported, download the generated SVG or PNG card, share the link to X, Weibo or Telegram, and scan a WeChat QR code. WeChat custom in-app share metadata still requires the official WeChat JS-SDK and a signed server endpoint, so the theme uses a QR fallback by default.
 
 The main visual system lives in `src/styles/global.css`. Use the CSS variables there for new components instead of hard-coded colors, shadows and radii.
