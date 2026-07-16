@@ -440,10 +440,14 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
   display: block;
   min-width: max-content;
   background: transparent;
-  color: inherit;
   font-size: 0.92rem;
   line-height: 1.75;
   padding: 0;
+}
+
+.article-content .code-window pre code,
+.article-content .code-window pre code span {
+  color: var(--shiki-light);
 }
 
 .article-content .code-window .sorapaper-code-line {
@@ -522,6 +526,11 @@ html[data-locale="en"] [data-lang]:not([data-lang="en"]) {
 
 :root[data-theme="dark"] .article-content .code-window-body {
   background: color-mix(in srgb, var(--surface-strong) 82%, black);
+}
+
+:root[data-theme="dark"] .article-content .code-window pre code,
+:root[data-theme="dark"] .article-content .code-window pre code span {
+  color: var(--shiki-dark);
 }
 
 .article-content blockquote {
