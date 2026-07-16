@@ -478,7 +478,7 @@ tags: ["Framework", "Frontend"]
 - 站点描述：`description`
 - 作者信息：`author`
 - Now 卡片：`now`
-- 功能开关：`featureFlags`
+- 功能开关：`featureFlags`（其中 `travel` 控制游记导航与页面）
 - 文章许可协议：`article.license`，可选 `cc-by-4.0`（默认）或 `cc-by-nc-4.0`。
 - 导航文案。
 - 首页 Hero 文案。

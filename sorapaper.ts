@@ -31,6 +31,7 @@ const config = {
   featureFlags: {
     comments: false,
     analytics: false,
+    travel: false,
     viewTransitions: true
   },
   codeBlocks: {

@@ -33,6 +33,7 @@ export const defaultThemeConfig = {
   featureFlags: {
     comments: false,
     analytics: false,
+    travel: false,
     viewTransitions: true
   },
   codeBlocks: {

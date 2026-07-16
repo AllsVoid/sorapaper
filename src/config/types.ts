@@ -131,6 +131,7 @@ export interface SoraPaperThemeConfig {
   featureFlags: {
     comments: boolean;
     analytics: boolean;
+    travel: boolean;
     viewTransitions: boolean;
   };
   codeBlocks: {
