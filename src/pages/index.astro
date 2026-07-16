@@ -25,7 +25,7 @@ const localeData = await Promise.all(
 <BaseLayout>
   <div class="container">
     {localeData.map(({ locale, t, posts, featuredPosts }) => (
-      <div data-lang={locale}>
+      <div class="home-page" data-lang={locale}>
         <HeroSection locale={locale} />
         <section class="home-grid">
           <div>
@@ -47,10 +47,15 @@ const localeData = await Promise.all(
 </BaseLayout>
 
 <style>
+  .home-page {
+    --home-aside: clamp(15rem, 24vw, 19.5rem);
+    --home-gap: clamp(1rem, 1.6vw, 1.4rem);
+  }
+
   .home-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(clamp(15rem, 24vw, 19.5rem), 0.34fr);
-    gap: clamp(1rem, 1.6vw, 1.4rem);
+    grid-template-columns: minmax(0, 1fr) var(--home-aside);
+    gap: var(--home-gap);
     align-items: start;
   }
 

@@ -29,9 +29,9 @@ const t = getUi(locale);
 <style>
   .hero {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(clamp(14rem, 24vw, 18.75rem), 0.34fr);
+    grid-template-columns: minmax(0, 1fr) var(--home-aside, clamp(15rem, 24vw, 19.5rem));
     align-items: center;
-    gap: clamp(1.5rem, 6vw, 5rem);
+    gap: var(--home-gap, clamp(1rem, 1.6vw, 1.4rem));
     padding: clamp(3.2rem, 8vw, 6.2rem) 0 2rem;
   }
 
