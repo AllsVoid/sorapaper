@@ -50,6 +50,7 @@ const localeData = await Promise.all(
   .home-page {
     --home-aside: clamp(15rem, 24vw, 19.5rem);
     --home-gap: clamp(1rem, 1.6vw, 1.4rem);
+    --home-section-gap: 1rem;
   }
 
   .home-grid {
@@ -67,6 +68,10 @@ const localeData = await Promise.all(
   .section-title a {
     color: var(--primary);
     font-size: 0.92rem;
+  }
+
+  .section-title {
+    margin-bottom: var(--home-section-gap);
   }
 
   .posts {
