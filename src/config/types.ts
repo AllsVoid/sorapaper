@@ -91,6 +91,11 @@ export interface LocaleUiConfig {
     runtimeMinutes: string;
     runtimeSeconds: string;
   };
+  mermaid: {
+    dialog: string;
+    open: string;
+    close: string;
+  };
   readingTime: string;
 }
 

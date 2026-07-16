@@ -1,9 +1,77 @@
+---
+import { ui } from "@/i18n/ui";
+---
+
+<dialog
+  class="mermaid-lightbox"
+  data-mermaid-dialog
+  data-dialog-zh={ui.zh.mermaid.dialog}
+  data-dialog-en={ui.en.mermaid.dialog}
+  data-open-zh={ui.zh.mermaid.open}
+  data-open-en={ui.en.mermaid.open}
+  data-close-zh={ui.zh.mermaid.close}
+  data-close-en={ui.en.mermaid.close}
+>
+  <button class="mermaid-lightbox-close" type="button" data-mermaid-dialog-close>
+    <span aria-hidden="true">×</span>
+  </button>
+  <div class="mermaid-lightbox-content" data-mermaid-dialog-content></div>
+</dialog>
+
 <script>
   const mermaidBlocks = Array.from(document.querySelectorAll<HTMLElement>("[data-mermaid-block]"));
 
   if (mermaidBlocks.length > 0) {
+    const dialog = document.querySelector<HTMLDialogElement>("[data-mermaid-dialog]");
+    const dialogContent = dialog?.querySelector<HTMLElement>("[data-mermaid-dialog-content]");
+    const dialogClose = dialog?.querySelector<HTMLButtonElement>("[data-mermaid-dialog-close]");
     let renderRun = 0;
     let renderTimer: number | undefined;
+
+    function getLocale() {
+      return document.documentElement.dataset.locale === "en" ? "en" : "zh";
+    }
+
+    function getDialogMessage(name: "dialog" | "open" | "close") {
+      const suffix = getLocale() === "en" ? "En" : "Zh";
+      return dialog?.dataset[`${name}${suffix}`] ?? "";
+    }
+
+    function updateDialogLabels() {
+      if (!dialog || !dialogClose) return;
+      dialog.setAttribute("aria-label", getDialogMessage("dialog"));
+      dialogClose.setAttribute("aria-label", getDialogMessage("close"));
+    }
+
+    function openDialog(svg: SVGSVGElement) {
+      if (!dialog || !dialogContent) return;
+      const clone = svg.cloneNode(true);
+      if (!(clone instanceof SVGSVGElement)) return;
+      const originalId = svg.id;
+      const previewId = `-preview`;
+      clone.id = previewId;
+      if (originalId) {
+        clone.querySelectorAll("style").forEach((style) => {
+          style.textContent = style.textContent?.replaceAll(originalId, previewId) ?? "";
+        });
+      }
+      dialogContent.replaceChildren(clone);
+      updateDialogLabels();
+      dialog.showModal();
+    }
+
+    function bindZoom(svg: SVGSVGElement) {
+      svg.classList.add("mermaid-svg");
+      svg.setAttribute("tabindex", "0");
+      svg.setAttribute("role", "button");
+      svg.setAttribute("aria-label", getDialogMessage("open"));
+      svg.addEventListener("click", () => openDialog(svg));
+      svg.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openDialog(svg);
+      });
+    }
 
     function getCssVar(styles: CSSStyleDeclaration, name: string, fallback: string) {
       return styles.getPropertyValue(name).trim() || fallback;
@@ -40,7 +108,6 @@
           secondaryBorderColor: border,
           tertiaryColor: accent,
           tertiaryTextColor: text,
-          tertiaryBorderColor: border,
           clusterBkg: surface,
           clusterBorder: border,
           nodeBorder: border,
@@ -62,7 +129,7 @@
           htmlLabels: false
         },
         sequence: {
-          useMaxWidth: true
+          useMaxWidth: false
         }
       };
     }
@@ -81,6 +148,8 @@
         try {
           const { svg, bindFunctions } = await mermaid.render(`sorapaper-mermaid-${renderRun}-${index}`, source);
           target.innerHTML = svg;
+          const renderedSvg = target.querySelector("svg");
+          if (renderedSvg instanceof SVGSVGElement) bindZoom(renderedSvg);
           bindFunctions?.(target);
           target.removeAttribute("aria-hidden");
           block.classList.add("is-mermaid-rendered");
@@ -101,17 +170,23 @@
       }, 80);
     }
 
+    dialogClose?.addEventListener("click", () => dialog?.close());
+    dialog?.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    updateDialogLabels();
     void renderMermaidBlocks();
 
     const observer = new MutationObserver((mutations) => {
-      if (mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme")) {
+      if (mutations.some((mutation) => mutation.attributeName === "data-locale")) updateDialogLabels();
+      if (mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme" || mutation.attributeName === "data-locale")) {
         scheduleRender();
       }
     });
 
     observer.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ["data-theme", "data-scheme"]
+      attributeFilter: ["data-theme", "data-scheme", "data-locale"]
     });
   }
 </script>

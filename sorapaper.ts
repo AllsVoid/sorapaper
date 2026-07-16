@@ -75,6 +75,11 @@ const config = {
         postNavigation: "相邻文章",
         previousPost: "上一篇",
         nextPost: "下一篇"
+      },
+      mermaid: {
+        dialog: "Mermaid 图表预览",
+        open: "点击放大图表",
+        close: "关闭图表预览"
       }
     },
     en: {
@@ -98,6 +103,11 @@ const config = {
         postNavigation: "Adjacent posts",
         previousPost: "Previous",
         nextPost: "Next"
+      },
+      mermaid: {
+        dialog: "Mermaid diagram preview",
+        open: "Open diagram in full size",
+        close: "Close diagram preview"
       }
     }
   }

@@ -95,6 +95,11 @@ export const defaultUi = {
       runtimeMinutes: "{count} 分钟",
       runtimeSeconds: "{count} 秒"
     },
+    mermaid: {
+      dialog: "Mermaid 图表预览",
+      open: "点击放大图表",
+      close: "关闭图表预览"
+    },
     readingTime: "{minutes} 分钟阅读"
   },
   en: {
@@ -187,6 +192,11 @@ export const defaultUi = {
       runtimeHours: "{count}h",
       runtimeMinutes: "{count}m",
       runtimeSeconds: "{count}s"
+    },
+    mermaid: {
+      dialog: "Mermaid diagram preview",
+      open: "Open diagram in full size",
+      close: "Close diagram preview"
     },
     readingTime: "{minutes} min read"
   }

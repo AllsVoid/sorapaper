@@ -180,7 +180,7 @@ flowchart TD
 :::
 ```
 
-SoraPaper uses the official Mermaid renderer only on article pages that contain Mermaid blocks. Mermaid runs with strict security settings, so static diagram syntax is supported while click handlers, unsafe HTML and interactive extensions are intentionally not part of the theme contract.
+SoraPaper uses the official Mermaid renderer only on article pages that contain Mermaid blocks. Wide diagrams keep their readable SVG dimensions and can scroll horizontally on small screens; tap, click or press Enter/Space on a diagram to open a larger SVG preview. Mermaid runs with strict security settings, so static diagram syntax is supported while click handlers, unsafe HTML and interactive extensions are intentionally not part of the theme contract.
 
 Footnotes use standard Markdown footnote syntax:
 
