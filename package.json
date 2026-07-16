@@ -1,14 +1,55 @@
 {
   "name": "sorapaper-astro-theme",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "A soft, content-first Astro blog theme for long-form writing.",
+  "keywords": [
+    "astro",
+    "astro-theme",
+    "blog",
+    "blog-theme",
+    "static-site",
+    "markdown",
+    "mdx",
+    "i18n"
+  ],
+  "license": "MIT",
+  "author": "AllsVoid",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AllsVoid/sorapaper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AllsVoid/sorapaper/issues"
+  },
+  "homepage": "https://github.com/AllsVoid/sorapaper#readme",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "files": [
+    "src/",
+    "public/",
+    "astro.config.mjs",
+    "sorapaper.ts",
+    "tsconfig.json",
+    "wrangler.jsonc",
+    "pnpm-workspace.yaml",
+    "CHANGELOG.md",
+    "docs/design-handoff.md",
+    "docs/development-guide.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "check": "astro check",
-    "test": "node --test src/lib/markdown/*.test.mjs"
+    "test": "node --test src/lib/markdown/*.test.mjs",
+    "release:check": "pnpm run check && pnpm run test && pnpm run build && npm pack --dry-run --ignore-scripts",
+    "prepublishOnly": "pnpm run release:check"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.2.1",

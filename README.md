@@ -25,6 +25,39 @@ npm run build
 npm run preview
 ```
 
+## Install from npm
+
+Download the exact published release into an empty directory, then install its
+dependencies and begin customizing `sorapaper.ts`:
+
+```bash
+mkdir your-site && cd your-site
+npm pack sorapaper-astro-theme@1.0.0
+tar -xzf sorapaper-astro-theme-1.0.0.tgz --strip-components=1
+pnpm install
+pnpm run dev
+```
+
+The published package contains the theme source, public assets, configuration
+files and user-facing development documentation; it intentionally excludes
+build output, dependencies and local development files. The tarball extraction
+step is necessary because this package is a complete site starter, rather than
+a runtime dependency.
+
+### Release process
+
+Maintainers should run the complete release gate before publishing:
+
+```bash
+pnpm run release:check
+npm publish
+```
+
+`prepublishOnly` runs the same gate during `npm publish`: Astro type checking,
+unit tests, a production build and a dry-run package-content inspection. The
+package is published publicly and requires Node.js 22.12 or newer. Review the
+version, changelog and `npm pack --dry-run` output before publishing.
+
 ## Cloudflare Workers
 
 SoraPaper deploys to Cloudflare Workers as a static-assets site. Commit
