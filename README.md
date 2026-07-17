@@ -34,7 +34,9 @@ dependencies and begin customizing `sorapaper.ts`:
 mkdir your-site && cd your-site
 npm pack sorapaper-astro-theme@1.0.0
 tar -xzf sorapaper-astro-theme-1.0.0.tgz --strip-components=1
-pnpm install
+mv .sorapaper-package/pnpm-lock.yaml pnpm-lock.yaml
+rmdir .sorapaper-package
+pnpm install --frozen-lockfile
 pnpm run dev
 ```
 

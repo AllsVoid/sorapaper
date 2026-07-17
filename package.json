@@ -34,6 +34,8 @@
     "tsconfig.json",
     "wrangler.jsonc",
     "pnpm-workspace.yaml",
+    "scripts/npm-package-lock.mjs",
+    ".sorapaper-package/pnpm-lock.yaml",
     "CHANGELOG.md",
     "docs/design-handoff.md",
     "docs/development-guide.md"
@@ -48,8 +50,10 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test src/lib/markdown/*.test.mjs",
-    "release:check": "pnpm run check && pnpm run test && pnpm run build && npm pack --dry-run --ignore-scripts",
-    "prepublishOnly": "pnpm run release:check"
+    "release:check": "pnpm run check && pnpm run test && pnpm run build && npm pack --dry-run",
+    "prepublishOnly": "pnpm run release:check",
+    "prepack": "node scripts/npm-package-lock.mjs prepare",
+    "postpack": "node scripts/npm-package-lock.mjs clean"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "7.2.1",
