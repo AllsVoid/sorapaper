@@ -1,0 +1,449 @@
+---
+import ArticleHeader from "@/components/ArticleHeader.astro";
+import ArticleLicense from "@/components/ArticleLicense.astro";
+import EncryptedBlockLoader from "@/components/EncryptedBlockLoader.astro";
+import GalleryLoader from "@/components/GalleryLoader.astro";
+import LivePhotoLoader from "@/components/LivePhotoLoader.astro";
+import MermaidLoader from "@/components/MermaidLoader.astro";
+import MusicPlayerLoader from "@/components/MusicPlayerLoader.astro";
+import PostShare from "@/components/PostShare.astro";
+import SeriesNavigation from "@/components/SeriesNavigation.astro";
+import TableOfContents from "@/components/TableOfContents.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getPostHref, getPostOgImagePngHref, type BlogPost } from "@/lib/posts";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+
+interface Props {
+  post: BlogPost;
+  locale: Locale;
+  alternatePath?: string;
+  alternates?: Partial<Record<Locale, string>>;
+  previousPost?: BlogPost;
+  nextPost?: BlogPost;
+  seriesPosts?: BlogPost[];
+  headings: { depth: number; slug: string; text: string }[];
+  Content: any;
+}
+
+const { post, locale, alternatePath, alternates, previousPost, nextPost, seriesPosts = [], headings, Content } = Astro.props;
+const t = getUi(locale);
+const hasMermaid = post.body?.includes(":::mermaid") ?? false;
+const hasGalleries = post.body?.includes(":::gallery") ?? false;
+const hasEncryptedBlocks = post.body?.includes(":::encrypted") ?? false;
+const hasMusicPlayers = /::+music(?:\{|\s)/.test(post.body ?? "");
+const ogImage = post.data.ogImage ?? getPostOgImagePngHref(post);
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description}
+  locale={locale}
+  alternatePath={alternatePath}
+  seo={{
+    type: "article",
+    canonicalPath: getPostHref(post),
+    image: ogImage,
+    alternates,
+    article: {
+      publishedTime: post.data.pubDate,
+      modifiedTime: post.data.updatedDate,
+      tags: post.data.tags
+    }
+  }}
+>
+  {!alternatePath && (
+    <div class="translation-toast" role="status" aria-live="polite" data-translation-toast data-post-locale={post.data.lang}>
+      {t.article.translationUnavailable}
+    </div>
+  )}
+  <article class="container" data-pagefind-body data-pagefind-filter={`lang:${post.data.lang}`}>
+    <ArticleHeader post={post} locale={locale}>
+      <PostShare post={post} locale={locale} />
+    </ArticleHeader>
+    <div class="article-grid">
+      <div class="series-aside">
+        {post.data.series && seriesPosts.length > 0 && <SeriesNavigation post={post} posts={seriesPosts} locale={locale} />}
+      </div>
+      <div class="article-content glass">
+        <Content />
+        <ArticleLicense locale={locale} />
+      </div>
+      {post.data.toc ? <TableOfContents headings={headings} /> : <div></div>}
+    </div>
+    {(previousPost || nextPost) && (
+      <nav class="post-nav" aria-label={t.article.postNavigation}>
+        {previousPost ? (
+          <a class="post-nav-card glass previous" href={getPostHref(previousPost)}>
+            <span>{t.article.previousPost}</span>
+            <strong>{previousPost.data.title}</strong>
+          </a>
+        ) : (
+          <div aria-hidden="true"></div>
+        )}
+        {nextPost && (
+          <a class="post-nav-card glass next" href={getPostHref(nextPost)}>
+            <span>{t.article.nextPost}</span>
+            <strong>{nextPost.data.title}</strong>
+          </a>
+        )}
+      </nav>
+    )}
+    <footer class="post-footer">
+      <p>{t.article.copyright}</p>
+      <a href={localizePath(locale, "/archive/")}>{t.article.browseArchive} →</a>
+    </footer>
+  </article>
+  <LivePhotoLoader />
+  {hasGalleries && <GalleryLoader />}
+  {hasMermaid && <MermaidLoader />}
+  {hasMusicPlayers && <MusicPlayerLoader />}
+  {hasEncryptedBlocks && <EncryptedBlockLoader />}
+
+  <script>
+  const translationToast = document.querySelector("[data-translation-toast]");
+  const postLocale = translationToast?.getAttribute("data-post-locale");
+
+  function showTranslationToast() {
+    if (!translationToast) return;
+    translationToast.classList.remove("is-visible");
+    window.requestAnimationFrame(() => {
+      translationToast.classList.add("is-visible");
+    });
+  }
+
+  function syncTranslationToast(locale = document.documentElement.dataset.locale) {
+    if (!translationToast || !postLocale) return;
+    if (locale && locale !== postLocale) {
+      showTranslationToast();
+    } else {
+      translationToast.classList.remove("is-visible");
+    }
+  }
+
+  syncTranslationToast();
+  document.addEventListener("sorapaper:locale-change", (event) => {
+    const locale = event instanceof CustomEvent ? event.detail?.locale : undefined;
+    syncTranslationToast(locale);
+  });
+
+  function enhanceCodeCopy(root = document) {
+    root.querySelectorAll("[data-code-copy]").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.codeCopyBound === "true") return;
+      button.dataset.codeCopyBound = "true";
+
+      button.addEventListener("click", async () => {
+        const code = button.getAttribute("data-code") ?? "";
+
+        try {
+          await navigator.clipboard.writeText(code);
+          button.setAttribute("data-copied", "true");
+          window.setTimeout(() => button.removeAttribute("data-copied"), 1600);
+        } catch {
+          button.removeAttribute("data-copied");
+        }
+      });
+    });
+  }
+
+  function enhanceCodeExpand(root = document) {
+    root.querySelectorAll("[data-code-expand]").forEach((button) => {
+      if (!(button instanceof HTMLButtonElement) || button.dataset.codeExpandBound === "true") return;
+      button.dataset.codeExpandBound = "true";
+
+      button.addEventListener("click", () => {
+        const codeBlock = button.closest("[data-code-block]");
+        codeBlock?.classList.toggle("is-expanded");
+      });
+    });
+  }
+
+  function enhanceHeadingAnchors(root = document) {
+    root.querySelectorAll(".article-content h2[id], .article-content h3[id], .article-content h4[id], h2[id], h3[id], h4[id]").forEach((heading) => {
+      if (!(heading instanceof HTMLHeadingElement) || heading.id === "footnote-label") return;
+      if (!heading.closest(".article-content")) return;
+      if (heading.querySelector("[data-heading-anchor]")) return;
+
+      const anchor = document.createElement("a");
+      anchor.className = "heading-anchor";
+      anchor.href = `#${heading.id}`;
+      anchor.setAttribute("aria-label", `Copy link to ${heading.textContent?.trim() ?? "this section"}`);
+      anchor.setAttribute("data-heading-anchor", "true");
+      anchor.textContent = "#";
+      heading.classList.add("has-heading-anchor");
+      heading.append(anchor);
+    });
+
+    root.querySelectorAll("[data-heading-anchor]").forEach((anchor) => {
+      if (!(anchor instanceof HTMLAnchorElement) || anchor.dataset.headingAnchorBound === "true") return;
+      anchor.dataset.headingAnchorBound = "true";
+
+      anchor.addEventListener("click", async () => {
+        if (!navigator.clipboard) return;
+
+        try {
+          await navigator.clipboard.writeText(anchor.href);
+          anchor.setAttribute("data-copied", "true");
+          window.setTimeout(() => anchor.removeAttribute("data-copied"), 1200);
+        } catch {
+          anchor.removeAttribute("data-copied");
+        }
+      });
+    });
+  }
+
+  function enhanceArticleContent(root = document) {
+    enhanceCodeCopy(root);
+    enhanceCodeExpand(root);
+    enhanceHeadingAnchors(root);
+  }
+
+  enhanceArticleContent();
+  document.addEventListener("sorapaper:content-unlocked", (event) => {
+    const root = event instanceof CustomEvent ? event.detail?.root : undefined;
+    if (root && typeof root.querySelectorAll === "function") {
+      enhanceArticleContent(root);
+    } else {
+      enhanceArticleContent();
+    }
+  });
+  </script>
+</BaseLayout>
+
+
+<style>
+  .article-grid {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, var(--article))
+      minmax(0, 1fr);
+    gap: var(--article-gap);
+    align-items: start;
+  }
+
+  article.container {
+    --article: clamp(42rem, 58vw, 58rem);
+    --article-aside: clamp(10rem, 14vw, 14rem);
+    --article-gap: clamp(0.9rem, 1.4vw, 1.4rem);
+    --container: 80vw;
+  }
+
+  :global(.article-header) {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, var(--article))
+      minmax(0, 1fr);
+    gap: var(--article-gap);
+  }
+
+  :global(.article-header .back),
+  :global(.article-header .inner) {
+    grid-column: 2;
+  }
+
+  .article-content {
+    border-radius: var(--radius-lg);
+    grid-column: 2;
+    font-size: clamp(1.08rem, 0.55vw + 1rem, 1.24rem);
+    line-height: 1.95;
+    padding: clamp(1.4rem, 4vw, 2.8rem);
+  }
+
+  .article-grid :global(.toc) {
+    justify-self: start;
+    width: min(100%, var(--article-aside));
+  }
+
+  .series-aside {
+    position: sticky;
+    top: 10vh;
+    align-self: start;
+    justify-self: end;
+    max-height: 80vh;
+    width: min(100%, var(--article-aside));
+  }
+
+  @supports (height: 100dvh) {
+    .series-aside {
+      top: 10dvh;
+      max-height: 80dvh;
+    }
+  }
+
+  .translation-toast {
+    position: fixed;
+    right: max(1rem, calc((100vw - var(--container)) / 2));
+    bottom: 1.25rem;
+    z-index: 40;
+    width: min(22rem, calc(100vw - 2rem));
+    border: 1px solid color-mix(in srgb, var(--primary) 46%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 18%, var(--surface-strong));
+    color: var(--text);
+    box-shadow: var(--shadow-card);
+    padding: 0.9rem 1.1rem;
+    line-height: 1.55;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.6rem) scale(0.96);
+    visibility: hidden;
+    backdrop-filter: blur(16px);
+  }
+
+  .translation-toast.is-visible {
+    animation: toast-bubble 5s ease-in-out forwards;
+    visibility: visible;
+  }
+
+  @keyframes toast-bubble {
+    0% {
+      opacity: 0;
+      transform: translateY(0.6rem) scale(0.96);
+    }
+
+    10%,
+    82% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    100% {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(0.35rem) scale(0.98);
+    }
+  }
+
+  .post-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    width: min(100%, var(--article));
+    margin: 1.2rem auto 0;
+  }
+
+  .post-nav-card {
+    display: grid;
+    min-height: 7.5rem;
+    align-content: center;
+    gap: 0.55rem;
+    border-radius: var(--radius-lg);
+    padding: 1.1rem;
+  }
+
+  .post-nav-card:hover {
+    border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+    transform: translateY(-1px);
+  }
+
+  .post-nav-card span {
+    color: var(--muted);
+    font-size: 0.86rem;
+  }
+
+  .post-nav-card strong {
+    color: var(--text);
+    font-family: var(--font-serif);
+    font-size: clamp(1.08rem, 2vw, 1.28rem);
+    line-height: 1.35;
+  }
+
+  .post-nav-card.next {
+    text-align: right;
+  }
+
+  .post-footer {
+    width: min(100%, var(--article));
+    margin: 1rem auto 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--muted);
+    padding: 1rem 1.2rem;
+  }
+
+  .post-footer p {
+    margin: 0 0 0.5rem;
+  }
+
+  .post-footer a {
+    color: var(--primary);
+  }
+
+  @media (max-width: 1080px) {
+    article.container {
+      --container: 100%;
+    }
+
+    .article-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    :global(.article-header) {
+      display: block;
+    }
+
+    .article-grid > div:last-child {
+      display: none;
+    }
+
+    .article-content {
+      grid-column: auto;
+      min-width: 0;
+      width: 100%;
+      order: 1;
+    }
+
+    .series-aside {
+      position: static;
+      justify-self: stretch;
+      max-height: none;
+      width: min(100%, var(--article));
+      margin: 0 auto;
+      order: 2;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .post-nav > div:empty {
+      display: none;
+    }
+
+    .post-nav-card,
+    .post-nav-card.next {
+      min-height: auto;
+      text-align: left;
+    }
+
+    .translation-toast {
+      right: 1rem;
+      bottom: 1rem;
+      width: calc(100vw - 2rem);
+      border-radius: var(--radius-lg);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .translation-toast.is-visible {
+      animation: toast-fade 5s linear forwards;
+    }
+
+    @keyframes toast-fade {
+      0%,
+      82% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+  }
+</style>

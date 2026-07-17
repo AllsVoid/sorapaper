@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Soft sunset cover">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="640" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d8c7ff"/>
+      <stop offset=".52" stop-color="#ffc4d6"/>
+      <stop offset="1" stop-color="#ffd9a7"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <circle cx="490" cy="96" r="52" fill="#fff5d7" opacity=".86"/>
+  <path d="M0 260h640v100H0z" fill="#27304a" opacity=".22"/>
+  <path d="M42 252h78v108H42zM150 214h112v146H150zM294 238h80v122h-80zM410 194h150v166H410z" fill="#27304a" opacity=".36"/>
+  <path d="M0 282c88-30 154-30 248 0s175 30 392-8" stroke="#fff" stroke-width="10" opacity=".46"/>
+</svg>

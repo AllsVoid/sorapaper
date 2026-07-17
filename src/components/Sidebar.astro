@@ -1,0 +1,172 @@
+---
+import { themeConfig } from "@/config/theme";
+import type { Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getUi(locale);
+
+const socialIconAliases: Record<string, string> = {
+  github: "github",
+  gitlab: "gitlab",
+  email: "email",
+  mail: "email",
+  x: "x",
+  twitter: "x",
+  wechat: "wechat",
+  微信: "wechat",
+  bilibili: "bilibili",
+  哔哩哔哩: "bilibili",
+  discord: "discord",
+  telegram: "telegram",
+  linkedin: "linkedin",
+  instagram: "instagram",
+  youtube: "youtube",
+  facebook: "facebook",
+  rss: "rss",
+  website: "website",
+  site: "website",
+  blog: "website",
+  mastodon: "mastodon",
+  juejin: "juejin",
+  掘金: "juejin"
+};
+
+function getSocialIcon(link: { label: string; icon?: string }) {
+  const key = (link.icon ?? link.label).trim().toLowerCase();
+  return socialIconAliases[key] ?? key.replace(/\s+/g, "-");
+}
+---
+
+<aside class="sidebar">
+  <section class="profile glass">
+    <img src={withBase(themeConfig.author.avatar)} alt="" width="92" height="92" />
+    <h2>{themeConfig.author.name}</h2>
+    <p class="title">{themeConfig.author.title}</p>
+    <p>{themeConfig.author.bio}</p>
+    <div class="links">
+      {themeConfig.author.links.map((link) => {
+        const icon = getSocialIcon(link);
+        return (
+          <a href={link.href} aria-label={link.label} title={link.label}>
+            <span class="social-icon" style={`--icon-url: url("${withBase(`/assets/social/${icon}.svg`)}")`}></span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="panel glass">
+    <h2>{t.sidebar.now}</h2>
+    <dl>
+      <div>
+        <dt>{t.sidebar.listening}</dt>
+        <dd>{themeConfig.now.listening}</dd>
+      </div>
+      <div>
+        <dt>{t.sidebar.reading}</dt>
+        <dd>{themeConfig.now.reading}</dd>
+      </div>
+      <div>
+        <dt>{t.sidebar.working}</dt>
+        <dd>{themeConfig.now.working}</dd>
+      </div>
+    </dl>
+  </section>
+</aside>
+
+<style>
+  .sidebar {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+  }
+
+  .profile,
+  .panel {
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+  }
+
+  .profile {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  img {
+    border: 6px solid color-mix(in srgb, var(--surface-strong) 80%, white);
+    border-radius: 999px;
+    box-shadow: var(--shadow-soft);
+  }
+
+  h2,
+  p,
+  dl {
+    margin: 0;
+  }
+
+  h2 {
+    margin-top: 0.75rem;
+    font-size: 1.08rem;
+  }
+
+  .title,
+  p {
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+
+  .links a {
+    display: inline-grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    place-items: center;
+    color: var(--muted);
+    transition: color 160ms ease, transform 160ms ease;
+  }
+
+  .links a:hover {
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .social-icon {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: currentColor;
+    -webkit-mask: var(--icon-url) center / contain no-repeat;
+    mask: var(--icon-url) center / contain no-repeat;
+  }
+
+  dl {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  dt {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.9rem;
+  }
+</style>

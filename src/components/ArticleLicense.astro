@@ -1,0 +1,114 @@
+---
+import { themeConfig } from "@/config/theme";
+import type { ArticleLicense } from "@/config/types";
+import type { Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getUi(locale);
+const licenseDetails: Record<ArticleLicense, { href: string; marks: string[] }> = {
+  "cc-by-4.0": {
+    href: "https://creativecommons.org/licenses/by/4.0/",
+    marks: ["CC", "BY"]
+  },
+  "cc-by-nc-4.0": {
+    href: "https://creativecommons.org/licenses/by-nc/4.0/",
+    marks: ["CC", "BY", "NC"]
+  }
+};
+const configuredLicense = themeConfig.article.license;
+const license: ArticleLicense = configuredLicense in licenseDetails ? configuredLicense : "cc-by-4.0";
+const details = licenseDetails[license];
+const licenseName = t.article.licenses[license];
+const [descriptionBefore, descriptionAfter = ""] = t.article.licenseDescription.split("{license}");
+---
+
+<aside class="article-license" aria-labelledby="article-license-label">
+  <div class="article-license-marks" aria-hidden="true">
+    {details.marks.map((mark) => <span>{mark}</span>)}
+  </div>
+  <div class="article-license-copy">
+    <p class="article-license-label" id="article-license-label">{t.article.licenseLabel}</p>
+    <p class="article-license-description">
+      {descriptionBefore}<a href={details.href} rel="license noopener" target="_blank">{licenseName}</a>{descriptionAfter}
+    </p>
+  </div>
+</aside>
+
+<style>
+  .article-license {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2.4rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font-sans);
+    padding-top: 1.2rem;
+  }
+
+  .article-license-marks {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 0.35rem;
+  }
+
+  .article-license-marks span {
+    display: grid;
+    place-items: center;
+    min-width: 2rem;
+    height: 2rem;
+    border: 1px solid color-mix(in srgb, var(--primary) 24%, var(--border));
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary) 7%, var(--surface-strong));
+    color: var(--text);
+    font-size: 0.64rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+  }
+
+  .article-license-copy {
+    min-width: 0;
+  }
+
+  .article-license-label,
+  .article-license-description {
+    margin: 0;
+  }
+
+  .article-license-label {
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .article-license-description {
+    margin-top: 0.22rem;
+    font-size: 0.82rem;
+    line-height: 1.65;
+  }
+
+  .article-license-description a {
+    color: var(--primary);
+    font-weight: 650;
+  }
+
+  .article-license-description a:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--primary) 54%, transparent);
+    outline-offset: 0.18rem;
+    border-radius: 0.2rem;
+  }
+
+  @media (max-width: 520px) {
+    .article-license {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 0.72rem;
+    }
+  }
+</style>

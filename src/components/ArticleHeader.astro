@@ -1,0 +1,118 @@
+---
+import type { BlogPost } from "@/lib/posts";
+import { formatDate, getPostSummary, getReadingTime, getTagSlug } from "@/lib/posts";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+
+interface Props {
+  post: BlogPost;
+  locale: Locale;
+}
+
+const { post, locale } = Astro.props;
+const t = getUi(locale);
+const summary = getPostSummary(post);
+---
+
+<header class="article-header">
+  <a class="back" href={localizePath(locale)}>← {t.article.back}</a>
+  <div class="inner">
+    <div class="tags">
+      {post.data.tags.map((tag) => <a class="pill" href={localizePath(locale, `/tags/${getTagSlug(tag)}/`)}>{tag}</a>)}
+    </div>
+    <h1>{post.data.title}</h1>
+    <p>{summary}</p>
+    <div class="meta">
+      <time class="meta-item" datetime={post.data.pubDate.toISOString()}>
+        <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 3.5v2.2M17 3.5v2.2M4.75 9.1h14.5M6.8 5h10.4a2.55 2.55 0 0 1 2.55 2.55v9.65a2.55 2.55 0 0 1-2.55 2.55H6.8a2.55 2.55 0 0 1-2.55-2.55V7.55A2.55 2.55 0 0 1 6.8 5Z" />
+        </svg>
+        {formatDate(post.data.pubDate, locale)}
+      </time>
+      <span class="meta-item">
+        <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 6.4v5.15l3.1 2.05M20.25 12A8.25 8.25 0 1 1 3.75 12a8.25 8.25 0 0 1 16.5 0Z" />
+        </svg>
+        {getReadingTime(post.body, locale)}
+      </span>
+      {post.data.updatedDate && (
+        <span class="meta-item">
+          <svg class="meta-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M19.25 12a7.25 7.25 0 0 1-12.38 5.13L4.75 15M4.75 15v4.25H9M4.75 12A7.25 7.25 0 0 1 17.13 6.87L19.25 9M19.25 9V4.75H15" />
+          </svg>
+          {t.article.updated} {formatDate(post.data.updatedDate, locale)}
+        </span>
+      )}
+      <slot />
+    </div>
+  </div>
+</header>
+
+<style>
+  .article-header {
+    padding: 3.4rem 0 2rem;
+  }
+
+  .back {
+    display: inline-flex;
+    margin-bottom: 1.8rem;
+    color: var(--muted);
+    font-size: 0.94rem;
+  }
+
+  .back:hover {
+    color: var(--primary);
+  }
+
+  .inner {
+    width: min(100%, var(--article));
+    margin-inline: auto;
+  }
+
+  .tags,
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  h1 {
+    margin: 1rem 0 0.7rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.4rem, 5.2vw, 5rem);
+    letter-spacing: 0;
+    line-height: 1.12;
+  }
+
+  p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 1.08rem;
+    line-height: 1.75;
+  }
+
+  .meta {
+    align-items: center;
+    margin-top: 1.1rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+  }
+
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+  }
+
+  .meta-icon {
+    width: 1.05em;
+    height: 1.05em;
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--primary) 72%, var(--muted));
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.75;
+  }
+</style>

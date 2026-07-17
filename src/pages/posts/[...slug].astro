@@ -1,0 +1,55 @@
+---
+import { render } from "astro:content";
+import PostLayout from "@/layouts/PostLayout.astro";
+import { locales } from "@/i18n/config";
+import {
+  getAdjacentPosts,
+  getPostAlternates,
+  getPostHref,
+  getPostSlug,
+  getPublishedPosts,
+  getSeriesPosts,
+  getTranslatedPost
+} from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const paths: Array<{
+    params: { slug: string };
+    props: { post: Awaited<ReturnType<typeof getPublishedPosts>>[number] };
+  }> = [];
+  for (const locale of locales) {
+    const posts = await getPublishedPosts(locale);
+    paths.push(
+      ...posts.map((post) => ({
+        params: { slug: getPostSlug(post) },
+        props: { post }
+      }))
+    );
+  }
+  return paths;
+}
+
+const { post } = Astro.props;
+const locale = post.data.lang;
+const targetLocale = locale === "zh" ? "en" : "zh";
+const allPosts = await getPublishedPosts();
+const localePosts = await getPublishedPosts(locale);
+const translatedPost = getTranslatedPost(post, allPosts, targetLocale);
+const alternatePath = translatedPost ? getPostHref(translatedPost) : undefined;
+const alternates = getPostAlternates(post, allPosts);
+const { previousPost, nextPost } = getAdjacentPosts(localePosts, post);
+const seriesPosts = post.data.series ? getSeriesPosts(localePosts, post.data.series) : [];
+const { Content, headings } = await render(post);
+---
+
+<PostLayout
+  post={post}
+  locale={locale}
+  alternatePath={alternatePath}
+  alternates={alternates}
+  previousPost={previousPost}
+  nextPost={nextPost}
+  seriesPosts={seriesPosts}
+  headings={headings}
+  Content={Content}
+/>
