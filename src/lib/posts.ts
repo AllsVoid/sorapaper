@@ -7,8 +7,12 @@ import { withBase } from "@/lib/paths";
 export type BlogPost = CollectionEntry<"blog">;
 
 export async function getPublishedPosts(locale?: Locale) {
-  const posts = await getCollection("blog", ({ data }) => !data.draft && (!locale || data.lang === locale));
-  return posts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  assertUniquePostSlugs(posts);
+
+  return posts
+    .filter((post) => !locale || post.data.lang === locale)
+    .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
 }
 
 export async function getPinnedPosts(locale?: Locale) {
@@ -17,6 +21,21 @@ export async function getPinnedPosts(locale?: Locale) {
 
 export function getPostSlug(post: BlogPost) {
   return post.data.slug ?? post.id.replace(/\.(md|mdx)$/i, "");
+}
+
+function assertUniquePostSlugs(posts: BlogPost[]) {
+  const postBySlug = new Map<string, BlogPost>();
+
+  for (const post of posts) {
+    const slug = getPostSlug(post);
+    const existingPost = postBySlug.get(slug);
+    if (existingPost) {
+      throw new Error(
+        `Duplicate published post slug "${slug}" in "${existingPost.id}" and "${post.id}".`
+      );
+    }
+    postBySlug.set(slug, post);
+  }
 }
 
 export function getPostHref(post: BlogPost) {

@@ -7,13 +7,18 @@ const imageMeta = z.object({
   alt: z.string()
 });
 
+const postSlug = z.string().trim().min(1).regex(
+  /^[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*(?:\/[\p{L}\p{N}]+(?:[-_][\p{L}\p{N}]+)*)*$/u,
+  "Slug segments may contain letters, numbers, hyphens and underscores, separated by single slashes."
+);
+
 const blog = defineCollection({
   loader: glob({ base: "./src/content/blog", pattern: "**/*.{md,mdx}" }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
     excerpt: z.string().optional(),
-    slug: z.string().trim().min(1).optional(),
+    slug: postSlug.optional(),
     lang: z.enum(["zh", "en"]).default("en"),
     translationKey: z.string().optional(),
     pubDate: z.coerce.date(),
