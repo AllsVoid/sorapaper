@@ -6,6 +6,8 @@
 
 ## Theme preview
 
+![SoraPaper theme preview](public/theme-preview.jpg)
+
 The repository includes a complete, editable preview site. Start it locally and open <http://localhost:4321>:
 
 ```bash

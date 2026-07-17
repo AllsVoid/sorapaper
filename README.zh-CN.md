@@ -6,6 +6,8 @@
 
 ## 主题预览
 
+![SoraPaper 主题预览](public/theme-preview.jpg)
+
 仓库内置了一套可直接编辑的完整预览站点。启动后访问 <http://localhost:4321>：
 
 ```bash
