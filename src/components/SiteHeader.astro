@@ -29,7 +29,7 @@ const nav = [
 <header class="site-header container glass">
   <a class="brand" href={localizePath(locale)} aria-label={`${themeConfig.name} ${t.nav.home}`}>
     <img src={withBase("/favicon.svg")} alt="" width="34" height="34" />
-    <span>Sora<span>Paper</span></span>
+    <span>{themeConfig.name}</span>
   </a>
 
   <nav class="nav" aria-label="Primary navigation">
@@ -121,10 +121,6 @@ const nav = [
     font-weight: 700;
     letter-spacing: -0.02em;
     min-width: max-content;
-  }
-
-  .brand span span {
-    color: var(--primary);
   }
 
   .nav {
