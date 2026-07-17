@@ -31,6 +31,11 @@ export default defineConfig({
   site: userConfig.site?.url ?? "https://example.com",
   base,
   integrations: [mdx(), sitemap()],
+  vite: {
+    build: {
+      chunkSizeWarningLimit: 700
+    }
+  },
   markdown: {
     processor: unified({
       remarkPlugins: [remarkMath, remarkGfm, remarkDirective, remarkCallouts, remarkMediaEmbeds, remarkMermaid, remarkEncrypted],
