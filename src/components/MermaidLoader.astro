@@ -27,6 +27,7 @@ import { ui } from "@/i18n/ui";
     const dialogClose = dialog?.querySelector<HTMLButtonElement>("[data-mermaid-dialog-close]");
     let renderRun = 0;
     let renderTimer: number | undefined;
+    let renderStarted = false;
 
     function getLocale() {
       return document.documentElement.dataset.locale === "en" ? "en" : "zh";
@@ -163,6 +164,12 @@ import { ui } from "@/i18n/ui";
       }
     }
 
+    function startRendering() {
+      if (renderStarted) return;
+      renderStarted = true;
+      void renderMermaidBlocks();
+    }
+
     function scheduleRender() {
       window.clearTimeout(renderTimer);
       renderTimer = window.setTimeout(() => {
@@ -175,16 +182,26 @@ import { ui } from "@/i18n/ui";
       if (event.target === dialog) dialog.close();
     });
     updateDialogLabels();
-    void renderMermaidBlocks();
 
-    const observer = new MutationObserver((mutations) => {
+    if ("IntersectionObserver" in window) {
+      const viewportObserver = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        viewportObserver.disconnect();
+        startRendering();
+      }, { rootMargin: "320px 0px" });
+      mermaidBlocks.forEach((block) => viewportObserver.observe(block));
+    } else {
+      startRendering();
+    }
+
+    const themeObserver = new MutationObserver((mutations) => {
       if (mutations.some((mutation) => mutation.attributeName === "data-locale")) updateDialogLabels();
-      if (mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme" || mutation.attributeName === "data-locale")) {
+      if (renderStarted && mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme" || mutation.attributeName === "data-locale")) {
         scheduleRender();
       }
     });
 
-    observer.observe(document.documentElement, {
+    themeObserver.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["data-theme", "data-scheme", "data-locale"]
     });
