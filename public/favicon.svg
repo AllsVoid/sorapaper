@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SoraPaper">
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff8f1"/>
+      <stop offset="1" stop-color="#eef4ff"/>
+    </linearGradient>
+    <linearGradient id="plane" x1="12" y1="15" x2="53" y2="49" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b7a8ff"/>
+      <stop offset=".52" stop-color="#8b8cf6"/>
+      <stop offset="1" stop-color="#66b7ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#505a82" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="url(#bg)"/>
+  <path d="M11 32 53 13 42 51 32 38 21 51 25 36 11 32Z" fill="url(#plane)" filter="url(#shadow)"/>
+  <path d="M25 36 53 13 32 38" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".76" stroke-width="3"/>
+  <path d="M11 32 25 36 21 51" fill="#ffffff" fill-opacity=".3"/>
+</svg>

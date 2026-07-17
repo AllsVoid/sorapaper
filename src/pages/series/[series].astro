@@ -1,0 +1,48 @@
+---
+import PostCard from "@/components/PostCard.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales, localizePath } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllSeries, getPublishedPosts } from "@/lib/posts";
+
+export async function getStaticPaths() {
+  const series = new Map<string, string>();
+  for (const locale of locales) {
+    for (const item of getAllSeries(await getPublishedPosts(locale))) series.set(item.slug, item.name);
+  }
+  return [...series.entries()].map(([slug, name]) => ({ params: { series: slug }, props: { series: name } }));
+}
+
+const { series } = Astro.props;
+const allPosts = await getPublishedPosts();
+const sourceItem = getAllSeries(allPosts).find((item) => item.slug === Astro.params.series);
+const sourceTranslationKeys = new Set(sourceItem?.posts.map((post) => post.data.translationKey).filter(Boolean));
+const localeData = await Promise.all(locales.map(async (locale) => {
+  const localeSeries = getAllSeries(await getPublishedPosts(locale));
+  const directItem = localeSeries.find((item) => item.slug === Astro.params.series);
+  const translatedItem = localeSeries.find((item) =>
+    item.posts.some((post) => post.data.translationKey && sourceTranslationKeys.has(post.data.translationKey))
+  );
+  return { locale, t: getUi(locale), item: directItem ?? translatedItem };
+}));
+---
+
+<BaseLayout title={series} description={`Posts in the ${series} series.`}>
+  {localeData.map(({ locale, t, item }) => (
+    <section class="container page" data-lang={locale}>
+      <header>
+        <a class="pill" href={localizePath(locale, "/series/")}>← {t.nav.series}</a>
+        <h1>{item?.name ?? series}</h1>
+        <p class="muted">{item ? `${item.posts.length} ${t.pages.seriesPosts}` : t.pages.seriesEmpty}</p>
+      </header>
+      {item && <div class="posts">{item.posts.map((post) => <PostCard post={post} locale={locale} />)}</div>}
+    </section>
+  ))}
+</BaseLayout>
+
+<style>
+  .page { padding: 3.2rem 0 0; }
+  header, .posts { width: min(100%, var(--article)); margin-inline: auto; }
+  h1 { margin: 1rem 0 0.6rem; font-family: var(--font-serif); font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.05; }
+  .posts { display: grid; gap: 1rem; margin-top: 2rem; }
+</style>

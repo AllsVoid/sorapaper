@@ -1,0 +1,178 @@
+<script>
+  const galleryMessages = {
+    zh: {
+      gallery: "图集",
+      previous: "上一张图片",
+      next: "下一张图片",
+      goTo: (index: number) => `转到第 ${index} 张图片`
+    },
+    en: {
+      gallery: "Image gallery",
+      previous: "Previous image",
+      next: "Next image",
+      goTo: (index: number) => `Go to image ${index}`
+    }
+  };
+
+  function getGalleryMessages() {
+    return document.documentElement.dataset.locale === "en" ? galleryMessages.en : galleryMessages.zh;
+  }
+
+  function updateGalleryLabels(gallery: HTMLElement) {
+    const messages = getGalleryMessages();
+    const previousButton = gallery.querySelector<HTMLButtonElement>("[data-gallery-previous]");
+    const nextButton = gallery.querySelector<HTMLButtonElement>("[data-gallery-next]");
+
+    previousButton?.setAttribute("aria-label", messages.previous);
+    nextButton?.setAttribute("aria-label", messages.next);
+    if (gallery.getAttribute("aria-label") === "Image gallery" || gallery.getAttribute("aria-label") === "图集") {
+      gallery.setAttribute("aria-label", messages.gallery);
+    }
+    gallery.querySelectorAll<HTMLButtonElement>("[data-gallery-dot-index]").forEach((dot) => {
+      const index = Number(dot.dataset.galleryDotIndex);
+      if (Number.isFinite(index)) dot.setAttribute("aria-label", messages.goTo(index + 1));
+    });
+  }
+
+  function initializeGallery(gallery: HTMLElement) {
+    if (gallery.dataset.galleryInitialized === "true") return;
+
+    const items = Array.from(gallery.querySelectorAll<HTMLElement>("[data-gallery-item]"));
+    const previousButton = gallery.querySelector<HTMLButtonElement>("[data-gallery-previous]");
+    const nextButton = gallery.querySelector<HTMLButtonElement>("[data-gallery-next]");
+    const dots = gallery.querySelector<HTMLElement>("[data-gallery-dots]");
+    const counter = gallery.querySelector<HTMLElement>("[data-gallery-counter]");
+    const track = gallery.querySelector<HTMLElement>(".gallery-track");
+    const gestureSurface = gallery.querySelector<HTMLElement>(".gallery-viewport, .gallery-stage");
+
+    if (items.length === 0 || !previousButton || !nextButton || !dots || !counter || !gestureSurface) return;
+
+    let current = 0;
+    let pointerStartX: number | undefined;
+    let pointerId: number | undefined;
+    let wheelLocked = false;
+    let suppressClick = false;
+    const dotButtons = items.map((_, index) => {
+      const dot = document.createElement("button");
+      dot.type = "button";
+      dot.className = "gallery-dot";
+      dot.dataset.galleryDotIndex = String(index);
+      dot.addEventListener("click", () => show(index));
+      dots.append(dot);
+      return dot;
+    });
+
+    function show(index: number) {
+      current = (index + items.length) % items.length;
+
+      if (track) {
+        track.style.transform = `translate3d(${-current * 100}%, 0, 0)`;
+      }
+
+      items.forEach((item, itemIndex) => {
+        const forward = (itemIndex - current + items.length) % items.length;
+        const backward = (current - itemIndex + items.length) % items.length;
+        item.classList.toggle("is-active", itemIndex === current);
+        item.classList.toggle("is-next", itemIndex !== current && forward === 1);
+        item.classList.toggle("is-previous", itemIndex !== current && backward === 1 && forward !== 1);
+        item.classList.toggle("is-hidden", itemIndex !== current && forward !== 1 && backward !== 1);
+        item.setAttribute("aria-hidden", itemIndex === current ? "false" : "true");
+        item.toggleAttribute("inert", itemIndex !== current);
+      });
+
+      dotButtons.forEach((dot, dotIndex) => {
+        const active = dotIndex === current;
+        dot.classList.toggle("is-active", active);
+        dot.setAttribute("aria-current", active ? "true" : "false");
+      });
+
+      counter!.textContent = `${current + 1} / ${items.length}`;
+    }
+
+    function previous() {
+      show(current - 1);
+    }
+
+    function next() {
+      show(current + 1);
+    }
+
+    previousButton.addEventListener("click", previous);
+    nextButton.addEventListener("click", next);
+    gallery.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        previous();
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        next();
+      }
+    });
+
+    gestureSurface.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      pointerStartX = event.clientX;
+      pointerId = event.pointerId;
+      gestureSurface.setPointerCapture(event.pointerId);
+    });
+
+    gestureSurface.addEventListener("pointerup", (event) => {
+      if (pointerStartX === undefined || pointerId !== event.pointerId) return;
+      const distance = event.clientX - pointerStartX;
+      pointerStartX = undefined;
+      pointerId = undefined;
+      if (Math.abs(distance) < 45) return;
+      suppressClick = true;
+      distance > 0 ? previous() : next();
+      window.setTimeout(() => {
+        suppressClick = false;
+      });
+    });
+
+    gestureSurface.addEventListener("pointercancel", () => {
+      pointerStartX = undefined;
+      pointerId = undefined;
+    });
+
+    gestureSurface.addEventListener("click", (event) => {
+      if (!suppressClick) return;
+      event.preventDefault();
+      event.stopPropagation();
+      suppressClick = false;
+    }, { capture: true });
+
+    gestureSurface.addEventListener("wheel", (event) => {
+      if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 12) return;
+      event.preventDefault();
+      if (wheelLocked) return;
+      wheelLocked = true;
+      event.deltaX > 0 ? next() : previous();
+      window.setTimeout(() => {
+        wheelLocked = false;
+      }, 320);
+    }, { passive: false });
+
+    const hasMultipleItems = items.length > 1;
+    previousButton.disabled = !hasMultipleItems;
+    nextButton.disabled = !hasMultipleItems;
+    gallery.dataset.galleryInitialized = "true";
+    gallery.classList.add("is-enhanced");
+    updateGalleryLabels(gallery);
+    show(0);
+  }
+
+  function initializeGalleries(root: ParentNode = document) {
+    root.querySelectorAll<HTMLElement>("[data-gallery]").forEach(initializeGallery);
+  }
+
+  initializeGalleries();
+  document.addEventListener("sorapaper:content-unlocked", (event) => {
+    const root = event instanceof CustomEvent && event.detail?.root instanceof HTMLElement
+      ? event.detail.root
+      : document;
+    initializeGalleries(root);
+  });
+  document.addEventListener("sorapaper:locale-change", () => {
+    document.querySelectorAll<HTMLElement>("[data-gallery]").forEach(updateGalleryLabels);
+  });
+</script>

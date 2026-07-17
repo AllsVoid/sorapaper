@@ -1,0 +1,147 @@
+<script>
+  const messages = {
+    zh: {
+      decrypting: "正在解锁...",
+      unlocked: "已解锁",
+      failed: "密码不正确，或加密内容已损坏。",
+      unsupported: "当前浏览器不支持 Web Crypto，无法解锁此内容。"
+    },
+    en: {
+      decrypting: "Unlocking...",
+      unlocked: "Unlocked",
+      failed: "The passphrase is incorrect, or the encrypted content is corrupted.",
+      unsupported: "This browser does not support Web Crypto, so the content cannot be unlocked."
+    }
+  };
+
+  type MessageKey = keyof typeof messages.zh;
+
+  interface EncryptedPayload {
+    salt: string;
+    iv: string;
+    aad: string;
+    ciphertext: string;
+    iterations: number;
+  }
+
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+  const cachedPassphrases = new Map<string, string>();
+
+  function getLocale(): keyof typeof messages {
+    return document.documentElement.dataset.locale === "en" ? "en" : "zh";
+  }
+
+  function getMessage(key: MessageKey) {
+    return messages[getLocale()][key];
+  }
+
+  function setStatus(block: Element, key?: MessageKey) {
+    const status = block.querySelector("[data-encrypted-status]");
+    if (status) status.textContent = key ? getMessage(key) : "";
+  }
+
+  function fromBase64(value: string) {
+    return Uint8Array.from(atob(value), (char) => char.charCodeAt(0));
+  }
+
+  function readPayload(block: Element): EncryptedPayload | undefined {
+    const payload = block.getAttribute("data-encrypted-payload");
+    if (!payload) return undefined;
+    return JSON.parse(decoder.decode(fromBase64(payload))) as EncryptedPayload;
+  }
+
+  async function deriveKey(passphrase: string, payload: EncryptedPayload) {
+    const baseKey = await globalThis.crypto.subtle.importKey("raw", encoder.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+
+    return globalThis.crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        hash: "SHA-256",
+        salt: fromBase64(payload.salt),
+        iterations: payload.iterations
+      },
+      baseKey,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+  }
+
+  async function decryptPayload(passphrase: string, payload: EncryptedPayload) {
+    const key = await deriveKey(passphrase, payload);
+    const decrypted = await globalThis.crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: fromBase64(payload.iv),
+        additionalData: encoder.encode(payload.aad)
+      },
+      key,
+      fromBase64(payload.ciphertext)
+    );
+
+    return decoder.decode(decrypted);
+  }
+
+  async function unlockBlock(block: HTMLElement, passphrase: string) {
+    const payload = readPayload(block);
+    if (!payload) return false;
+
+    const html = await decryptPayload(passphrase, payload);
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const unlockedContent = template.content;
+
+    document.dispatchEvent(new CustomEvent("sorapaper:content-unlocked", { detail: { root: unlockedContent } }));
+    block.replaceWith(...unlockedContent.childNodes);
+
+    return true;
+  }
+
+  async function unlockBlocksByKey(keyId: string, passphrase: string) {
+    const blocks = [...document.querySelectorAll("[data-encrypted-block]")].filter((block) => block.getAttribute("data-encrypted-key") === keyId);
+
+    await Promise.all(
+      blocks.map(async (block) => {
+        if (!(block instanceof HTMLElement) || block.classList.contains("is-unlocked")) return;
+        await unlockBlock(block, passphrase);
+      })
+    );
+  }
+
+  if (!globalThis.crypto?.subtle) {
+    document.querySelectorAll("[data-encrypted-block]").forEach((block) => setStatus(block, "unsupported"));
+  } else {
+    document.querySelectorAll("[data-encrypted-form]").forEach((form) => {
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!(form instanceof HTMLFormElement)) return;
+
+        const block = form.closest("[data-encrypted-block]");
+        const input = form.querySelector("[data-encrypted-password]");
+        if (!(block instanceof HTMLElement) || !(input instanceof HTMLInputElement)) return;
+
+        const keyId = block.getAttribute("data-encrypted-key") ?? "default";
+        const passphrase = input.value || cachedPassphrases.get(keyId);
+        const sharedKey = block.getAttribute("data-encrypted-shared") === "true";
+        if (!passphrase) return;
+
+        setStatus(block, "decrypting");
+        form.querySelector("button")?.setAttribute("disabled", "true");
+
+        try {
+          if (sharedKey) {
+            await unlockBlocksByKey(keyId, passphrase);
+            cachedPassphrases.set(keyId, passphrase);
+          } else {
+            await unlockBlock(block, passphrase);
+          }
+        } catch {
+          setStatus(block, "failed");
+        } finally {
+          form.querySelector("button")?.removeAttribute("disabled");
+        }
+      });
+    });
+  }
+</script>

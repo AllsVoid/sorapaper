@@ -1,0 +1,163 @@
+---
+import { themeConfig } from "@/config/theme";
+import { ui } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
+
+const runtimeStart = Date.parse(themeConfig.footer.startedAt ?? "");
+const startedAt = Number.isFinite(runtimeStart) && runtimeStart <= Date.now() ? runtimeStart : undefined;
+const icp = themeConfig.footer.icp?.number.trim();
+const publicSecurity = themeConfig.footer.publicSecurity;
+const hasPublicSecurity = Boolean(publicSecurity?.number.trim() && publicSecurity.href.trim());
+const publicSecurityIcon = publicSecurity?.icon?.trim() || "/assets/beian-gongan.png";
+const publicSecurityIconHref = publicSecurityIcon ? withBase(publicSecurityIcon) : undefined;
+
+function formatRuntime(start: number, footer: typeof ui.zh.footer) {
+  let remaining = Math.max(0, Math.floor((Date.now() - start) / 1000));
+  const days = Math.floor(remaining / 86400);
+  remaining %= 86400;
+  const hours = Math.floor(remaining / 3600);
+  remaining %= 3600;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
+  const time = [
+    footer.runtimeDays.replace("{count}", String(days)),
+    footer.runtimeHours.replace("{count}", String(hours)),
+    footer.runtimeMinutes.replace("{count}", String(minutes)),
+    footer.runtimeSeconds.replace("{count}", String(seconds))
+  ].join(" ");
+
+  return footer.runningSince.replace("{time}", time);
+}
+---
+
+<footer class="site-footer container">
+  <p class="footer-line">
+    © {new Date().getFullYear()} <a href="https://github.com/AllsVoid/SoraPaper">SoraPaper</a>.
+    <span data-lang="zh">{ui.zh.footer.builtWith}</span>
+    <span data-lang="en">{ui.en.footer.builtWith}</span>
+  </p>
+  {startedAt && (
+    <p class="footer-line">
+      <time
+        datetime={themeConfig.footer.startedAt}
+        data-runtime-start={String(startedAt)}
+        data-runtime-template={ui.zh.footer.runningSince}
+        data-runtime-days={ui.zh.footer.runtimeDays}
+        data-runtime-hours={ui.zh.footer.runtimeHours}
+        data-runtime-minutes={ui.zh.footer.runtimeMinutes}
+        data-runtime-seconds={ui.zh.footer.runtimeSeconds}
+        data-lang="zh"
+      >
+        {formatRuntime(startedAt, ui.zh.footer)}
+      </time>
+      <time
+        datetime={themeConfig.footer.startedAt}
+        data-runtime-start={String(startedAt)}
+        data-runtime-template={ui.en.footer.runningSince}
+        data-runtime-days={ui.en.footer.runtimeDays}
+        data-runtime-hours={ui.en.footer.runtimeHours}
+        data-runtime-minutes={ui.en.footer.runtimeMinutes}
+        data-runtime-seconds={ui.en.footer.runtimeSeconds}
+        data-lang="en"
+      >
+        {formatRuntime(startedAt, ui.en.footer)}
+      </time>
+    </p>
+  )}
+  {(icp || hasPublicSecurity) && (
+    <p class="footer-filings">
+      {icp && (
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">
+          {icp}
+        </a>
+      )}
+      {hasPublicSecurity && publicSecurity && (
+        <a href={publicSecurity.href} target="_blank" rel="noreferrer">
+          {publicSecurityIconHref && <img src={publicSecurityIconHref} alt="" width="16" height="16" />}
+          {publicSecurity.number}
+        </a>
+      )}
+    </p>
+  )}
+</footer>
+
+<script>
+  function updateRuntime(node: Element) {
+    const start = Number(node.getAttribute("data-runtime-start"));
+    if (!Number.isFinite(start)) return;
+
+    let remaining = Math.max(0, Math.floor((Date.now() - start) / 1000));
+    const days = Math.floor(remaining / 86400);
+    remaining %= 86400;
+    const hours = Math.floor(remaining / 3600);
+    remaining %= 3600;
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    const format = (key: string, value: number) => (node.getAttribute(key) ?? "").replace("{count}", String(value));
+    const time = [
+      format("data-runtime-days", days),
+      format("data-runtime-hours", hours),
+      format("data-runtime-minutes", minutes),
+      format("data-runtime-seconds", seconds)
+    ].join(" ");
+
+    node.textContent = (node.getAttribute("data-runtime-template") ?? "{time}").replace("{time}", time);
+  }
+
+  const runtimeNodes = document.querySelectorAll("[data-runtime-start]");
+  runtimeNodes.forEach(updateRuntime);
+  window.setInterval(() => runtimeNodes.forEach(updateRuntime), 1000);
+</script>
+
+<style is:global>
+  .site-footer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.28rem;
+    color: var(--muted);
+    font-size: 0.92rem;
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+
+  .site-footer .footer-line,
+  .site-footer .footer-filings {
+    margin: 0;
+    line-height: 1.65;
+  }
+
+  .site-footer .footer-filings {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 0.85rem;
+    margin-top: 0.25rem;
+  }
+
+  .site-footer a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.16em;
+  }
+
+  .site-footer a:hover,
+  .site-footer a:focus-visible {
+    color: var(--primary);
+    text-decoration-color: currentColor;
+  }
+
+  .site-footer .footer-filings a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+  }
+
+  .site-footer .footer-filings img {
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+  }
+</style>

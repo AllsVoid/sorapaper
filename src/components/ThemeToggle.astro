@@ -1,0 +1,59 @@
+<button class="theme-toggle" type="button" aria-label="Toggle theme" data-theme-toggle>
+  <span class="theme-icon" aria-hidden="true">
+    <svg class="moon" viewBox="0 0 24 24" width="21" height="21">
+      <path d="M20.1 14.6A7.7 7.7 0 0 1 9.4 3.9a8.5 8.5 0 1 0 10.7 10.7Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"/>
+      <path d="M15.7 4.2v2.2M16.8 5.3h-2.2" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"/>
+    </svg>
+    <svg class="sun" viewBox="0 0 24 24" width="21" height="21">
+      <circle cx="12" cy="12" r="4.25" fill="none" stroke="currentColor" stroke-width="1.75"/>
+      <path d="M12 2.9v2.1M12 19v2.1M4.55 4.55l1.48 1.48M17.97 17.97l1.48 1.48M2.9 12h2.1M19 12h2.1M4.55 19.45l1.48-1.48M17.97 6.03l1.48-1.48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.65"/>
+    </svg>
+  </span>
+</button>
+
+<script>
+  const button = document.querySelector("[data-theme-toggle]");
+
+  button?.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    if (next === "dark") {
+      document.documentElement.dataset.theme = "dark";
+      localStorage.setItem("theme", "dark");
+    } else {
+      delete document.documentElement.dataset.theme;
+      localStorage.setItem("theme", "light");
+    }
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .theme-icon,
+  .theme-icon .moon {
+    display: block;
+  }
+
+  .theme-icon .sun {
+    display: none;
+  }
+
+  :global(html[data-theme="dark"]) .theme-icon .moon {
+    display: none;
+  }
+
+  :global(html[data-theme="dark"]) .theme-icon .sun {
+    display: block;
+  }
+</style>

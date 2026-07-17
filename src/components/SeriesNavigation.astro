@@ -1,0 +1,122 @@
+---
+import type { Locale } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getPostHref, getSeriesSlug, type BlogPost } from "@/lib/posts";
+import { withBase } from "@/lib/paths";
+
+interface Props {
+  post: BlogPost;
+  posts: BlogPost[];
+  locale: Locale;
+}
+
+const { post, posts, locale } = Astro.props;
+const t = getUi(locale);
+const currentIndex = posts.findIndex((item) => item.id === post.id);
+const series = post.data.series ?? "";
+const progress = t.article.seriesProgress
+  .replace("{current}", String(currentIndex + 1))
+  .replace("{total}", String(posts.length));
+---
+
+{series && posts.length > 0 && (
+  <aside class="series-navigation glass" aria-labelledby="series-navigation-title">
+    <header>
+      <div>
+        <span>{t.article.seriesLabel}</span>
+        <h2 id="series-navigation-title"><a href={withBase(`/series/${getSeriesSlug(series)}/`)}>{series}</a></h2>
+      </div>
+      <strong>{progress}</strong>
+    </header>
+    <ol>
+      {posts.map((item, index) => (
+        <li class:list={{ current: item.id === post.id }}>
+          <a href={getPostHref(item)} aria-current={item.id === post.id ? "page" : undefined}>
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <span class="series-post-title" title={item.data.title}>{item.data.title}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </aside>
+)}
+
+<style>
+  .series-navigation {
+    max-height: 80vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    width: 100%;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+
+  .series-navigation::-webkit-scrollbar {
+    display: none;
+  }
+
+  header {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  header span,
+  header strong {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  h2 {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+  }
+
+  h2 a:hover { color: var(--primary); }
+
+  ol {
+    display: grid;
+    gap: 0.35rem;
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li a {
+    display: grid;
+    grid-template-columns: 1.7rem minmax(0, 1fr);
+    gap: 0.55rem;
+    border-radius: var(--radius-sm);
+    color: var(--muted);
+    padding: 0.55rem 0.65rem;
+  }
+
+  li a:hover { background: var(--tag); color: var(--text); }
+  li.current a { background: var(--tag); color: var(--text); font-weight: 700; }
+  li a > span:first-child { color: var(--primary); font-variant-numeric: tabular-nums; }
+
+  .series-post-title {
+    display: -webkit-box;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    font-size: 0.84rem;
+    line-height: 1.4;
+  }
+
+  li a:hover .series-post-title,
+  li a:focus-visible .series-post-title {
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
+
+  @media (max-width: 1080px) {
+    .series-navigation {
+      max-height: 50vh;
+      margin-top: 1.2rem;
+    }
+  }
+</style>

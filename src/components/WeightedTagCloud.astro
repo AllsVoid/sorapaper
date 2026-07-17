@@ -1,0 +1,141 @@
+---
+import { localizePath, type Locale } from "@/i18n/config";
+import { getTagSlug } from "@/lib/posts";
+
+interface TagItem {
+  name: string;
+  count: number;
+}
+
+interface Props {
+  tags: TagItem[];
+  locale: Locale;
+  compact?: boolean;
+  limit?: number;
+}
+
+const { tags, locale, compact = false, limit } = Astro.props;
+const visibleTags = typeof limit === "number" ? tags.slice(0, limit) : tags;
+const counts = visibleTags.map((tag) => tag.count);
+const minCount = Math.min(...counts, 0);
+const maxCount = Math.max(...counts, 1);
+
+function getWeight(count: number) {
+  if (maxCount === minCount) return 0.55;
+  return (count - minCount) / (maxCount - minCount);
+}
+---
+
+<nav class:list={["weighted-tag-cloud", { compact }]} aria-label="Tag cloud">
+  {visibleTags.map((tag, index) => {
+    const weight = getWeight(tag.count);
+    const fontWeight = Math.round(450 + weight * 250);
+    const rhythm = index % 5;
+
+    return (
+      <a
+        href={localizePath(locale, `/tags/${getTagSlug(tag.name)}/`)}
+        style={`--weight: ${weight.toFixed(3)}; --font-weight: ${fontWeight}; --rhythm: ${rhythm};`}
+        title={`${tag.name} (${tag.count})`}
+        aria-label={`${tag.name}, ${tag.count} posts`}
+      >
+        <span>{tag.name}</span>
+        <small>{tag.count}</small>
+      </a>
+    );
+  })}
+</nav>
+
+<style>
+  .weighted-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: clamp(0.55rem, 1.4vw, 1rem) clamp(0.95rem, 2.6vw, 2rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background:
+      radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--primary) 12%, transparent), transparent 34%),
+      radial-gradient(circle at 88% 72%, color-mix(in srgb, var(--secondary) 12%, transparent), transparent 30%),
+      var(--surface);
+    box-shadow: var(--shadow-soft);
+    padding: clamp(1.6rem, 4vw, 3rem);
+  }
+
+  a {
+    --size: calc(1rem + var(--weight) * 2.1rem);
+    --lift: calc((var(--rhythm) - 2) * 0.12rem);
+    display: inline-flex;
+    position: relative;
+    align-items: baseline;
+    gap: 0.32rem;
+    border-radius: 999px;
+    color: color-mix(in srgb, var(--primary) calc(45% + var(--weight) * 45%), var(--text));
+    font-family: var(--font-serif);
+    font-size: clamp(1rem, var(--size), 3.2rem);
+    font-weight: var(--font-weight);
+    letter-spacing: calc(-0.02em - var(--weight) * 0.03em);
+    line-height: 1.08;
+    opacity: calc(0.66 + var(--weight) * 0.34);
+    padding: 0.16em 0.24em;
+    transform: translateY(var(--lift));
+    transition:
+      background 180ms ease,
+      color 180ms ease,
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  a:nth-child(3n + 2) {
+    color: color-mix(in srgb, var(--secondary) calc(42% + var(--weight) * 36%), var(--text));
+  }
+
+  a:nth-child(4n) {
+    color: color-mix(in srgb, var(--accent) calc(42% + var(--weight) * 40%), var(--text));
+  }
+
+  a:hover,
+  a:focus-visible {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    opacity: 1;
+    transform: translateY(calc(var(--lift) - 0.12rem));
+  }
+
+  small {
+    color: var(--muted);
+    font-family: var(--font-sans);
+    font-size: 0.36em;
+    font-weight: 700;
+    letter-spacing: 0;
+    opacity: 0;
+    transform: translateY(-0.15em);
+    transition: opacity 180ms ease;
+  }
+
+  a:hover small,
+  a:focus-visible small {
+    opacity: 0.72;
+  }
+
+  .compact {
+    justify-content: flex-start;
+    gap: 0.35rem 0.55rem;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .compact a {
+    --size: calc(0.88rem + var(--weight) * 0.7rem);
+    font-family: var(--font-sans);
+    letter-spacing: -0.02em;
+    padding: 0.16rem 0.2rem;
+  }
+
+  .compact small {
+    display: none;
+  }
+</style>

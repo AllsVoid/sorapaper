@@ -1,0 +1,98 @@
+<script is:inline>
+  // @ts-nocheck
+  const livePhotoWindow = /** @type {Window & typeof globalThis & { LivePhotosKit?: any; __soraPaperLivePhotosKitPromise?: Promise<any> }} */ (window);
+  const livePhotoTargets = /** @type {HTMLElement[]} */ (Array.from(document.querySelectorAll("[data-live-photo-target]")));
+
+  if (livePhotoTargets.length > 0) {
+    const scriptUrl = "https://cdn.apple-livephotoskit.com/lpk/1/livephotoskit.js";
+
+    function loadLivePhotosKit() {
+      if (livePhotoWindow.LivePhotosKit) return Promise.resolve(livePhotoWindow.LivePhotosKit);
+      if (livePhotoWindow.__soraPaperLivePhotosKitPromise) return livePhotoWindow.__soraPaperLivePhotosKitPromise;
+
+      livePhotoWindow.__soraPaperLivePhotosKitPromise = new Promise((resolve, reject) => {
+        const existingScript = document.querySelector(`script[src="${scriptUrl}"]`);
+        const script = existingScript ?? document.createElement("script");
+
+        script.addEventListener("load", () => resolve(livePhotoWindow.LivePhotosKit), { once: true });
+        script.addEventListener("error", reject, { once: true });
+
+        if (!existingScript) {
+          script.src = scriptUrl;
+          script.async = true;
+          document.head.append(script);
+        }
+      });
+
+      return livePhotoWindow.__soraPaperLivePhotosKitPromise;
+    }
+
+    function setOptionalBoolean(player, property, value) {
+      if (value !== "true" && value !== "false") return;
+      player[property] = value === "true";
+    }
+
+    function createLivePhotoPlayer(target) {
+      const kit = livePhotoWindow.LivePhotosKit;
+
+      if (typeof kit.augmentElementAsPlayer === "function") {
+        return kit.augmentElementAsPlayer(target);
+      }
+
+      if (typeof kit.augementElementAsPlayer === "function") {
+        return kit.augementElementAsPlayer(target);
+      }
+
+      if (typeof kit.createPlayer === "function") {
+        return kit.createPlayer(target);
+      }
+
+      return kit.Player(target);
+    }
+
+    function initializeLivePhoto(target) {
+      if (target.dataset.livePhotoInitialized === "true" || !livePhotoWindow.LivePhotosKit) return;
+
+      const frame = target.closest("[data-live-photo-frame]") ?? target;
+      const player = createLivePhotoPlayer(target);
+
+      if (player) {
+        player.photoSrc = target.dataset.photoSrc;
+        player.videoSrc = target.dataset.videoSrc;
+      }
+
+      if (player && target.dataset.photoTime) {
+        const photoTime = Number(target.dataset.photoTime);
+        if (Number.isFinite(photoTime)) player.photoTime = photoTime;
+      }
+
+      if (player) {
+        setOptionalBoolean(player, "showsNativeControls", target.dataset.showsNativeControls);
+        setOptionalBoolean(player, "proactivelyLoadsVideo", target.dataset.proactivelyLoadsVideo);
+      }
+
+      const eventTarget = player?.addEventListener ? player : target;
+      eventTarget.addEventListener("photoload", () => {
+        frame.classList.add("is-live-photo-ready");
+      });
+      eventTarget.addEventListener("canplay", () => {
+        frame.classList.add("is-live-photo-ready", "is-live-photo-playable");
+      });
+      eventTarget.addEventListener("error", () => {
+        frame.classList.add("is-live-photo-error");
+      });
+
+      target.dataset.livePhotoInitialized = "true";
+    }
+
+    loadLivePhotosKit()
+      .then(() => {
+        livePhotoTargets.forEach(initializeLivePhoto);
+      })
+      .catch(() => {
+        livePhotoTargets.forEach((target) => {
+          target.classList.add("is-live-photo-error");
+        });
+      });
+  }
+</script>

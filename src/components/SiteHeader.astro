@@ -1,0 +1,201 @@
+---
+import ThemeToggle from "@/components/ThemeToggle.astro";
+import SearchDialog from "@/components/SearchDialog.astro";
+import { themeConfig } from "@/config/theme";
+import { localizePath, type Locale } from "@/i18n/config";
+import { getUi, ui } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
+
+interface Props {
+  locale: Locale;
+  currentPath: string;
+  alternatePath?: string;
+}
+
+const { locale, currentPath, alternatePath } = Astro.props;
+const t = getUi(locale);
+const nav = [
+  { zh: ui.zh.nav.home, en: ui.en.nav.home, href: "/" },
+  { zh: ui.zh.nav.archive, en: ui.en.nav.archive, href: "/archive/" },
+  { zh: ui.zh.nav.tags, en: ui.en.nav.tags, href: "/tags/" },
+  { zh: ui.zh.nav.series, en: ui.en.nav.series, href: "/series/" },
+  { zh: ui.zh.nav.about, en: ui.en.nav.about, href: "/about/" },
+  { zh: ui.zh.nav.friends, en: ui.en.nav.friends, href: "/friends/" },
+  ...(themeConfig.featureFlags.travel ? [{ zh: ui.zh.nav.travel, en: ui.en.nav.travel, href: "/travel/" }] : []),
+  { zh: "RSS", en: "RSS", href: "/rss.xml" }
+];
+---
+
+<header class="site-header container glass">
+  <a class="brand" href={localizePath(locale)} aria-label={`${themeConfig.name} ${t.nav.home}`}>
+    <img src={withBase("/favicon.svg")} alt="" width="34" height="34" />
+    <span>{themeConfig.name}</span>
+  </a>
+
+  <nav class="nav" aria-label="Primary navigation">
+    {nav.map((item) => (
+      <a href={localizePath(locale, item.href)}>
+        <span data-lang="zh">{item.zh}</span>
+        <span data-lang="en">{item.en}</span>
+      </a>
+    ))}
+  </nav>
+
+  <div class="actions">
+    <button class="scheme" type="button" aria-label="Change color scheme" data-scheme-toggle>
+      <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+        <path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5c0-1.35-.96-2.28-2.22-2.28h-1.06c-.7 0-1.18-.55-1.18-1.16 0-.32.12-.62.34-.86.4-.44.33-1.15-.18-1.46A8.45 8.45 0 0 0 12 3.5Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.65"/>
+        <circle cx="8.35" cy="10" r="1.05" fill="currentColor"/>
+        <circle cx="11.25" cy="7.45" r="1.05" fill="currentColor"/>
+        <circle cx="7.95" cy="14" r="1.05" fill="currentColor"/>
+        <circle cx="12.25" cy="16.4" r="1.05" fill="currentColor"/>
+      </svg>
+    </button>
+    <button class="search" type="button" aria-label={t.search.ariaOpen} data-search-trigger>
+      <svg viewBox="0 0 24 24" width="21" height="21" aria-hidden="true">
+        <path d="m16.7 16.7 3.3 3.3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"/>
+        <circle cx="10.9" cy="10.9" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M8.35 9.45c.55-1.05 1.52-1.7 2.72-1.82" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.6"/>
+      </svg>
+    </button>
+    <button class="language" type="button" aria-label="Switch language" data-locale-toggle data-alternate-path={alternatePath ?? ""}>
+      <svg xmlns="http://www.w3.org/2000/svg" height="22" viewBox="0 -960 960 960" width="22" aria-hidden="true">
+        <path d="m476-80 182-480h84L924-80h-84l-43-122H603L560-80h-84ZM160-200l-56-56 202-202q-35-35-63.5-80T190-640h84q20 39 40 68t48 58q33-33 68.5-92.5T484-720H40v-80h280v-80h80v80h280v80H564q-21 72-63 148t-83 116l96 98-30 82-122-125-202 201Zm468-72h144l-72-204-72 204Z" />
+      </svg>
+    </button>
+    <ThemeToggle />
+  </div>
+</header>
+<SearchDialog />
+
+<script is:inline define:vars={{ currentPath }}>
+  const schemes = ["paper", "sakura", "moon", "ocean"];
+  const button = document.querySelector("[data-scheme-toggle]");
+  const localeButton = document.querySelector("[data-locale-toggle]");
+
+  button?.addEventListener("click", () => {
+    const current = document.documentElement.dataset.scheme ?? "paper";
+    const next = schemes[(schemes.indexOf(current) + 1) % schemes.length];
+    document.documentElement.dataset.scheme = next;
+    localStorage.setItem("scheme", next);
+  });
+
+  localeButton?.addEventListener("click", () => {
+    const current = document.documentElement.dataset.locale === "en" ? "en" : "zh";
+    const next = current === "zh" ? "en" : "zh";
+    localStorage.setItem("locale", next);
+    document.documentElement.dataset.locale = next;
+    document.documentElement.lang = next;
+    document.dispatchEvent(new CustomEvent("sorapaper:locale-change", { detail: { locale: next } }));
+
+    const alternatePath = localeButton.getAttribute("data-alternate-path");
+    if (alternatePath && alternatePath !== currentPath) {
+      window.location.href = alternatePath;
+    }
+  });
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 1rem;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    border-radius: var(--radius-lg);
+    padding: 0.7rem 1rem;
+  }
+
+  .brand,
+  .nav,
+  .actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .brand {
+    gap: 0.65rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    min-width: max-content;
+  }
+
+  .nav {
+    justify-content: center;
+    gap: 0.35rem;
+  }
+
+  .nav a {
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    padding: 0.62rem 0.88rem;
+    white-space: nowrap;
+  }
+
+  .nav a:hover {
+    background: var(--tag);
+    color: var(--text);
+  }
+
+  .actions {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .search,
+  .scheme,
+  .language {
+    display: inline-grid;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface-strong);
+    color: var(--text);
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+  }
+
+  .search,
+  .scheme,
+  .language {
+    width: 2.5rem;
+  }
+
+  .language {
+    padding: 0;
+  }
+
+  .search svg,
+  .scheme svg,
+  .language svg {
+    display: block;
+  }
+
+  .language svg {
+    fill: currentColor;
+  }
+
+  @media (max-width: 900px) {
+    .site-header {
+      grid-template-columns: 1fr auto;
+    }
+
+    .nav {
+      grid-column: 1 / -1;
+      order: 3;
+      justify-content: flex-start;
+      overflow-x: auto;
+      padding-bottom: 0.1rem;
+      scrollbar-width: none;
+    }
+
+    .nav::-webkit-scrollbar {
+      display: none;
+    }
+  }
+</style>

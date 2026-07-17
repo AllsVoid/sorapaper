@@ -1,0 +1,52 @@
+---
+import WeightedTagCloud from "@/components/WeightedTagCloud.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { locales } from "@/i18n/config";
+import { getUi } from "@/i18n/ui";
+import { getAllTags, getPublishedPosts } from "@/lib/posts";
+
+const localeData = await Promise.all(
+  locales.map(async (locale) => ({
+    locale,
+    t: getUi(locale),
+    tags: getAllTags(await getPublishedPosts(locale))
+  }))
+);
+---
+
+<BaseLayout title="Tags" description="Browse posts by tag.">
+  {localeData.map(({ locale, t, tags }) => (
+    <section class="container page" data-lang={locale}>
+      <header>
+        <span class="pill">{t.nav.tags}</span>
+        <h1>{t.pages.tagsTitle}</h1>
+        <p class="muted">{t.pages.tagsDescription}</p>
+      </header>
+
+      <WeightedTagCloud tags={tags} locale={locale} />
+    </section>
+  ))}
+</BaseLayout>
+
+<style>
+  .page {
+    padding: 3.2rem 0 0;
+  }
+
+  header {
+    width: min(100%, var(--article));
+    margin-inline: auto;
+  }
+
+  h1 {
+    margin: 1rem 0 0.6rem;
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    letter-spacing: -0.06em;
+    line-height: 1.02;
+  }
+
+  :global(.weighted-tag-cloud) {
+    margin-top: 2rem;
+  }
+</style>

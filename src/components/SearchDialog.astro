@@ -1,0 +1,210 @@
+---
+import { ui } from "@/i18n/ui";
+import { withBase } from "@/lib/paths";
+---
+
+<dialog class="search-dialog glass" data-search-dialog>
+  <form method="dialog">
+    <button type="submit" aria-label="Close search">&times;</button>
+  </form>
+  <label>
+    <span>
+      <span data-lang="zh">{ui.zh.search.label}</span>
+      <span data-lang="en">{ui.en.search.label}</span>
+    </span>
+    <input type="search" placeholder={ui.zh.search.placeholder} data-search-input data-placeholder-zh={ui.zh.search.placeholder} data-placeholder-en={ui.en.search.placeholder} />
+  </label>
+  <div class="results" data-search-results>
+    <p class="muted">
+      <span data-lang="zh">{ui.zh.search.empty}</span>
+      <span data-lang="en">{ui.en.search.empty}</span>
+    </p>
+  </div>
+</dialog>
+
+<script is:inline define:vars={{ pagefindScriptPath: withBase("/pagefind/pagefind.js"), siteBase: withBase("/"), emptyTextZh: ui.zh.search.empty, emptyTextEn: ui.en.search.empty, noResultsTextZh: ui.zh.search.noResults, noResultsTextEn: ui.en.search.noResults }}>
+  const dialog = document.querySelector("[data-search-dialog]");
+  const input = document.querySelector("[data-search-input]");
+  const results = document.querySelector("[data-search-results]");
+  const triggers = document.querySelectorAll("[data-search-trigger]");
+  let pagefind;
+  let searchToken = 0;
+
+  const getCurrentLocale = () => (document.documentElement.dataset.locale === "en" ? "en" : "zh");
+  const getCopy = () => {
+    const locale = getCurrentLocale();
+    return {
+      emptyText: locale === "en" ? emptyTextEn : emptyTextZh,
+      noResultsText: locale === "en" ? noResultsTextEn : noResultsTextZh
+    };
+  };
+
+  const setMessage = (message) => {
+    if (!results) return;
+    results.replaceChildren();
+    const element = document.createElement("p");
+    element.className = "muted";
+    element.textContent = message;
+    results.append(element);
+  };
+
+  const normalizeUrl = (url) => {
+    if (!url || /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url)) return url;
+    if (siteBase === "/" || url.startsWith(siteBase)) return url;
+    return url.startsWith("/") ? siteBase.replace(/\/$/, "") + url : url;
+  };
+
+  const renderResults = (items) => {
+    if (!results) return;
+    const { emptyText, noResultsText } = getCopy();
+
+    if (!input?.value.trim()) {
+      setMessage(emptyText);
+      return;
+    }
+
+    if (items.length === 0) {
+      setMessage(noResultsText);
+      return;
+    }
+
+    results.replaceChildren();
+    for (const item of items) {
+      const link = document.createElement("a");
+      link.className = "result";
+      link.href = normalizeUrl(item.url);
+
+      const title = document.createElement("strong");
+      title.textContent = item.meta?.title ?? link.href;
+
+      const excerpt = document.createElement("span");
+      excerpt.innerHTML = item.excerpt ?? "";
+
+      link.append(title, excerpt);
+      results.append(link);
+    }
+  };
+
+  const loadPagefind = async () => {
+    if (pagefind) return pagefind;
+    pagefind = await import(pagefindScriptPath);
+    await pagefind.options({ excerptLength: 24 });
+    return pagefind;
+  };
+
+  const search = async () => {
+    const query = input?.value.trim() ?? "";
+    const token = ++searchToken;
+    const { emptyText, noResultsText } = getCopy();
+
+    if (!query) {
+      setMessage(emptyText);
+      return;
+    }
+
+    try {
+      const pagefindSearch = await loadPagefind();
+      const response = await pagefindSearch.search(query, {
+        filters: {
+          lang: getCurrentLocale()
+        }
+      });
+      const items = await Promise.all(response.results.slice(0, 8).map((result) => result.data()));
+      if (token === searchToken) renderResults(items);
+    } catch {
+      if (token === searchToken) setMessage(noResultsText);
+    }
+  };
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener("click", async () => {
+      const locale = getCurrentLocale();
+      if (input) input.placeholder = locale === "en" ? input.dataset.placeholderEn ?? "" : input.dataset.placeholderZh ?? "";
+      searchToken += 1;
+      setMessage(getCopy().emptyText);
+      dialog?.showModal();
+      input?.focus();
+      await loadPagefind().catch(() => undefined);
+    });
+  });
+
+  input?.addEventListener("input", search);
+</script>
+
+<style>
+  .search-dialog {
+    width: min(92vw, 680px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text);
+    padding: 1rem;
+  }
+
+  .search-dialog::backdrop {
+    background: rgba(20, 24, 40, 0.36);
+    backdrop-filter: blur(8px);
+  }
+
+  form {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    background: var(--tag);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  label {
+    display: grid;
+    gap: 0.65rem;
+    font-weight: 700;
+  }
+
+  input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    color: var(--text);
+    outline: none;
+    padding: 0.95rem 1rem;
+  }
+
+  input:focus {
+    border-color: var(--primary);
+  }
+
+  .results {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+
+  :global(.result) {
+    display: grid;
+    gap: 0.2rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-strong);
+    padding: 0.85rem;
+  }
+
+  :global(.result span) {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  :global(.result mark) {
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--primary) 28%, transparent);
+    color: inherit;
+    padding: 0 0.12em;
+  }
+</style>

@@ -1,0 +1,73 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+const visible = headings.filter((heading) => heading.depth > 1 && heading.depth < 4 && heading.slug !== "footnote-label");
+---
+
+{visible.length > 0 && (
+  <nav class="toc glass" aria-label="Table of contents">
+    <strong>On this page</strong>
+    {visible.map((heading) => (
+      <a class={`depth-${heading.depth}`} href={`#${heading.slug}`}>{heading.text}</a>
+    ))}
+  </nav>
+)}
+
+<style>
+  .toc {
+    position: sticky;
+    top: 10vh;
+    display: grid;
+    max-height: 80vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    gap: 0.55rem;
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+
+  .toc::-webkit-scrollbar {
+    display: none;
+  }
+
+  @supports (height: 100dvh) {
+    .toc {
+      top: 10dvh;
+      max-height: 80dvh;
+    }
+  }
+
+  strong {
+    font-size: 0.9rem;
+  }
+
+  a {
+    color: var(--muted);
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  a:hover {
+    color: var(--primary);
+  }
+
+  .depth-3 {
+    padding-left: 0.8rem;
+  }
+
+  @media (max-width: 1080px) {
+    .toc {
+      display: none;
+    }
+  }
+</style>

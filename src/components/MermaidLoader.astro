@@ -1,0 +1,209 @@
+---
+import { ui } from "@/i18n/ui";
+---
+
+<dialog
+  class="mermaid-lightbox"
+  data-mermaid-dialog
+  data-dialog-zh={ui.zh.mermaid.dialog}
+  data-dialog-en={ui.en.mermaid.dialog}
+  data-open-zh={ui.zh.mermaid.open}
+  data-open-en={ui.en.mermaid.open}
+  data-close-zh={ui.zh.mermaid.close}
+  data-close-en={ui.en.mermaid.close}
+>
+  <button class="mermaid-lightbox-close" type="button" data-mermaid-dialog-close>
+    <span aria-hidden="true">×</span>
+  </button>
+  <div class="mermaid-lightbox-content" data-mermaid-dialog-content></div>
+</dialog>
+
+<script>
+  const mermaidBlocks = Array.from(document.querySelectorAll<HTMLElement>("[data-mermaid-block]"));
+
+  if (mermaidBlocks.length > 0) {
+    const dialog = document.querySelector<HTMLDialogElement>("[data-mermaid-dialog]");
+    const dialogContent = dialog?.querySelector<HTMLElement>("[data-mermaid-dialog-content]");
+    const dialogClose = dialog?.querySelector<HTMLButtonElement>("[data-mermaid-dialog-close]");
+    let renderRun = 0;
+    let renderTimer: number | undefined;
+    let renderStarted = false;
+
+    function getLocale() {
+      return document.documentElement.dataset.locale === "en" ? "en" : "zh";
+    }
+
+    function getDialogMessage(name: "dialog" | "open" | "close") {
+      const suffix = getLocale() === "en" ? "En" : "Zh";
+      return dialog?.dataset[`${name}${suffix}`] ?? "";
+    }
+
+    function updateDialogLabels() {
+      if (!dialog || !dialogClose) return;
+      dialog.setAttribute("aria-label", getDialogMessage("dialog"));
+      dialogClose.setAttribute("aria-label", getDialogMessage("close"));
+    }
+
+    function openDialog(svg: SVGSVGElement) {
+      if (!dialog || !dialogContent) return;
+      const clone = svg.cloneNode(true);
+      if (!(clone instanceof SVGSVGElement)) return;
+      const originalId = svg.id;
+      const previewId = `-preview`;
+      clone.id = previewId;
+      if (originalId) {
+        clone.querySelectorAll("style").forEach((style) => {
+          style.textContent = style.textContent?.replaceAll(originalId, previewId) ?? "";
+        });
+      }
+      dialogContent.replaceChildren(clone);
+      updateDialogLabels();
+      dialog.showModal();
+    }
+
+    function bindZoom(svg: SVGSVGElement) {
+      svg.classList.add("mermaid-svg");
+      svg.setAttribute("tabindex", "0");
+      svg.setAttribute("role", "button");
+      svg.setAttribute("aria-label", getDialogMessage("open"));
+      svg.addEventListener("click", () => openDialog(svg));
+      svg.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openDialog(svg);
+      });
+    }
+
+    function getCssVar(styles: CSSStyleDeclaration, name: string, fallback: string) {
+      return styles.getPropertyValue(name).trim() || fallback;
+    }
+
+    function getMermaidConfig() {
+      const root = document.documentElement;
+      const styles = getComputedStyle(root);
+      const isDark = root.dataset.theme === "dark";
+      const text = getCssVar(styles, "--text", isDark ? "#f4f6ff" : "#27304a");
+      const muted = getCssVar(styles, "--muted", isDark ? "#aeb7d7" : "#6f7890");
+      const primary = getCssVar(styles, "--primary", isDark ? "#b7a8ff" : "#8b8cf6");
+      const secondary = getCssVar(styles, "--secondary", isDark ? "#82d4ff" : "#83c5f7");
+      const accent = getCssVar(styles, "--accent", isDark ? "#ffbfd8" : "#f2b8d1");
+      const surface = getCssVar(styles, "--surface-strong", isDark ? "rgba(31, 36, 61, 0.9)" : "rgba(255, 255, 255, 0.9)");
+      const border = getCssVar(styles, "--border", isDark ? "rgba(180, 188, 255, 0.15)" : "rgba(117, 125, 170, 0.16)");
+      const fontFamily = getCssVar(styles, "--font-sans", "ui-sans-serif, system-ui, sans-serif");
+
+      return {
+        startOnLoad: false,
+        securityLevel: "strict" as const,
+        theme: "base" as const,
+        fontFamily,
+        themeVariables: {
+          darkMode: isDark,
+          background: "transparent",
+          mainBkg: surface,
+          primaryColor: surface,
+          primaryTextColor: text,
+          primaryBorderColor: border,
+          lineColor: muted,
+          secondaryColor: secondary,
+          secondaryTextColor: text,
+          secondaryBorderColor: border,
+          tertiaryColor: accent,
+          tertiaryTextColor: text,
+          clusterBkg: surface,
+          clusterBorder: border,
+          nodeBorder: border,
+          nodeTextColor: text,
+          textColor: text,
+          titleColor: text,
+          edgeLabelBackground: surface,
+          actorBkg: surface,
+          actorBorder: border,
+          actorTextColor: text,
+          labelTextColor: text,
+          signalColor: text,
+          signalTextColor: text,
+          noteBkgColor: surface,
+          noteTextColor: text,
+          noteBorderColor: primary
+        },
+        flowchart: {
+          htmlLabels: false
+        },
+        sequence: {
+          useMaxWidth: false
+        }
+      };
+    }
+
+    async function renderMermaidBlocks() {
+      const mermaid = (await import("mermaid")).default;
+      renderRun += 1;
+      mermaid.initialize(getMermaidConfig());
+
+      for (const [index, block] of mermaidBlocks.entries()) {
+        const source = block.querySelector<HTMLElement>("[data-mermaid-source]")?.textContent?.trim();
+        const target = block.querySelector<HTMLElement>("[data-mermaid-render]");
+
+        if (!source || !target) continue;
+
+        try {
+          const { svg, bindFunctions } = await mermaid.render(`sorapaper-mermaid-${renderRun}-${index}`, source);
+          target.innerHTML = svg;
+          const renderedSvg = target.querySelector("svg");
+          if (renderedSvg instanceof SVGSVGElement) bindZoom(renderedSvg);
+          bindFunctions?.(target);
+          target.removeAttribute("aria-hidden");
+          block.classList.add("is-mermaid-rendered");
+          block.classList.remove("is-mermaid-error");
+        } catch {
+          target.innerHTML = "";
+          target.setAttribute("aria-hidden", "true");
+          block.classList.add("is-mermaid-error");
+          block.classList.remove("is-mermaid-rendered");
+        }
+      }
+    }
+
+    function startRendering() {
+      if (renderStarted) return;
+      renderStarted = true;
+      void renderMermaidBlocks();
+    }
+
+    function scheduleRender() {
+      window.clearTimeout(renderTimer);
+      renderTimer = window.setTimeout(() => {
+        void renderMermaidBlocks();
+      }, 80);
+    }
+
+    dialogClose?.addEventListener("click", () => dialog?.close());
+    dialog?.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    updateDialogLabels();
+
+    if ("IntersectionObserver" in window) {
+      const viewportObserver = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        viewportObserver.disconnect();
+        startRendering();
+      }, { rootMargin: "320px 0px" });
+      mermaidBlocks.forEach((block) => viewportObserver.observe(block));
+    } else {
+      startRendering();
+    }
+
+    const themeObserver = new MutationObserver((mutations) => {
+      if (mutations.some((mutation) => mutation.attributeName === "data-locale")) updateDialogLabels();
+      if (renderStarted && mutations.some((mutation) => mutation.attributeName === "data-theme" || mutation.attributeName === "data-scheme" || mutation.attributeName === "data-locale")) {
+        scheduleRender();
+      }
+    });
+
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "data-scheme", "data-locale"]
+    });
+  }
+</script>
