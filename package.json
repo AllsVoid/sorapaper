@@ -39,7 +39,8 @@
     "CHANGELOG.md",
     "README.zh-CN.md",
     "docs/design-handoff.md",
-    "docs/development-guide.md"
+    "docs/development-guide.md",
+    "docs/legacy-readme.md"
   ],
   "publishConfig": {
     "access": "public"

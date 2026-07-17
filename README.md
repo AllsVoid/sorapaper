@@ -155,6 +155,7 @@ Please search existing issues first and never include passwords, tokens, or othe
 - [Development guide](docs/development-guide.md) — configuration, content model, and extension points.
 - [Design handoff](docs/design-handoff.md) — visual and accessibility rules.
 - [Changelog](CHANGELOG.md) — release notes and upgrade notes.
+- [Legacy README](docs/legacy-readme.md) — the detailed configuration and extension reference kept from before the homepage was simplified.
 
 ## License
 

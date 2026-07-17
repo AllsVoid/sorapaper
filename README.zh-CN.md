@@ -155,6 +155,7 @@ pnpm run build
 - [开发指南](docs/development-guide.md)：配置、内容模型与扩展点。
 - [设计交接说明](docs/design-handoff.md)：视觉与无障碍规则。
 - [更新日志](CHANGELOG.md)：发行与升级说明。
+- [旧版 README](docs/legacy-readme.md)：精简 GitHub 首页前保留的完整配置与扩展参考。
 
 ## 许可证
 
