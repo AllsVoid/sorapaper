@@ -31,10 +31,7 @@ export const defaultThemeConfig = {
     working: "A new project"
   },
   featureFlags: {
-    comments: false,
-    analytics: false,
-    travel: false,
-    viewTransitions: true
+    travel: false
   },
   codeBlocks: {
     copyButton: true,

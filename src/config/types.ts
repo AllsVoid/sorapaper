@@ -129,10 +129,7 @@ export interface SoraPaperThemeConfig {
     working: string;
   };
   featureFlags: {
-    comments: boolean;
-    analytics: boolean;
     travel: boolean;
-    viewTransitions: boolean;
   };
   codeBlocks: {
     copyButton: boolean;
