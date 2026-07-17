@@ -37,6 +37,10 @@ npm run preview
 
 注意：当前仓库依赖版本使用 `latest`，便于在真正开发环境中解析最新版本。正式发布主题前建议锁定版本并提交 lockfile。
 
+### npm 发布
+
+主题模板包为 `sorapaper-astro-theme`；创建器为 `create-sorapaper-astro-theme`，因此用户命令是 `npm create sorapaper-astro-theme@latest <目录>`。发布时先发布模板的新版本，再发布创建器；创建器依赖模板包，并将其内容复制到用户的独立站点目录。
+
 ## 3. 目录结构
 
 ```text
@@ -49,6 +53,8 @@ npm run preview
 ├─ docs/
 │  ├─ design-handoff.md
 │  └─ development-guide.md
+├─ packages/
+│  └─ create-sorapaper-astro-theme/  # npm create initializer
 ├─ public/
 │  ├─ assets/
 │  │  └─ social/

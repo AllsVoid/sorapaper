@@ -1,0 +1,32 @@
+# Documentation and repository-only material
+docs/
+README.zh-CN.md
+CHANGELOG.md
+AGENTS.md
+
+# Development and CI configuration
+.github/
+.agents/
+.codex/
+
+# Local dependencies, build output, caches, and logs
+node_modules/
+dist/
+.astro/
+coverage/
+.nyc_output/
+.cache/
+.npm/
+.pnpm-store/
+*.log
+
+# Local configuration and editor files
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

@@ -27,38 +27,40 @@ npm run preview
 
 ## Install from npm
 
-Download the exact published release into an empty directory, then install its
-dependencies and begin customizing `sorapaper.ts`:
+Create an independent, editable site in a new directory:
 
 ```bash
-mkdir your-site && cd your-site
-npm pack sorapaper-astro-theme@1.0.0
-tar -xzf sorapaper-astro-theme-1.0.0.tgz --strip-components=1
-mv .sorapaper-package/pnpm-lock.yaml pnpm-lock.yaml
-rmdir .sorapaper-package
+npm create sorapaper-astro-theme@latest your-site
+cd your-site
 pnpm install --frozen-lockfile
 pnpm run dev
 ```
 
-The published package contains the theme source, public assets, configuration
-files and user-facing development documentation; it intentionally excludes
-build output, dependencies and local development files. The tarball extraction
-step is necessary because this package is a complete site starter, rather than
-a runtime dependency.
+The initializer downloads the published template, copies its source, public
+assets and configuration into `your-site`, then restores its pnpm lockfile. It
+does not add SoraPaper as a runtime dependency. Published templates exclude
+repository documentation, build output, dependencies and local development
+files.
 
 ### Release process
 
-Maintainers should run the complete release gate before publishing:
+Publish the template before the initializer, because the latter depends on the
+new template release:
 
 ```bash
+# Repository root: release sorapaper-astro-theme
 pnpm run release:check
-npm publish
+npm publish --access public
+
+# packages/create-sorapaper-astro-theme: release the initializer
+cd packages/create-sorapaper-astro-theme
+npm pack --dry-run
+npm publish --access public
 ```
 
-`prepublishOnly` runs the same gate during `npm publish`: Astro type checking,
-unit tests, a production build and a dry-run package-content inspection. The
-package is published publicly and requires Node.js 22.12 or newer. Review the
-version, changelog and `npm pack --dry-run` output before publishing.
+The template package `prepublishOnly` runs Astro type checking, unit tests, a
+production build and a dry-run package-content inspection. Review versions,
+the changelog and both `npm pack --dry-run` outputs before publishing.
 
 ## Cloudflare Workers
 

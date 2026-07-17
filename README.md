@@ -38,11 +38,15 @@ Explore the included examples:
 Requires Node.js 22.12+ and pnpm 11+.
 
 ```bash
-git clone https://github.com/AllsVoid/sorapaper.git my-site
+npm create sorapaper-astro-theme@latest my-site
 cd my-site
 pnpm install
 pnpm dev
 ```
+
+The command creates a standalone, editable site; it does not add the theme as
+a runtime dependency. To develop directly from the repository instead, clone
+it and follow the same install and development commands.
 
 Then open <http://localhost:4321> and start with:
 
@@ -131,7 +135,7 @@ pnpm run check
 pnpm run build
 ```
 
-If you began from the npm starter, unpack the new release into a temporary directory and migrate your `sorapaper.ts`, `src/content/`, and `public/` changes deliberately. Do not overwrite a customized site without reviewing the release notes and diff.
+If you began with `npm create`, generate the new release in a temporary directory with `npm create sorapaper-astro-theme@latest /tmp/sorapaper-upstream`, then deliberately migrate your `sorapaper.ts`, `src/content/`, and `public/` changes. Do not overwrite a customized site without reviewing the release notes and diff.
 
 ## Bugs and feature requests
 

@@ -1,6 +1,6 @@
 {
   "name": "sorapaper-astro-theme",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A soft, content-first Astro blog theme for long-form writing.",
   "keywords": [
     "astro",
@@ -12,20 +12,17 @@
     "mdx",
     "i18n"
   ],
-  "license": "MIT",
-  "author": "AllsVoid",
+  "homepage": "https://github.com/AllsVoid/sorapaper#readme",
+  "bugs": {
+    "url": "https://github.com/AllsVoid/sorapaper/issues"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AllsVoid/sorapaper.git"
   },
-  "bugs": {
-    "url": "https://github.com/AllsVoid/sorapaper/issues"
-  },
-  "homepage": "https://github.com/AllsVoid/sorapaper#readme",
-  "engines": {
-    "node": ">=22.12.0"
-  },
-  "packageManager": "pnpm@11.7.0",
+  "license": "MIT",
+  "author": "AllsVoid",
+  "type": "module",
   "files": [
     "src/",
     "public/",
@@ -35,17 +32,8 @@
     "wrangler.jsonc",
     "pnpm-workspace.yaml",
     "scripts/npm-package-lock.mjs",
-    ".sorapaper-package/pnpm-lock.yaml",
-    "CHANGELOG.md",
-    "README.zh-CN.md",
-    "docs/design-handoff.md",
-    "docs/development-guide.md",
-    "docs/legacy-readme.md"
+    ".sorapaper-package/pnpm-lock.yaml"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist",
@@ -81,5 +69,12 @@
     "@types/qrcode": "1.5.6",
     "pagefind": "1.5.2",
     "typescript": "6.0.3"
-  }
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@11.7.0"
 }

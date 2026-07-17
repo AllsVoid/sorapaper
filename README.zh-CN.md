@@ -38,11 +38,13 @@ pnpm dev
 需要 Node.js 22.12+ 与 pnpm 11+。
 
 ```bash
-git clone https://github.com/AllsVoid/sorapaper.git my-site
+npm create sorapaper-astro-theme@latest my-site
 cd my-site
 pnpm install
 pnpm dev
 ```
+
+该命令会创建一个可独立编辑的完整站点，并非将主题添加为运行时依赖。若要直接参与主题开发，也可以克隆仓库后执行相同的安装和开发命令。
 
 打开 <http://localhost:4321> 后，优先修改：
 
@@ -131,7 +133,7 @@ pnpm run check
 pnpm run build
 ```
 
-如果使用 npm 起始包，请先将新版本解压到临时目录，再有意识地迁移 `sorapaper.ts`、`src/content/` 和 `public/`。在阅读更新说明和差异前，不要直接覆盖已经定制的网站。
+如果使用 `npm create` 初始化，请先通过 `npm create sorapaper-astro-theme@latest /tmp/sorapaper-upstream` 在临时目录生成新版本，再有意识地迁移 `sorapaper.ts`、`src/content/` 和 `public/`。在阅读更新说明和差异前，不要直接覆盖已经定制的网站。
 
 ## 提交 Bug 与功能建议
 
