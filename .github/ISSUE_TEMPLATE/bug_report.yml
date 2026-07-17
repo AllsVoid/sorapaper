@@ -1,0 +1,63 @@
+name: Bug 报告
+description: 报告可复现的问题，帮助我们尽快定位并修复。
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请尽可能完整地填写以下信息；不要在 Issue 中提交密码、访问令牌或其他敏感数据。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issue，确认没有重复报告。
+          required: true
+        - label: 我已阅读 README 和相关文档。
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: SoraPaper 版本
+      description: 例如 1.0.0；如果使用源码，请填写提交哈希。
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 请填写操作系统、Node.js、包管理器和浏览器（如适用）。
+      placeholder: macOS 15, Node.js 22.12.0, pnpm 11.7.0, Chrome 131
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 提供能稳定复现问题的最小步骤或最小仓库。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 可以附上截图、录屏或错误信息。
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志
+      description: 请删除其中的敏感信息。
+      render: shell
