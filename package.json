@@ -37,6 +37,7 @@
     "scripts/npm-package-lock.mjs",
     ".sorapaper-package/pnpm-lock.yaml",
     "CHANGELOG.md",
+    "README.zh-CN.md",
     "docs/design-handoff.md",
     "docs/development-guide.md"
   ],
