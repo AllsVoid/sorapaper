@@ -8,7 +8,6 @@ const config = {
     base: "/",
     ogImage: "/covers/sky.svg",
     defaultLocale: "zh",
-    locales: ["zh", "en"]
   },
   author: {
     name: "Sora",

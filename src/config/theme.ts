@@ -10,7 +10,6 @@ export const defaultThemeConfig = {
     base: "/",
     ogImage: "/covers/sky.svg",
     defaultLocale: "zh",
-    locales: ["zh", "en"]
   },
   author: {
     name: "Sora",
