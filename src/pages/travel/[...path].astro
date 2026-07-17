@@ -3,8 +3,9 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 import { themeConfig } from "@/config/theme";
-if (!themeConfig.featureFlags.travel) {
-  return Astro.redirect("/");
+
+export function getStaticPaths() {
+  return themeConfig.featureFlags.travel ? [{ params: { path: undefined } }] : [];
 }
 ---
 
