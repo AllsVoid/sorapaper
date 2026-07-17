@@ -1,6 +1,6 @@
 ---
 import type { BlogPost } from "@/lib/posts";
-import { formatDate, getPostSummary, getReadingTime } from "@/lib/posts";
+import { formatDate, getPostSummary, getReadingTime, getTagSlug } from "@/lib/posts";
 import { localizePath, type Locale } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 
@@ -18,7 +18,7 @@ const summary = getPostSummary(post);
   <a class="back" href={localizePath(locale)}>← {t.article.back}</a>
   <div class="inner">
     <div class="tags">
-      {post.data.tags.map((tag) => <a class="pill" href={localizePath(locale, `/tags/${tag.toLowerCase()}/`)}>{tag}</a>)}
+      {post.data.tags.map((tag) => <a class="pill" href={localizePath(locale, `/tags/${getTagSlug(tag)}/`)}>{tag}</a>)}
     </div>
     <h1>{post.data.title}</h1>
     <p>{summary}</p>

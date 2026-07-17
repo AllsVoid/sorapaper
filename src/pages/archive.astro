@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales, localizePath } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
-import { formatDate, getArchiveGroups, getPostHref, getPostSummary, getPublishedPosts, type BlogPost } from "@/lib/posts";
+import { formatDate, getArchiveGroups, getPostHref, getPostSummary, getPublishedPosts, getTagSlug, type BlogPost } from "@/lib/posts";
 import { withBase } from "@/lib/paths";
 
 function formatTimelineMonth(date: Date, locale: string) {
@@ -73,7 +73,7 @@ const localeData = await Promise.all(
                           <p>{getPostSummary(post)}</p>
                           {post.data.tags.length > 0 && (
                             <div class="tags">
-                              {post.data.tags.slice(0, 3).map((tag) => <a href={localizePath(locale, `/tags/${tag.toLowerCase()}/`)}>{tag}</a>)}
+                              {post.data.tags.slice(0, 3).map((tag) => <a href={localizePath(locale, `/tags/${getTagSlug(tag)}/`)}>{tag}</a>)}
                             </div>
                           )}
                         </div>
