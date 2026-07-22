@@ -28,7 +28,7 @@ const config = {
     working: "A new project"
   },
   featureFlags: {
-    travel: false
+    travel: true
   },
   codeBlocks: {
     copyButton: true,

@@ -1,0 +1,9 @@
+import { createReadStream } from "node:fs";
+import { mkdir, writeFile } from "node:fs/promises";
+import { createInterface } from "node:readline";
+const [input, output] = process.argv.slice(2);
+if (!input || !output) throw new Error("Usage: node scripts/build-travel-map.mjs <ok_geo.csv> <output.json>");
+function simplify(points) { const length = points.length; const step = length > 5000 ? 12 : length > 1500 ? 6 : length > 600 ? 3 : length > 250 ? 2 : 1; const result = []; for (let index = 0; index < length; index += step) { const point = points[index]; const previous = result.at(-1); if (!previous || previous[0] !== point[0] || previous[1] !== point[1]) result.push(point); } if (result.length > 2 && (result[0][0] !== result.at(-1)[0] || result[0][1] !== result.at(-1)[1])) result.push(result[0]); return result; }
+function parse(row) { const match = row.match(/^(\d+),(\d+),(\d+),"([^"]*)","([^"]*)","([^"]*)","(.*)"$/); if (!match) return null; const [, id, pid, deep, name, , , polygon] = match; if (Number(deep) > 1 || polygon === "EMPTY") return null; const polygons = polygon.split(";").flatMap((part) => part.split("~")).map((part) => simplify(part.split(",").map((point) => point.split(" ").map(Number)).filter((point) => Number.isFinite(point[0]) && Number.isFinite(point[1])))).filter((part) => part.length > 3); return polygons.length ? { id, pid, level: Number(deep), name, polygons } : null; }
+const rows = []; const lines = createInterface({ input: createReadStream(input, { encoding: "utf8" }), crlfDelay: Infinity }); let first = true; for await (const line of lines) { if (first) { first = false; continue; } const row = parse(line); if (row) rows.push(row); }
+await mkdir(new URL(".", `file://${process.cwd()}/${output}`).pathname, { recursive: true }); await writeFile(output, JSON.stringify({ source: "AreaCity-JsSpider-StatsGov / ok_geo.csv", features: rows })); console.log(`Wrote ${rows.length} province/city boundaries to ${output}`);

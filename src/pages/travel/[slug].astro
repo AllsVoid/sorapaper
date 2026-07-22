@@ -1,0 +1,26 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { withBase } from "@/lib/paths";
+import { getPublishedTravels, getTravelDays, getTravelHref, getTravelSlug, formatTravelDateRange } from "@/lib/travel";
+
+export async function getStaticPaths() {
+  const travels = await getPublishedTravels();
+  return travels.map((travel) => ({ params: { slug: getTravelSlug(travel) }, props: { travel } }));
+}
+
+const { travel } = Astro.props;
+const { Content } = await render(travel);
+---
+
+<BaseLayout title={travel.data.title} description={travel.data.description} locale={travel.data.lang} seo={{ type: "article", canonicalPath: getTravelHref(travel), article: { publishedTime: travel.data.startDate, tags: travel.data.tags } }}>
+  <article class="travel-detail container">
+    <a class="back" href={withBase("/travel/")}>← {travel.data.lang === "zh" ? "所有游记" : "All travel"}</a>
+    <header><p class="date">{formatTravelDateRange(travel, travel.data.lang)} · {getTravelDays(travel)} {travel.data.lang === "zh" ? "天" : "days"}</p><h1>{travel.data.title}</h1><p class="lede">{travel.data.description}</p><div class="places">{travel.data.destinations.map((place) => <span>{place.province ? `${place.province} · ` : ""}{place.name}</span>)}</div></header>
+    <div class="body"><Content /></div>
+  </article>
+</BaseLayout>
+
+<style>
+  .travel-detail { max-width: var(--article); padding-top: 2.5rem; } .back { color: var(--primary); text-decoration: none; } header { margin: 2rem 0; } .date { color: var(--muted); } h1 { margin: .6rem 0; font-family: var(--font-serif); font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.1; } .lede { color: var(--muted); font-size: 1.1rem; line-height: 1.8; } .places { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; } .places span { padding: .35rem .6rem; border: 1px solid var(--border); border-radius: 999px; color: var(--primary); font-size: .86rem; } .body { margin-top: 3rem; }
+</style>

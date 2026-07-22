@@ -1,0 +1,15 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import TravelMap from "@/components/TravelMap.astro";
+import { getPublishedTravels } from "@/lib/travel";
+
+const travels = await getPublishedTravels();
+---
+
+<BaseLayout title="Travel" description="Travel notes and map records.">
+  <main class="travel-page">{travels.length > 0 && <TravelMap travels={travels} />}</main>
+</BaseLayout>
+
+<style>
+  .travel-page { width: min(100% - 2rem, 78rem); min-height: calc(100vh - 8rem); margin: 0 auto; display: grid; align-items: center; }
+</style>

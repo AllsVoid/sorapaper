@@ -86,6 +86,25 @@ flowchart LR
 
 See the [development guide](docs/development-guide.md) for all frontmatter fields, configuration options, and Markdown extensions.
 
+## Write a travel entry
+
+The travel MVP is enabled with `featureFlags.travel` in `sorapaper.ts`. Add a `.md` or `.mdx` file under `src/content/travel/`; every entry needs a date range and at least one destination:
+
+```yaml
+---
+title: "A spring between Suzhou and Guangzhou"
+description: "A short introduction to the journey."
+startDate: 2026-04-08
+endDate: 2026-04-13
+destinations:
+  - name: "Suzhou"
+    province: "Jiangsu"
+    country: "CN"
+---
+```
+
+Entries appear alongside normal posts on the home page. `/travel/` contains a local, static national province map; hover, focus, or tap a province to reveal its city boundaries and recorded cities. The map never calls an external API. Regenerate its simplified province/city data with `node scripts/build-travel-map.mjs /path/to/ok_geo.csv src/data/maps/china-admin.json`. See [the travel PRD](docs/travel-prd.md) for interaction details.
+
 ## Deploy
 
 SoraPaper outputs a static site. Build it, then upload `dist/` to any static host:

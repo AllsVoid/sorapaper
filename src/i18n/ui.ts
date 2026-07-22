@@ -76,9 +76,9 @@ export const defaultUi = {
       friendsTitle: "网络花园里的邻居",
       friendsDescription: "一些值得访问的链接。",
       travelTitle: "游记",
-      travelDescription: "未来会在这里记录旅行路线、城市印象和地图足迹。",
-      travelEmptyTitle: "旅行地图即将展开",
-      travelEmptyDescription: "这个页面暂时独立于博客系统，后续可以接入地图、地点数据和旅行记录服务。"
+      travelDescription: "在地图、城市和文字之间，收集旅行留下的路径。",
+      travelEmptyTitle: "还没有旅行记录",
+      travelEmptyDescription: "添加一篇旅行内容后，它会出现在这里。"
     },
     search: {
       label: "搜索文章",
@@ -174,9 +174,9 @@ export const defaultUi = {
       friendsTitle: "Neighbors in the web garden",
       friendsDescription: "A small collection of links worth visiting.",
       travelTitle: "Travel",
-      travelDescription: "A future home for routes, city notes and map-based travel records.",
-      travelEmptyTitle: "The travel map will unfold here",
-      travelEmptyDescription: "This page is separate from the blog system, ready for maps, place data and a dedicated travel service later."
+      travelDescription: "A collection of routes, cities and travel stories.",
+      travelEmptyTitle: "No travel records yet",
+      travelEmptyDescription: "Add a travel entry and it will appear here."
     },
     search: {
       label: "Search posts",

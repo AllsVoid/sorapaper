@@ -1,0 +1,20 @@
+---
+import type { Locale } from "@/i18n/config";
+import { formatTravelDateRange, getTravelHref, type TravelEntry } from "@/lib/travel";
+
+interface Props { travel: TravelEntry; locale: Locale; }
+const { travel, locale } = Astro.props;
+---
+
+<article class="travel-card glass">
+  <div class="content">
+    <div class="meta"><time datetime={travel.data.startDate.toISOString()}>{formatTravelDateRange(travel, locale)}</time><span>游记</span></div>
+    <h3><a href={getTravelHref(travel)}>{travel.data.title}</a></h3>
+    <p>{travel.data.description}</p>
+    <div class="foot"><span>{travel.data.destinations.map((place) => place.name).join(" · ")}</span><a aria-label={`Read ${travel.data.title}`} href={getTravelHref(travel)}>→</a></div>
+  </div>
+</article>
+
+<style>
+  .travel-card { border-radius: var(--radius-md); padding: .62rem; transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; } .travel-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--primary) 38%, var(--border)); } .content { display: grid; gap: .5rem; padding: .55rem .6rem; } .meta, .foot { display: flex; align-items: center; justify-content: space-between; gap: .8rem; color: var(--muted); font-size: .84rem; } .meta span { border-radius: 999px; background: var(--tag); color: var(--primary); padding: .26rem .58rem; } h3, p { margin: 0; } h3 { font-size: 1.05rem; line-height: 1.35; } h3 a:hover { color: var(--primary); } p { color: var(--muted); font-size: .94rem; line-height: 1.6; } .foot a { color: var(--primary); font-size: 1.15rem; }
+</style>

@@ -234,6 +234,12 @@ toc: true
 ---
 ```
 
+### 游记内容
+
+游记 collection 位于 `src/content/travel/`，在 `src/content.config.ts` 中定义。每篇游记必须包含 `title`、`description`、`startDate`、`endDate`，以及至少一个 `destinations` 项。每个目的地包含 `name`、`country`，并可选填 `province`、`adminCode` 和 `summary`；`endDate` 不得早于 `startDate`。
+
+游记会作为内容卡片展示在首页的最新内容流中；`/travel/` 只保留足迹地图。MVP 以省份作为底层入口：鼠标悬停、键盘聚焦或移动端轻触省份时展开对应城市，点击城市进入 `/travel/[slug]/`。当前视觉版使用本地静态的全国省、市两级边界数据：`src/data/maps/china-admin.json`。该文件由 `scripts/build-travel-map.mjs` 从 AreaCity 的 `ok_geo.csv` 提取并简化，原始 CSV 不进入仓库或网页；接入真实行政区的状态机、命中区和无障碍约束见 [游记功能 PRD](travel-prd.md)。
+
 Markdown 扩展：
 
 - 文章支持 `:::note`、`:::info`、`:::tips`、`:::warning`、`:::success` 和 `:::error` 提示块。

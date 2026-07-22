@@ -46,4 +46,31 @@ const friends = defineCollection({
   })
 });
 
-export const collections = { blog, friends };
+const travel = defineCollection({
+  loader: glob({ base: "./src/content/travel", pattern: "**/*.{md,mdx}" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    slug: postSlug.optional(),
+    lang: z.enum(["zh", "en"]).default("zh"),
+    translationKey: z.string().optional(),
+    startDate: z.coerce.date(),
+    endDate: z.coerce.date(),
+    draft: z.boolean().default(false),
+    cover: imageMeta.optional(),
+    tags: z.array(z.string()).default([]),
+    destinations: z.array(z.object({
+      name: z.string(),
+      country: z.string(),
+      adminCode: z.string().optional(),
+      province: z.string().optional(),
+      summary: z.string().optional()
+    })).min(1),
+    featured: z.boolean().default(false)
+  }).refine((data) => data.endDate >= data.startDate, {
+    message: "endDate must be on or after startDate.",
+    path: ["endDate"]
+  })
+});
+
+export const collections = { blog, friends, travel };

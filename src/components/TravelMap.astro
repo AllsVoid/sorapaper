@@ -1,0 +1,68 @@
+---
+import mapData from "@/data/maps/china-admin.json";
+import { getTravelHref, type TravelEntry } from "@/lib/travel";
+
+interface Props { travels: TravelEntry[]; }
+interface MapFeature { id: string; pid: string; level: number; name: string; polygons: number[][][]; }
+
+const { travels } = Astro.props;
+const features = mapData.features as MapFeature[];
+const provinces = features.filter((feature) => feature.level === 0);
+const citiesByProvince = new Map(provinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
+const cityLinks = new Map<string, string>();
+for (const travel of travels) {
+  for (const destination of travel.data.destinations) {
+    const code = destination.adminCode?.replace(/00$/, "");
+    if (code) cityLinks.set(code, getTravelHref(travel));
+  }
+}
+
+const bounds = { minLng: 73, maxLng: 135, minLat: 18, maxLat: 54 };
+function project([lng, lat]: number[]) {
+  const x = ((lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 1000;
+  const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 620;
+  return [x.toFixed(1), y.toFixed(1)];
+}
+function path(feature: MapFeature) {
+  return feature.polygons.map((ring) => ring.map((point, index) => `${index ? "L" : "M"}${project(point).join(" ")}`).join("") + "Z").join("");
+}
+---
+
+<section class="travel-map" data-travel-map aria-label="China travel map">
+  <svg viewBox="0 0 1000 620" role="img" aria-label="China administrative map">
+    <g class="provinces">
+      {provinces.map((province) => {
+        const cities = citiesByProvince.get(province.id) ?? [];
+        return <g class="province" data-province tabindex="0" role="button" aria-label={province.name} aria-expanded="false">
+          <path class="province-shape" d={path(province)} />
+          <g class="cities" aria-hidden="true">
+            {cities.map((city) => cityLinks.has(city.id) ? (
+              <a href={cityLinks.get(city.id)} aria-label={city.name}><path class="city visited" d={path(city)} /></a>
+            ) : <path class="city" d={path(city)} />)}
+          </g>
+        </g>;
+      })}
+    </g>
+  </svg>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-travel-map]").forEach((map) => {
+    const provinces = [...map.querySelectorAll<HTMLElement>("[data-province]")];
+    provinces.forEach((province) => {
+      const open = () => provinces.forEach((item) => {
+        const active = item === province;
+        item.classList.toggle("is-open", active);
+        item.setAttribute("aria-expanded", String(active));
+        item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
+      });
+      province.addEventListener("mouseenter", open);
+      province.addEventListener("focus", open);
+      province.addEventListener("click", open);
+    });
+  });
+</script>
+
+<style>
+  .travel-map { width: 100%; } svg { display: block; width: 100%; min-height: 68vh; overflow: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); background: color-mix(in srgb, var(--bg-soft) 72%, transparent); } .province { cursor: pointer; outline: none; } .province-shape { fill: color-mix(in srgb, var(--surface-strong) 84%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 40%, var(--border)); stroke-width: 1.2; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease; } .province:hover .province-shape, .province:focus .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 22%, var(--surface)); filter: drop-shadow(0 14px 15px color-mix(in srgb, var(--primary) 25%, transparent)); } .cities { opacity: 0; pointer-events: none; transform: translateY(14px) scale(.985); transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-13px) scale(1); } .city { fill: color-mix(in srgb, var(--surface) 84%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 42%, var(--border)); stroke-width: .75; vector-effect: non-scaling-stroke; } .city.visited { fill: color-mix(in srgb, var(--accent) 68%, var(--surface)); stroke: var(--primary); stroke-width: 1.5; cursor: pointer; } a:hover .city.visited, a:focus .city.visited { fill: var(--primary); } .province:focus-visible .province-shape { stroke: var(--text); stroke-width: 2.5; } @media (prefers-reduced-motion: reduce) { .province-shape, .cities { transition: none; } }
+</style>
