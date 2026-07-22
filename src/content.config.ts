@@ -63,6 +63,7 @@ const travel = defineCollection({
       name: z.string(),
       country: z.string(),
       adminCode: z.string().optional(),
+      coordinates: z.tuple([z.number().min(-180).max(180), z.number().min(-90).max(90)]).optional(),
       province: z.string().optional(),
       summary: z.string().optional()
     })).min(1),

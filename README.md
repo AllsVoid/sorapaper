@@ -100,10 +100,13 @@ destinations:
   - name: "Suzhou"
     province: "Jiangsu"
     country: "CN"
+    adminCode: "320500"
+    # For destinations outside the bundled China administrative map, add coordinates:
+    # coordinates: [135.7681, 35.0116]
 ---
 ```
 
-Entries appear alongside normal posts on the home page. `/travel/` contains a local, static national province map; hover, focus, or tap a province to reveal its city boundaries and recorded cities. The map never calls an external API. Regenerate its simplified province/city data with `node scripts/build-travel-map.mjs /path/to/ok_geo.csv src/data/maps/china-admin.json`. See [the travel PRD](docs/travel-prd.md) for interaction details.
+Entries appear alongside normal posts on the home page. `/travel/` contains a local, static map that renders Chinese provinces represented by published `adminCode` values plus the provinces between them, preserving a continuous regional view; hover, focus, or tap a province to reveal its city boundaries and recorded cities. Destinations with `coordinates` are included as markers, so future international entries can extend the map without an external API. The map has optional zoom controls when its selected area is broad. Regenerate its simplified province/city data with `node scripts/build-travel-map.mjs /path/to/ok_geo.csv src/data/maps/china-admin.json`. See [the travel PRD](docs/travel-prd.md) for interaction details.
 
 ## Deploy
 

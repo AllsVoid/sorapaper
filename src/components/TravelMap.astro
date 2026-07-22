@@ -4,65 +4,233 @@ import { getTravelHref, type TravelEntry } from "@/lib/travel";
 
 interface Props { travels: TravelEntry[]; }
 interface MapFeature { id: string; pid: string; level: number; name: string; polygons: number[][][]; }
+interface Bounds { minLng: number; maxLng: number; minLat: number; maxLat: number; }
+interface TravelPreview { href: string; title: string; description: string; place: string; }
 
 const { travels } = Astro.props;
 const features = mapData.features as MapFeature[];
-const provinces = features.filter((feature) => feature.level === 0);
-const citiesByProvince = new Map(provinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
+const allProvinces = features.filter((feature) => feature.level === 0 && !["81", "82"].includes(feature.id));
+const citiesByProvince = new Map(allProvinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
 const cityLinks = new Map<string, string>();
+const cityPreviews = new Map<string, TravelPreview>();
+const destinationMarkers: { name: string; href: string; coordinates: [number, number] }[] = [];
 for (const travel of travels) {
   for (const destination of travel.data.destinations) {
     const code = destination.adminCode?.replace(/00$/, "");
-    if (code) cityLinks.set(code, getTravelHref(travel));
+    if (code) {
+      const href = getTravelHref(travel);
+      cityLinks.set(code, href);
+      cityPreviews.set(code, { href, title: travel.data.title, description: travel.data.description, place: destination.name });
+    }
+    if (destination.coordinates) destinationMarkers.push({ name: destination.name, href: getTravelHref(travel), coordinates: destination.coordinates });
   }
 }
 
-const bounds = { minLng: 73, maxLng: 135, minLat: 18, maxLat: 54 };
-function project([lng, lat]: number[]) {
-  const x = ((lng - bounds.minLng) / (bounds.maxLng - bounds.minLng)) * 1000;
-  const y = ((bounds.maxLat - lat) / (bounds.maxLat - bounds.minLat)) * 620;
-  return [x.toFixed(1), y.toFixed(1)];
+const visitedCityIds = new Set(cityLinks.keys());
+const displayProvinceId: Record<string, string> = { "81": "44", "82": "44" };
+const visitedProvinceIds = new Set(
+  features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id)).map((feature) => displayProvinceId[feature.pid] ?? feature.pid)
+);
+const visitedProvinces = allProvinces.filter((province) => visitedProvinceIds.has(province.id));
+const visitedProvinceBounds = getRawBounds(visitedProvinces.flatMap((province) => province.polygons.flatMap((ring) => ring)));
+const provinces = visitedProvinces.length < 2 ? visitedProvinces : allProvinces.filter((province) => {
+  const provinceBounds = getRawBounds(province.polygons.flatMap((ring) => ring));
+  return provinceBounds.minLng <= visitedProvinceBounds.maxLng && provinceBounds.maxLng >= visitedProvinceBounds.minLng
+    && provinceBounds.minLat <= visitedProvinceBounds.maxLat && provinceBounds.maxLat >= visitedProvinceBounds.minLat;
+});
+const visibleFeatures = [...provinces, ...provinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
+const points = [
+  ...visibleFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)),
+  ...destinationMarkers.map((marker) => marker.coordinates)
+];
+function getProvincePreview(provinceId: string) {
+  return (citiesByProvince.get(provinceId) ?? []).map((city) => cityPreviews.get(city.id)).find(Boolean);
+}
+
+function getRawBounds(coordinates: number[][]): Bounds {
+  const fallback = { minLng: 73, maxLng: 135, minLat: 18, maxLat: 54 };
+  if (!coordinates.length) return fallback;
+  let minLng = Infinity;
+  let maxLng = -Infinity;
+  let minLat = Infinity;
+  let maxLat = -Infinity;
+  for (const [lng, lat] of coordinates) {
+    minLng = Math.min(minLng, lng);
+    maxLng = Math.max(maxLng, lng);
+    minLat = Math.min(minLat, lat);
+    maxLat = Math.max(maxLat, lat);
+  }
+  return { minLng, maxLng, minLat, maxLat };
+}
+function getBounds(coordinates: number[][]): Bounds {
+  const raw = getRawBounds(coordinates);
+  const spanLng = Math.max(raw.maxLng - raw.minLng, 1.2);
+  const spanLat = Math.max(raw.maxLat - raw.minLat, 1.2);
+  const padding = Math.max(spanLng, spanLat) * 0.09;
+  return { minLng: raw.minLng - padding, maxLng: raw.maxLng + padding, minLat: raw.minLat - padding, maxLat: raw.maxLat + padding };
+}
+const bounds = getBounds(points);
+const viewBox = `${bounds.minLng} ${-bounds.maxLat} ${bounds.maxLng - bounds.minLng} ${bounds.maxLat - bounds.minLat}`;
+function point([lng, lat]: number[]) { return `${lng} ${-lat}`; }
+function ringArea(ring: number[][]) {
+  return ring.reduce((area, [x, y], index) => {
+    const [nextX, nextY] = ring[(index + 1) % ring.length];
+    return area + x * nextY - nextX * y;
+  }, 0) / 2;
+}
+function labelPoint(feature: MapFeature) {
+  const ring = feature.polygons.reduce((largest, candidate) => Math.abs(ringArea(candidate)) > Math.abs(ringArea(largest)) ? candidate : largest, feature.polygons[0]);
+  const area = ringArea(ring);
+  if (!area) {
+    const featureBounds = getRawBounds(ring);
+    return [(featureBounds.minLng + featureBounds.maxLng) / 2, -(featureBounds.minLat + featureBounds.maxLat) / 2] as const;
+  }
+  const [x, y] = ring.reduce(([sumX, sumY], [currentX, currentY], index) => {
+    const [nextX, nextY] = ring[(index + 1) % ring.length];
+    const cross = currentX * nextY - nextX * currentY;
+    return [sumX + (currentX + nextX) * cross, sumY + (currentY + nextY) * cross];
+  }, [0, 0]);
+  return [x / (6 * area), -y / (6 * area)] as const;
 }
 function path(feature: MapFeature) {
-  return feature.polygons.map((ring) => ring.map((point, index) => `${index ? "L" : "M"}${project(point).join(" ")}`).join("") + "Z").join("");
+  return feature.polygons.map((ring) => ring.map((coordinates, index) => `${index ? "L" : "M"}${point(coordinates)}`).join("") + "Z").join("");
 }
 ---
 
-<section class="travel-map" data-travel-map aria-label="China travel map">
-  <svg viewBox="0 0 1000 620" role="img" aria-label="China administrative map">
+<section class="travel-map" data-travel-map aria-label="Travel map">
+  <div class="map-stage">
+    <div class="map-key" aria-label="Map legend"><span class="key-province"></span><span data-lang="zh">有游记的省份</span><span data-lang="en">Province with travel</span></div>
+    <div class="map-controls" aria-label="Map zoom controls">
+      <button type="button" data-map-zoom-in aria-label="Zoom in"><span data-lang="zh">放大</span><span data-lang="en">Zoom in</span></button>
+      <button type="button" data-map-zoom-out aria-label="Zoom out"><span data-lang="zh">缩小</span><span data-lang="en">Zoom out</span></button>
+      <button type="button" data-map-zoom-reset><span data-lang="zh">复位</span><span data-lang="en">Reset</span></button>
+    </div>
+    <svg viewBox={viewBox} role="group" aria-label="Travel destinations map. Drag or use arrow keys to pan." preserveAspectRatio="xMidYMid meet" tabindex="0" data-map-canvas>
     <g class="provinces">
       {provinces.map((province) => {
         const cities = citiesByProvince.get(province.id) ?? [];
-        return <g class="province" data-province tabindex="0" role="button" aria-label={province.name} aria-expanded="false">
-          <path class="province-shape" d={path(province)} />
+        const [labelX, labelY] = labelPoint(province);
+        const preview = getProvincePreview(province.id);
+        return <g class:list={["province", { "is-visited": visitedProvinceIds.has(province.id) }]} data-province data-province-preview={preview ? "" : undefined} data-preview-title={preview?.title} data-preview-description={preview?.description} data-preview-place={preview?.place} data-preview-href={preview?.href}>
+          <path class="province-shape" d={path(province)} tabindex="0" role="button" aria-label={`Show ${province.name} cities`} aria-expanded="false" />
+          <text class="province-label" x={labelX} y={labelY}>{province.name.replace(/(省|市|自治区|特别行政区)$/, "")}</text>
           <g class="cities" aria-hidden="true">
-            {cities.map((city) => cityLinks.has(city.id) ? (
-              <a href={cityLinks.get(city.id)} aria-label={city.name}><path class="city visited" d={path(city)} /></a>
-            ) : <path class="city" d={path(city)} />)}
+            {cities.map((city) => {
+              const [cityX, cityY] = labelPoint(city);
+              const preview = cityPreviews.get(city.id);
+              return preview ? (
+                <a class="city-region" href={preview.href} aria-label={city.name} data-city-region data-city-preview data-preview-title={preview.title} data-preview-description={preview.description} data-preview-place={preview.place} data-preview-href={preview.href}><path class="city visited" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{city.name.replace(/市$/, "")}</text></a>
+              ) : <g class="city-region" data-city-region tabindex="0" role="button" aria-label={city.name}><path class="city" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{city.name.replace(/市$/, "")}</text></g>;
+            })}
           </g>
         </g>;
       })}
     </g>
-  </svg>
+    <g class="markers">
+      {destinationMarkers.map((marker) => <a href={marker.href} aria-label={marker.name}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
+    </g>
+    </svg>
+    <article class="map-preview glass" data-map-preview aria-live="polite">
+      <p data-preview-place></p>
+      <h2 data-preview-title></h2>
+      <p class="preview-description" data-preview-description></p>
+      <a data-preview-link><span data-lang="zh">阅读游记</span><span data-lang="en">Read travel</span> →</a>
+    </article>
+  </div>
+  <ul class="destination-list" aria-label="Travel destinations">
+    {travels.flatMap((travel) => travel.data.destinations.map((destination) => <li><a href={getTravelHref(travel)}>{destination.name}</a><span>{destination.country}</span></li>))}
+  </ul>
 </section>
 
 <script>
   document.querySelectorAll<HTMLElement>("[data-travel-map]").forEach((map) => {
+    const stage = map.querySelector<HTMLElement>(".map-stage");
+    const preview = map.querySelector<HTMLElement>("[data-map-preview]");
+    const previewPlace = preview?.querySelector<HTMLElement>("[data-preview-place]");
+    const previewTitle = preview?.querySelector<HTMLElement>("[data-preview-title]");
+    const previewDescription = preview?.querySelector<HTMLElement>("[data-preview-description]");
+    const previewLink = preview?.querySelector<HTMLAnchorElement>("[data-preview-link]");
+    const showPreview = (source: DOMStringMap) => {
+      if (!preview || !source.previewHref) return;
+      if (previewPlace) previewPlace.textContent = source.previewPlace ?? "";
+      if (previewTitle) previewTitle.textContent = source.previewTitle ?? "";
+      if (previewDescription) previewDescription.textContent = source.previewDescription ?? "";
+      if (previewLink) previewLink.href = source.previewHref;
+      stage?.classList.add("is-preview-open");
+    };
     const provinces = [...map.querySelectorAll<HTMLElement>("[data-province]")];
+    const provinceLayer = map.querySelector<SVGGElement>(".provinces");
     provinces.forEach((province) => {
-      const open = () => provinces.forEach((item) => {
-        const active = item === province;
-        item.classList.toggle("is-open", active);
-        item.setAttribute("aria-expanded", String(active));
-        item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
+      const open = (showArticle = false) => {
+        provinces.forEach((item) => {
+          const active = item === province;
+          item.classList.toggle("is-open", active);
+          item.querySelector<SVGPathElement>(".province-shape")?.setAttribute("aria-expanded", String(active));
+          item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
+        });
+        provinceLayer?.append(province);
+        if (showArticle && province.dataset.provincePreview !== undefined) showPreview(province.dataset);
+      };
+      province.addEventListener("mouseenter", () => open());
+      province.addEventListener("focus", () => open());
+      province.addEventListener("click", () => open(true));
+      province.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(true); }
       });
-      province.addEventListener("mouseenter", open);
-      province.addEventListener("focus", open);
-      province.addEventListener("click", open);
     });
+
+    const cityRegions = [...map.querySelectorAll<HTMLElement>("[data-city-region]")];
+    cityRegions.forEach((city) => {
+      const activate = () => {
+        cityRegions.forEach((item) => item.classList.toggle("is-active", item === city));
+        if (stage?.classList.contains("is-preview-open") && city.dataset.cityPreview !== undefined) showPreview(city.dataset);
+      };
+      city.addEventListener("mouseenter", activate);
+      city.addEventListener("focus", activate);
+      city.addEventListener("click", activate);
+    });
+
+    const svg = map.querySelector<SVGSVGElement>("[data-map-canvas]");
+    if (!svg) return;
+    const initial = svg.viewBox.baseVal;
+    const original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
+    let zoom = 1;
+    let centerX = original.x + original.width / 2;
+    let centerY = original.y + original.height / 2;
+    const updateViewBox = () => {
+      const width = original.width / zoom;
+      const height = original.height / zoom;
+      svg.setAttribute("viewBox", `${centerX - width / 2} ${centerY - height / 2} ${width} ${height}`);
+    };
+    let dragStart: { x: number; y: number } | undefined;
+    svg.addEventListener("pointerdown", (event) => { dragStart = { x: event.clientX, y: event.clientY }; svg.setPointerCapture(event.pointerId); });
+    svg.addEventListener("pointermove", (event) => {
+      if (!dragStart) return;
+      const rect = svg.getBoundingClientRect();
+      centerX -= (event.clientX - dragStart.x) * (original.width / zoom) / rect.width;
+      centerY -= (event.clientY - dragStart.y) * (original.height / zoom) / rect.height;
+      dragStart = { x: event.clientX, y: event.clientY };
+      updateViewBox();
+    });
+    svg.addEventListener("pointerup", () => { dragStart = undefined; });
+    svg.addEventListener("pointercancel", () => { dragStart = undefined; });
+    svg.addEventListener("keydown", (event) => {
+      const step = (event.shiftKey ? .3 : .12) / zoom;
+      if (event.key === "ArrowLeft") centerX -= original.width * step;
+      else if (event.key === "ArrowRight") centerX += original.width * step;
+      else if (event.key === "ArrowUp") centerY -= original.height * step;
+      else if (event.key === "ArrowDown") centerY += original.height * step;
+      else return;
+      event.preventDefault();
+      updateViewBox();
+    });
+    map.querySelector<HTMLButtonElement>("[data-map-zoom-in]")?.addEventListener("click", () => { zoom = Math.min(zoom * 1.4, 5); updateViewBox(); });
+    map.querySelector<HTMLButtonElement>("[data-map-zoom-out]")?.addEventListener("click", () => { zoom = Math.max(zoom / 1.4, 1); updateViewBox(); });
+    map.querySelector<HTMLButtonElement>("[data-map-zoom-reset]")?.addEventListener("click", () => { zoom = 1; centerX = original.x + original.width / 2; centerY = original.y + original.height / 2; updateViewBox(); });
   });
 </script>
 
 <style>
-  .travel-map { width: 100%; } svg { display: block; width: 100%; min-height: 68vh; overflow: visible; border: 1px solid var(--border); border-radius: var(--radius-xl); background: color-mix(in srgb, var(--bg-soft) 72%, transparent); } .province { cursor: pointer; outline: none; } .province-shape { fill: color-mix(in srgb, var(--surface-strong) 84%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 40%, var(--border)); stroke-width: 1.2; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease; } .province:hover .province-shape, .province:focus .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 22%, var(--surface)); filter: drop-shadow(0 14px 15px color-mix(in srgb, var(--primary) 25%, transparent)); } .cities { opacity: 0; pointer-events: none; transform: translateY(14px) scale(.985); transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-13px) scale(1); } .city { fill: color-mix(in srgb, var(--surface) 84%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 42%, var(--border)); stroke-width: .75; vector-effect: non-scaling-stroke; } .city.visited { fill: color-mix(in srgb, var(--accent) 68%, var(--surface)); stroke: var(--primary); stroke-width: 1.5; cursor: pointer; } a:hover .city.visited, a:focus .city.visited { fill: var(--primary); } .province:focus-visible .province-shape { stroke: var(--text); stroke-width: 2.5; } @media (prefers-reduced-motion: reduce) { .province-shape, .cities { transition: none; } }
+  .travel-map { position: relative; width: 100%; padding: .75rem; border-radius: var(--radius-xl); } svg { display: block; width: 100%; min-height: 62vh; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 48%, var(--border)); border-radius: calc(var(--radius-xl) - .35rem); background: var(--bg); cursor: grab; touch-action: none; } svg:active { cursor: grabbing; } .map-controls, .map-key { position: absolute; z-index: 1; display: flex; align-items: center; gap: .35rem; padding: .35rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); box-shadow: var(--shadow-soft); } .map-controls { top: 1.35rem; right: 1.35rem; } .map-key { top: 1.35rem; left: 1.35rem; color: var(--text); font-size: .82rem; } .key-province { width: .7rem; height: .7rem; border: 2px solid var(--text); border-radius: .18rem; background: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); } .map-controls button { min-width: 2.25rem; min-height: 2.25rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); cursor: pointer; } .map-controls button:last-child { padding-inline: .55rem; } .province { cursor: pointer; } .province-shape { fill: color-mix(in srgb, var(--primary) 28%, var(--surface-strong)); stroke: color-mix(in srgb, var(--primary) 72%, var(--text)); stroke-width: .16; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease; } .province.is-visited .province-shape { fill: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); stroke: var(--text); } .province:hover .province-shape, .province:focus-within .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 64%, var(--surface)); filter: drop-shadow(0 .6rem .65rem color-mix(in srgb, var(--primary) 38%, transparent)); } .province-label { pointer-events: none; fill: var(--text); font-size: .3px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .08px; transition: opacity .16s ease; } .province.is-open .province-label { opacity: 0; } .cities { opacity: 0; pointer-events: none; transform: translateY(-.48px) scale(.985); transform-box: fill-box; transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-.9px) scale(1.85); } .city { fill: color-mix(in srgb, var(--surface) 68%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 74%, var(--text)); stroke-width: .08; vector-effect: non-scaling-stroke; } .city-label { pointer-events: none; fill: var(--text); font-size: .2px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .06px; } .city.visited, .destination-marker { fill: var(--accent); stroke: var(--text); stroke-width: .12; vector-effect: non-scaling-stroke; cursor: pointer; } a:hover .city.visited, a:focus .city.visited, a:hover .destination-marker, a:focus .destination-marker { fill: var(--primary); } .province-shape:focus-visible, svg:focus-visible, .map-controls button:focus-visible, a:focus-visible .city, a:focus-visible .destination-marker { outline: none; stroke: var(--text); stroke-width: .22; } .destination-list { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .8rem .2rem 0; padding: 0; list-style: none; color: var(--muted); font-size: .9rem; } .destination-list li { display: flex; gap: .35rem; } .destination-list a { color: var(--primary); } .destination-list span::before { content: "·"; margin-right: .35rem; } @media (max-width: 640px) { svg { min-height: 48vh; } .map-controls { top: 1.2rem; right: 1.2rem; } .map-key { top: 1.2rem; left: 1.2rem; } .map-controls button:last-child { display: none; } .province-label { font-size: .24px; } .city-label { font-size: .16px; } } @media (prefers-reduced-motion: reduce) { .province-label, .cities { transition: none; } }
+  .map-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; } .map-stage.is-preview-open { grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem); gap: 1rem; } .map-stage svg { grid-column: 1; } .map-stage .map-controls { right: 1.35rem; } .map-stage.is-preview-open .map-controls { right: calc(21rem + 1.35rem); } .map-preview { display: none; align-content: center; gap: .7rem; min-width: 0; padding: 1.4rem; border-radius: var(--radius-lg); } .map-stage.is-preview-open .map-preview { display: grid; } .map-preview p, .map-preview h2 { margin: 0; } .map-preview > p { color: var(--primary); font-size: .86rem; font-weight: 700; } .map-preview h2 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.2vw, 2.2rem); line-height: 1.2; } .map-preview .preview-description { color: var(--muted); line-height: 1.7; } .map-preview a { width: fit-content; color: var(--primary); font-weight: 700; } .city-region { cursor: pointer; } .city-region:hover .city, .city-region:focus .city, .city-region.is-active .city { fill: color-mix(in srgb, var(--primary) 74%, var(--surface)); stroke: var(--text); stroke-width: .14; filter: drop-shadow(0 .22rem .28rem color-mix(in srgb, var(--primary) 42%, transparent)); } .city-label { font-size: .12px; } @media (max-width: 940px) { .map-stage.is-preview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage svg { grid-column: auto; } .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.35rem; } .map-preview { min-height: 12rem; } } @media (max-width: 640px) { .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.2rem; } .city-label { font-size: .1px; } }
 </style>

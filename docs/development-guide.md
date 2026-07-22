@@ -236,9 +236,9 @@ toc: true
 
 ### 游记内容
 
-游记 collection 位于 `src/content/travel/`，在 `src/content.config.ts` 中定义。每篇游记必须包含 `title`、`description`、`startDate`、`endDate`，以及至少一个 `destinations` 项。每个目的地包含 `name`、`country`，并可选填 `province`、`adminCode` 和 `summary`；`endDate` 不得早于 `startDate`。
+游记 collection 位于 `src/content/travel/`，在 `src/content.config.ts` 中定义。每篇游记必须包含 `title`、`description`、`startDate`、`endDate`，以及至少一个 `destinations` 项。每个目的地包含 `name`、`country`，并可选填 `province`、`adminCode`、`coordinates: [lng, lat]` 和 `summary`；坐标必须落在有效经纬度范围内，`endDate` 不得早于 `startDate`。
 
-游记会作为内容卡片展示在首页的最新内容流中；`/travel/` 只保留足迹地图。MVP 以省份作为底层入口：鼠标悬停、键盘聚焦或移动端轻触省份时展开对应城市，点击城市进入 `/travel/[slug]/`。当前视觉版使用本地静态的全国省、市两级边界数据：`src/data/maps/china-admin.json`。该文件由 `scripts/build-travel-map.mjs` 从 AreaCity 的 `ok_geo.csv` 提取并简化，原始 CSV 不进入仓库或网页；接入真实行政区的状态机、命中区和无障碍约束见 [游记功能 PRD](travel-prd.md)。
+游记会作为内容卡片展示在首页的最新内容流中；`/travel/` 初始只显示省级底图、简短省名及“有游记”的省份强调色。构建时渲染这些省份，以及落在其联合边界范围内的过渡省份，从而保持区域视觉连续；地图范围按最终渲染边界计算。香港、澳门的游记关联会归入广东省显示。悬停或键盘聚焦省份仅展开市级投影层；点击或键盘确认有游记的省份后，才会在桌面右侧（移动端地图下方）显示该省的文章预览。当前省会提升到 SVG 最上层，省名淡出，市级边界和市名以 1.85 倍投影层展开。第二层城市有独立的悬停、焦点和选中高亮；文章预览打开后，悬停或键盘聚焦有游记的城市会更新文章预览，点击该城市进入 `/travel/[slug]/`。未在本地中国行政区数据中关联的国际目的地可用 `coordinates` 渲染为标记；没有坐标时仍会显示在地图下方的可访问目的地列表。地图范围较大时，浏览器端提供缩放、复位以及鼠标/触摸拖动和键盘方向键平移。当前视觉版使用本地静态的全国省、市两级边界数据：`src/data/maps/china-admin.json`。该文件由 `scripts/build-travel-map.mjs` 从 AreaCity 的 `ok_geo.csv` 提取并简化，原始 CSV 不进入仓库或网页；接入真实行政区的状态机、命中区和无障碍约束见 [游记功能 PRD](travel-prd.md)。
 
 Markdown 扩展：
 
