@@ -1,5 +1,6 @@
 ---
 import mapData from "@/data/maps/china-admin.json";
+import taiwanCityData from "@/data/maps/taiwan-cities.json";
 import { getTravelHref, type TravelEntry } from "@/lib/travel";
 
 interface Props { travels: TravelEntry[]; }
@@ -8,7 +9,7 @@ interface Bounds { minLng: number; maxLng: number; minLat: number; maxLat: numbe
 interface TravelPreview { href: string; title: string; description: string; place: string; }
 
 const { travels } = Astro.props;
-const features = mapData.features as MapFeature[];
+const features = [...mapData.features, ...taiwanCityData.features] as MapFeature[];
 const allProvinces = features.filter((feature) => feature.level === 0 && !["81", "82"].includes(feature.id));
 const citiesByProvince = new Map(allProvinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
 const cityLinks = new Map<string, string>();
@@ -27,10 +28,12 @@ for (const travel of travels) {
 }
 
 const visitedCityIds = new Set(cityLinks.keys());
-const displayProvinceId: Record<string, string> = { "81": "44", "82": "44" };
-const visitedProvinceIds = new Set(
-  features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id)).map((feature) => displayProvinceId[feature.pid] ?? feature.pid)
-);
+const specialRegionIds = new Set(["8100", "8200"]);
+const specialRegions = features.flatMap((feature) => {
+  const preview = cityPreviews.get(feature.id);
+  return specialRegionIds.has(feature.id) && preview ? [{ ...preview, name: getCityLabel(feature.name) }] : [];
+});
+const visitedProvinceIds = new Set(features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id) && !specialRegionIds.has(feature.id)).map((feature) => feature.pid));
 const visitedProvinces = allProvinces.filter((province) => visitedProvinceIds.has(province.id));
 const visitedProvinceBounds = getRawBounds(visitedProvinces.flatMap((province) => province.polygons.flatMap((ring) => ring)));
 const provinces = visitedProvinces.length < 2 ? visitedProvinces : allProvinces.filter((province) => {
@@ -92,6 +95,10 @@ function labelPoint(feature: MapFeature) {
   }, [0, 0]);
   return [x / (6 * area), -y / (6 * area)] as const;
 }
+function getCityLabel(name: string) {
+  const shortened = name.replace("香港特别行政区", "香港").replace("澳门特别行政区", "澳门");
+  return ["省", "市", "县"].includes(shortened.at(-1) ?? "") ? shortened.slice(0, -1) : shortened;
+}
 function path(feature: MapFeature) {
   return feature.polygons.map((ring) => ring.map((coordinates, index) => `${index ? "L" : "M"}${point(coordinates)}`).join("") + "Z").join("");
 }
@@ -119,8 +126,8 @@ function path(feature: MapFeature) {
               const [cityX, cityY] = labelPoint(city);
               const preview = cityPreviews.get(city.id);
               return preview ? (
-                <a class="city-region" href={preview.href} aria-label={city.name} data-city-region data-city-preview data-preview-title={preview.title} data-preview-description={preview.description} data-preview-place={preview.place} data-preview-href={preview.href}><path class="city visited" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{city.name.replace(/市$/, "")}</text></a>
-              ) : <g class="city-region" data-city-region tabindex="0" role="button" aria-label={city.name}><path class="city" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{city.name.replace(/市$/, "")}</text></g>;
+                <a class="city-region" href={preview.href} aria-label={city.name} data-city-region data-city-preview data-preview-title={preview.title} data-preview-description={preview.description} data-preview-place={preview.place} data-preview-href={preview.href}><path class="city visited" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{getCityLabel(city.name)}</text></a>
+              ) : <g class="city-region" data-city-region tabindex="0" role="button" aria-label={city.name}><path class="city" d={path(city)} /><text class="city-label" x={cityX} y={cityY}>{getCityLabel(city.name)}</text></g>;
             })}
           </g>
         </g>;
@@ -137,6 +144,12 @@ function path(feature: MapFeature) {
       <a data-preview-link><span data-lang="zh">阅读游记</span><span data-lang="en">Read travel</span> →</a>
     </article>
   </div>
+  {specialRegions.length > 0 && (
+    <aside class="special-region-list glass" aria-label="Hong Kong and Macau travel">
+      <p><span data-lang="zh">香港与澳门</span><span data-lang="en">Hong Kong and Macau</span></p>
+      {specialRegions.map((region) => <a href={region.href}>{region.name}</a>)}
+    </aside>
+  )}
   <ul class="destination-list" aria-label="Travel destinations">
     {travels.flatMap((travel) => travel.data.destinations.map((destination) => <li><a href={getTravelHref(travel)}>{destination.name}</a><span>{destination.country}</span></li>))}
   </ul>
@@ -169,6 +182,7 @@ function path(feature: MapFeature) {
           item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
         });
         provinceLayer?.append(province);
+        map.classList.add("is-province-open");
         if (showArticle && province.dataset.provincePreview !== undefined) showPreview(province.dataset);
       };
       province.addEventListener("mouseenter", () => open());
@@ -190,8 +204,24 @@ function path(feature: MapFeature) {
       city.addEventListener("click", activate);
     });
 
+    const close = () => {
+      provinces.forEach((province) => {
+        province.classList.remove("is-open");
+        province.querySelector<SVGPathElement>(".province-shape")?.setAttribute("aria-expanded", "false");
+        province.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", "true");
+      });
+      cityRegions.forEach((city) => city.classList.remove("is-active"));
+      map.classList.remove("is-province-open");
+      stage?.classList.remove("is-preview-open");
+    };
+    stage?.addEventListener("mouseleave", close);
+
     const svg = map.querySelector<SVGSVGElement>("[data-map-canvas]");
     if (!svg) return;
+    svg.addEventListener("pointermove", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element) || !target.closest("[data-province]")) close();
+    });
     const initial = svg.viewBox.baseVal;
     const original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
     let zoom = 1;
@@ -231,6 +261,12 @@ function path(feature: MapFeature) {
 </script>
 
 <style>
-  .travel-map { position: relative; width: 100%; padding: .75rem; border-radius: var(--radius-xl); } svg { display: block; width: 100%; min-height: 62vh; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 48%, var(--border)); border-radius: calc(var(--radius-xl) - .35rem); background: var(--bg); cursor: grab; touch-action: none; } svg:active { cursor: grabbing; } .map-controls, .map-key { position: absolute; z-index: 1; display: flex; align-items: center; gap: .35rem; padding: .35rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); box-shadow: var(--shadow-soft); } .map-controls { top: 1.35rem; right: 1.35rem; } .map-key { top: 1.35rem; left: 1.35rem; color: var(--text); font-size: .82rem; } .key-province { width: .7rem; height: .7rem; border: 2px solid var(--text); border-radius: .18rem; background: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); } .map-controls button { min-width: 2.25rem; min-height: 2.25rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); cursor: pointer; } .map-controls button:last-child { padding-inline: .55rem; } .province { cursor: pointer; } .province-shape { fill: color-mix(in srgb, var(--primary) 28%, var(--surface-strong)); stroke: color-mix(in srgb, var(--primary) 72%, var(--text)); stroke-width: .16; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease; } .province.is-visited .province-shape { fill: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); stroke: var(--text); } .province:hover .province-shape, .province:focus-within .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 64%, var(--surface)); filter: drop-shadow(0 .6rem .65rem color-mix(in srgb, var(--primary) 38%, transparent)); } .province-label { pointer-events: none; fill: var(--text); font-size: .3px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .08px; transition: opacity .16s ease; } .province.is-open .province-label { opacity: 0; } .cities { opacity: 0; pointer-events: none; transform: translateY(-.48px) scale(.985); transform-box: fill-box; transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-.9px) scale(1.85); } .city { fill: color-mix(in srgb, var(--surface) 68%, var(--primary)); stroke: color-mix(in srgb, var(--primary) 74%, var(--text)); stroke-width: .08; vector-effect: non-scaling-stroke; } .city-label { pointer-events: none; fill: var(--text); font-size: .2px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .06px; } .city.visited, .destination-marker { fill: var(--accent); stroke: var(--text); stroke-width: .12; vector-effect: non-scaling-stroke; cursor: pointer; } a:hover .city.visited, a:focus .city.visited, a:hover .destination-marker, a:focus .destination-marker { fill: var(--primary); } .province-shape:focus-visible, svg:focus-visible, .map-controls button:focus-visible, a:focus-visible .city, a:focus-visible .destination-marker { outline: none; stroke: var(--text); stroke-width: .22; } .destination-list { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .8rem .2rem 0; padding: 0; list-style: none; color: var(--muted); font-size: .9rem; } .destination-list li { display: flex; gap: .35rem; } .destination-list a { color: var(--primary); } .destination-list span::before { content: "·"; margin-right: .35rem; } @media (max-width: 640px) { svg { min-height: 48vh; } .map-controls { top: 1.2rem; right: 1.2rem; } .map-key { top: 1.2rem; left: 1.2rem; } .map-controls button:last-child { display: none; } .province-label { font-size: .24px; } .city-label { font-size: .16px; } } @media (prefers-reduced-motion: reduce) { .province-label, .cities { transition: none; } }
-  .map-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; } .map-stage.is-preview-open { grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem); gap: 1rem; } .map-stage svg { grid-column: 1; } .map-stage .map-controls { right: 1.35rem; } .map-stage.is-preview-open .map-controls { right: calc(21rem + 1.35rem); } .map-preview { display: none; align-content: center; gap: .7rem; min-width: 0; padding: 1.4rem; border-radius: var(--radius-lg); } .map-stage.is-preview-open .map-preview { display: grid; } .map-preview p, .map-preview h2 { margin: 0; } .map-preview > p { color: var(--primary); font-size: .86rem; font-weight: 700; } .map-preview h2 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.2vw, 2.2rem); line-height: 1.2; } .map-preview .preview-description { color: var(--muted); line-height: 1.7; } .map-preview a { width: fit-content; color: var(--primary); font-weight: 700; } .city-region { cursor: pointer; } .city-region:hover .city, .city-region:focus .city, .city-region.is-active .city { fill: color-mix(in srgb, var(--primary) 74%, var(--surface)); stroke: var(--text); stroke-width: .14; filter: drop-shadow(0 .22rem .28rem color-mix(in srgb, var(--primary) 42%, transparent)); } .city-label { font-size: .12px; } @media (max-width: 940px) { .map-stage.is-preview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage svg { grid-column: auto; } .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.35rem; } .map-preview { min-height: 12rem; } } @media (max-width: 640px) { .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.2rem; } .city-label { font-size: .1px; } }
+  .travel-map { position: relative; width: 100%; padding: .75rem; border-radius: var(--radius-xl); } svg { display: block; width: 100%; min-height: 62vh; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 58%, var(--border)); border-radius: calc(var(--radius-xl) - .35rem); background: color-mix(in srgb, var(--bg-soft) 72%, transparent); backdrop-filter: blur(18px); cursor: grab; touch-action: none; } svg:active { cursor: grabbing; } .map-controls, .map-key { position: absolute; z-index: 1; display: flex; align-items: center; gap: .35rem; padding: .35rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); box-shadow: var(--shadow-soft); } .map-controls { top: 1.35rem; right: 1.35rem; } .map-key { top: 1.35rem; left: 1.35rem; color: var(--text); font-size: .82rem; } .key-province { width: .7rem; height: .7rem; border: 2px solid var(--text); border-radius: .18rem; background: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); } .map-controls button { min-width: 2.25rem; min-height: 2.25rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); cursor: pointer; } .map-controls button:last-child { padding-inline: .55rem; } .province { cursor: pointer; } .province-shape { fill: color-mix(in srgb, var(--surface-strong) 84%, var(--primary)); stroke: color-mix(in srgb, var(--text) 72%, var(--primary)); stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease, opacity .25s ease; } .province.is-visited .province-shape { fill: color-mix(in srgb, var(--primary) 32%, var(--surface)); stroke: var(--text); stroke-width: 1.35; } .province:hover .province-shape, .province:focus-within .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 48%, var(--surface)); filter: drop-shadow(0 .6rem .65rem color-mix(in srgb, var(--primary) 38%, transparent)); } .province-label { pointer-events: none; fill: var(--text); font-size: .3px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .08px; transition: opacity .16s ease; } .province.is-open .province-label { opacity: 0; } .cities { opacity: 0; pointer-events: none; transform: translateY(-.48px) scale(.985); transform-box: fill-box; transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-.9px) scale(2.4); } .city { fill: color-mix(in srgb, var(--surface) 84%, var(--primary)); stroke: color-mix(in srgb, var(--text) 68%, var(--primary)); stroke-width: .8; vector-effect: non-scaling-stroke; } .city-label { pointer-events: none; fill: var(--text); font-size: .2px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .06px; } .city.visited, .destination-marker { fill: var(--accent); stroke: var(--text); stroke-width: 1.15; vector-effect: non-scaling-stroke; cursor: pointer; } a:hover .city.visited, a:focus .city.visited, a:hover .destination-marker, a:focus .destination-marker { fill: var(--primary); } .province-shape:focus-visible, svg:focus-visible, .map-controls button:focus-visible, a:focus-visible .city, a:focus-visible .destination-marker { outline: none; stroke: var(--text); stroke-width: 1.6; } .destination-list { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .8rem .2rem 0; padding: 0; list-style: none; color: var(--muted); font-size: .9rem; } .destination-list li { display: flex; gap: .35rem; } .destination-list a { color: var(--primary); } .destination-list span::before { content: "·"; margin-right: .35rem; } @media (max-width: 640px) { svg { min-height: 48vh; } .map-controls { top: 1.2rem; right: 1.2rem; } .map-key { top: 1.2rem; left: 1.2rem; } .map-controls button:last-child { display: none; } .province-label { font-size: .24px; } .city-label { font-size: .16px; } } @media (prefers-reduced-motion: reduce) { .province-label, .cities { transition: none; } }
+  .map-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; } .map-stage.is-preview-open { grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem); gap: 1rem; } .map-stage svg { grid-column: 1; } .map-stage .map-controls { right: 1.35rem; } .map-stage.is-preview-open .map-controls { right: calc(21rem + 1.35rem); } .map-preview { display: none; align-content: center; gap: .7rem; min-width: 0; padding: 1.4rem; border-radius: var(--radius-lg); } .map-stage.is-preview-open .map-preview { display: grid; } .map-preview p, .map-preview h2 { margin: 0; } .map-preview > p { color: var(--primary); font-size: .86rem; font-weight: 700; } .map-preview h2 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.2vw, 2.2rem); line-height: 1.2; } .map-preview .preview-description { color: var(--muted); line-height: 1.7; } .map-preview a { width: fit-content; color: var(--primary); font-weight: 700; } .city-region { cursor: pointer; } .city-region:hover .city, .city-region:focus .city, .city-region.is-active .city { fill: color-mix(in srgb, var(--primary) 74%, var(--surface)); stroke: var(--text); stroke-width: 1.2; filter: drop-shadow(0 .22rem .28rem color-mix(in srgb, var(--primary) 42%, transparent)); } .city-label { font-size: .12px; } @media (max-width: 940px) { .map-stage.is-preview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage svg { grid-column: auto; } .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.35rem; } .map-preview { min-height: 12rem; } } @media (max-width: 640px) { .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.2rem; } .city-label { font-size: .1px; } }
+  .travel-map.is-province-open .province-shape { opacity: .24; filter: blur(1.6px); }
+  .travel-map.is-province-open .province-label { opacity: .18; }
+  .travel-map.is-province-open .province.is-open .province-shape { opacity: .34; filter: blur(.8px); }
+  .special-region-list { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .8rem .2rem 0; padding: .65rem .8rem; border-radius: var(--radius-md); }
+  .special-region-list p { margin: 0 .3rem 0 0; color: var(--muted); font-size: .9rem; }
+  .special-region-list a { border: 1px solid var(--border); border-radius: 999px; background: var(--surface-strong); color: var(--primary); font-weight: 700; padding: .35rem .65rem; }
 </style>
