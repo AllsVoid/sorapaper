@@ -7,6 +7,7 @@ interface Props { travels: TravelEntry[]; }
 interface MapFeature { id: string; pid: string; level: number; name: string; polygons: number[][][]; }
 interface Bounds { minLng: number; maxLng: number; minLat: number; maxLat: number; }
 interface TravelPreview { href: string; title: string; description: string; place: string; }
+interface SpecialRegion { name: string; feature: MapFeature; viewBox: string; }
 
 const { travels } = Astro.props;
 const features = [...mapData.features, ...taiwanCityData.features] as MapFeature[];
@@ -31,7 +32,9 @@ const visitedCityIds = new Set(cityLinks.keys());
 const specialRegionIds = new Set(["8100", "8200"]);
 const specialRegions = features.flatMap((feature) => {
   const preview = cityPreviews.get(feature.id);
-  return specialRegionIds.has(feature.id) && preview ? [{ ...preview, name: getCityLabel(feature.name) }] : [];
+  if (!specialRegionIds.has(feature.id) || !preview) return [];
+  const featureBounds = getDetailBounds(feature.polygons.flat());
+  return [{ name: getCityLabel(feature.name), feature, viewBox: `${featureBounds.minLng} ${-featureBounds.maxLat} ${featureBounds.maxLng - featureBounds.minLng} ${featureBounds.maxLat - featureBounds.minLat}` } satisfies SpecialRegion];
 });
 const visitedProvinceIds = new Set(features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id) && !specialRegionIds.has(feature.id)).map((feature) => feature.pid));
 const visitedProvinces = allProvinces.filter((province) => visitedProvinceIds.has(province.id));
@@ -44,6 +47,7 @@ const provinces = visitedProvinces.length < 2 ? visitedProvinces : allProvinces.
 const visibleFeatures = [...provinces, ...provinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
 const points = [
   ...visibleFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)),
+  ...specialRegions.flatMap((region) => region.feature.polygons.flat()),
   ...destinationMarkers.map((marker) => marker.coordinates)
 ];
 function getProvincePreview(provinceId: string) {
@@ -70,6 +74,15 @@ function getBounds(coordinates: number[][]): Bounds {
   const spanLng = Math.max(raw.maxLng - raw.minLng, 1.2);
   const spanLat = Math.max(raw.maxLat - raw.minLat, 1.2);
   const padding = Math.max(spanLng, spanLat) * 0.09;
+  return { minLng: raw.minLng - padding, maxLng: raw.maxLng + padding, minLat: raw.minLat - padding, maxLat: raw.maxLat + padding };
+}
+function getDetailBounds(coordinates: number[][]): Bounds {
+  const raw = getRawBounds(coordinates);
+  // Hong Kong and Macao include scattered islands. A tight crop makes their
+  // outlines fill the entire canvas, so retain a regional amount of context.
+  const spanLng = Math.max(raw.maxLng - raw.minLng, 4);
+  const spanLat = Math.max(raw.maxLat - raw.minLat, 3);
+  const padding = Math.max(spanLng, spanLat) * .09;
   return { minLng: raw.minLng - padding, maxLng: raw.maxLng + padding, minLat: raw.minLat - padding, maxLat: raw.maxLat + padding };
 }
 const bounds = getBounds(points);
@@ -133,9 +146,27 @@ function path(feature: MapFeature) {
         </g>;
       })}
     </g>
+    {specialRegions.length > 0 && <g class="special-region-shapes">
+      {specialRegions.map((region) => {
+        const [labelX, labelY] = labelPoint(region.feature);
+        return <g class="special-region-shape" data-special-region-shape={region.feature.id} aria-hidden="true"><path d={path(region.feature)} /><text class="special-region-label" x={labelX} y={labelY}>{region.name}</text></g>;
+      })}
+    </g>}
     <g class="markers">
       {destinationMarkers.map((marker) => <a href={marker.href} aria-label={marker.name}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
     </g>
+    {specialRegions.length > 0 && <g class="special-region-markers">
+      {specialRegions.map((region, index) => {
+        const [x, y] = labelPoint(region.feature);
+        const markerX = x + (index ? 2.2 : -2.2);
+        const markerY = y + (index ? -1.1 : 1.1);
+        return <g class="special-region-marker" data-special-region data-region-id={region.feature.id} data-region-view-box={region.viewBox} tabindex="0" role="button" aria-label={`Show ${region.name} travel`}>
+          <line x1={x} y1={y} x2={markerX} y2={markerY} />
+          <circle cx={markerX} cy={markerY} r=".46" />
+          <text x={markerX} y={markerY + .1}>{region.name}</text>
+        </g>;
+      })}
+    </g>}
     </svg>
     <article class="map-preview glass" data-map-preview aria-live="polite">
       <p data-preview-place></p>
@@ -144,12 +175,6 @@ function path(feature: MapFeature) {
       <a data-preview-link><span data-lang="zh">阅读游记</span><span data-lang="en">Read travel</span> →</a>
     </article>
   </div>
-  {specialRegions.length > 0 && (
-    <aside class="special-region-list glass" aria-label="Hong Kong and Macau travel">
-      <p><span data-lang="zh">香港与澳门</span><span data-lang="en">Hong Kong and Macau</span></p>
-      {specialRegions.map((region) => <a href={region.href}>{region.name}</a>)}
-    </aside>
-  )}
   <ul class="destination-list" aria-label="Travel destinations">
     {travels.flatMap((travel) => travel.data.destinations.map((destination) => <li><a href={getTravelHref(travel)}>{destination.name}</a><span>{destination.country}</span></li>))}
   </ul>
@@ -163,6 +188,18 @@ function path(feature: MapFeature) {
     const previewTitle = preview?.querySelector<HTMLElement>("[data-preview-title]");
     const previewDescription = preview?.querySelector<HTMLElement>("[data-preview-description]");
     const previewLink = preview?.querySelector<HTMLAnchorElement>("[data-preview-link]");
+    const svg = map.querySelector<SVGSVGElement>("[data-map-canvas]");
+    if (!svg) return;
+    const initial = svg.viewBox.baseVal;
+    const original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
+    const initialViewBox = svg.getAttribute("viewBox") ?? "";
+    const specialRegionShapes = [...map.querySelectorAll<SVGGElement>("[data-special-region-shape]")];
+    let specialRegionOpen = false;
+    const hideSpecialRegions = () => {
+      specialRegionOpen = false;
+      specialRegionShapes.forEach((shape) => { shape.classList.remove("is-open"); shape.setAttribute("aria-hidden", "true"); });
+      svg.setAttribute("viewBox", initialViewBox);
+    };
     const showPreview = (source: DOMStringMap) => {
       if (!preview || !source.previewHref) return;
       if (previewPlace) previewPlace.textContent = source.previewPlace ?? "";
@@ -171,6 +208,25 @@ function path(feature: MapFeature) {
       if (previewLink) previewLink.href = source.previewHref;
       stage?.classList.add("is-preview-open");
     };
+    const specialRegions = [...map.querySelectorAll<HTMLElement>("[data-special-region]")];
+    specialRegions.forEach((region) => {
+      const open = () => {
+        specialRegionOpen = true;
+        specialRegions.forEach((item) => item.classList.toggle("is-active", item === region));
+        specialRegionShapes.forEach((shape) => {
+          const active = shape.dataset.specialRegionShape === region.dataset.regionId;
+          shape.classList.toggle("is-open", active);
+          shape.setAttribute("aria-hidden", String(!active));
+        });
+        if (region.dataset.regionViewBox) svg.setAttribute("viewBox", region.dataset.regionViewBox);
+      };
+      region.addEventListener("mouseenter", open);
+      region.addEventListener("focus", open);
+      region.addEventListener("click", open);
+      region.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); open(); }
+      });
+    });
     const provinces = [...map.querySelectorAll<HTMLElement>("[data-province]")];
     const provinceLayer = map.querySelector<SVGGElement>(".provinces");
     provinces.forEach((province) => {
@@ -183,6 +239,8 @@ function path(feature: MapFeature) {
         });
         provinceLayer?.append(province);
         map.classList.add("is-province-open");
+        hideSpecialRegions();
+        specialRegions.forEach((item) => item.classList.remove("is-active"));
         if (showArticle && province.dataset.provincePreview !== undefined) showPreview(province.dataset);
       };
       province.addEventListener("mouseenter", () => open());
@@ -197,6 +255,8 @@ function path(feature: MapFeature) {
     cityRegions.forEach((city) => {
       const activate = () => {
         cityRegions.forEach((item) => item.classList.toggle("is-active", item === city));
+        hideSpecialRegions();
+        specialRegions.forEach((item) => item.classList.remove("is-active"));
         if (stage?.classList.contains("is-preview-open") && city.dataset.cityPreview !== undefined) showPreview(city.dataset);
       };
       city.addEventListener("mouseenter", activate);
@@ -211,19 +271,17 @@ function path(feature: MapFeature) {
         province.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", "true");
       });
       cityRegions.forEach((city) => city.classList.remove("is-active"));
+      specialRegions.forEach((region) => region.classList.remove("is-active"));
+      hideSpecialRegions();
       map.classList.remove("is-province-open");
       stage?.classList.remove("is-preview-open");
     };
     stage?.addEventListener("mouseleave", close);
 
-    const svg = map.querySelector<SVGSVGElement>("[data-map-canvas]");
-    if (!svg) return;
     svg.addEventListener("pointermove", (event) => {
       const target = event.target;
-      if (!(target instanceof Element) || !target.closest("[data-province]")) close();
+      if (!specialRegionOpen && (!(target instanceof Element) || !target.closest("[data-province], [data-special-region]"))) close();
     });
-    const initial = svg.viewBox.baseVal;
-    const original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
     let zoom = 1;
     let centerX = original.x + original.width / 2;
     let centerY = original.y + original.height / 2;
@@ -266,7 +324,14 @@ function path(feature: MapFeature) {
   .travel-map.is-province-open .province-shape { opacity: .24; filter: blur(1.6px); }
   .travel-map.is-province-open .province-label { opacity: .18; }
   .travel-map.is-province-open .province.is-open .province-shape { opacity: .34; filter: blur(.8px); }
-  .special-region-list { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin: .8rem .2rem 0; padding: .65rem .8rem; border-radius: var(--radius-md); }
-  .special-region-list p { margin: 0 .3rem 0 0; color: var(--muted); font-size: .9rem; }
-  .special-region-list a { border: 1px solid var(--border); border-radius: 999px; background: var(--surface-strong); color: var(--primary); font-weight: 700; padding: .35rem .65rem; }
+  .special-region-marker { cursor: pointer; }
+  .special-region-marker line { stroke: var(--accent); stroke-width: .08; vector-effect: non-scaling-stroke; }
+  .special-region-marker circle { fill: var(--accent); stroke: var(--text); stroke-width: .1; vector-effect: non-scaling-stroke; transition: r .18s ease, fill .18s ease; }
+  .special-region-marker text { pointer-events: none; fill: var(--text); font-size: .28px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .07px; }
+  .special-region-marker:hover circle, .special-region-marker:focus circle, .special-region-marker.is-active circle { fill: var(--primary); r: .55; }
+  .special-region-marker:focus-visible { outline: none; }
+  .special-region-shape { display: none; }
+  .special-region-shape.is-open { display: block; }
+  .special-region-shape path { fill: color-mix(in srgb, var(--primary) 34%, var(--surface)); stroke: var(--text); stroke-width: .02; vector-effect: non-scaling-stroke; }
+  .special-region-label { pointer-events: none; fill: var(--text); font-size: .04px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .014px; }
 </style>
