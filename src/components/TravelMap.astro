@@ -1,7 +1,7 @@
 ---
 import mapData from "@/data/maps/china-admin.json";
 import taiwanCityData from "@/data/maps/taiwan-cities.json";
-import japanMapData from "@/data/maps/japan-admin2.json";
+import japanMapData from "@/data/maps/japan-admin.json";
 import { getTravelHref, type TravelEntry } from "@/lib/travel";
 
 interface Props { travels: TravelEntry[]; }
@@ -14,9 +14,11 @@ const { travels } = Astro.props;
 const features = [...mapData.features, ...taiwanCityData.features, ...japanMapData.features] as MapFeature[];
 const allProvinces = features.filter((feature) => feature.level === 0 && !["81", "82"].includes(feature.id));
 const citiesByProvince = new Map(allProvinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
+const japanProvinceIdsByName = new Map(allProvinces.filter((province) => province.id.startsWith("JP-")).map((province) => [province.name, province.id]));
+const japanFeatureIds = new Set(features.filter((feature) => feature.id.startsWith("JP-") || feature.pid.startsWith("JP-")).map((feature) => feature.id));
 const cityLinks = new Map<string, string>();
 const cityPreviews = new Map<string, TravelPreview>();
-const destinationMarkers: { name: string; href: string; coordinates: [number, number] }[] = [];
+const destinationMarkers: { name: string; href: string; country: string; coordinates: [number, number] }[] = [];
 const mapOverviewItems = travels.flatMap((travel) => travel.data.destinations
   .map((destination) => ({
     href: getTravelHref(travel),
@@ -27,13 +29,15 @@ const mapOverviewItems = travels.flatMap((travel) => travel.data.destinations
   })));
 for (const travel of travels) {
   for (const destination of travel.data.destinations) {
-    const code = destination.country === "JP" ? destination.adminCode : destination.adminCode?.replace(/00$/, "");
+    const code = destination.country === "JP"
+      ? (destination.adminCode && japanFeatureIds.has(destination.adminCode) ? destination.adminCode : japanProvinceIdsByName.get(destination.province ?? ""))
+      : destination.adminCode?.replace(/00$/, "");
     if (code) {
       const href = getTravelHref(travel);
       cityLinks.set(code, href);
       cityPreviews.set(code, { href, title: travel.data.title, description: travel.data.description, place: destination.name });
     }
-    if (destination.coordinates) destinationMarkers.push({ name: destination.name, href: getTravelHref(travel), coordinates: destination.coordinates });
+    if (destination.coordinates) destinationMarkers.push({ name: destination.name, href: getTravelHref(travel), country: destination.country, coordinates: destination.coordinates });
   }
 }
 
@@ -45,25 +49,32 @@ const specialRegions = features.flatMap((feature) => {
   const featureBounds = getDetailBounds(feature.polygons.flat());
   return [{ name: getCityLabel(feature.name), feature, viewBox: `${featureBounds.minLng} ${-featureBounds.maxLat} ${featureBounds.maxLng - featureBounds.minLng} ${featureBounds.maxLat - featureBounds.minLat}` } satisfies SpecialRegion];
 });
-const visitedProvinceIds = new Set(features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id) && !specialRegionIds.has(feature.id)).map((feature) => feature.pid));
+const visitedProvinceIds = new Set([
+  ...features.filter((feature) => feature.level === 1 && visitedCityIds.has(feature.id) && !specialRegionIds.has(feature.id)).map((feature) => feature.pid),
+  ...features.filter((feature) => feature.level === 0 && visitedCityIds.has(feature.id)).map((feature) => feature.id)
+]);
 const chinaProvinces = allProvinces.filter((province) => !province.id.startsWith("JP-"));
 const japanProvinces = allProvinces.filter((province) => province.id.startsWith("JP-"));
 const visitedChinaProvinces = chinaProvinces.filter((province) => visitedProvinceIds.has(province.id));
 const visitedJapanProvinces = japanProvinces.filter((province) => visitedProvinceIds.has(province.id));
 const visitedChinaBounds = getRawBounds(visitedChinaProvinces.flatMap((province) => province.polygons.flatMap((ring) => ring)));
 const chinaVisibleProvinces = visitedChinaProvinces.length < 2 ? visitedChinaProvinces : chinaProvinces.filter((province) => intersects(getRawBounds(province.polygons.flat()), visitedChinaBounds));
-const visitedJapanBounds = getRawBounds(visitedJapanProvinces.flatMap((province) => province.polygons.flatMap((ring) => ring)));
-const japanContextBounds = getContextBounds(visitedJapanBounds);
-const japanVisibleProvinces = visitedJapanProvinces.length === 0 ? [] : japanProvinces.filter((province) => intersects(getRawBounds(province.polygons.flat()), japanContextBounds));
-const provinces = [...chinaVisibleProvinces, ...japanVisibleProvinces];
-const visibleFeatures = [...provinces, ...provinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
-const points = [
-  ...visibleFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)),
+const hasJapanTravel = visitedJapanProvinces.length > 0;
+// ADM1 preserves the full prefectural extent instead of cropping to the
+// prefectures near the recorded destination.
+const japanVisibleProvinces = hasJapanTravel ? japanProvinces : [];
+const domesticProvinces = chinaVisibleProvinces;
+const provinces = [...domesticProvinces, ...japanVisibleProvinces];
+const domesticFeatures = [...domesticProvinces, ...domesticProvinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
+const japanFeatures = [...japanVisibleProvinces, ...japanVisibleProvinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
+const domesticPoints = [
+  ...domesticFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)),
   ...specialRegions.flatMap((region) => region.feature.polygons.flat()),
-  ...destinationMarkers.map((marker) => marker.coordinates)
+  ...destinationMarkers.filter((marker) => marker.country !== "JP").map((marker) => marker.coordinates)
 ];
+const japanPoints = [...japanFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)), ...destinationMarkers.filter((marker) => marker.country === "JP").map((marker) => marker.coordinates)];
 function getProvincePreview(provinceId: string) {
-  return (citiesByProvince.get(provinceId) ?? []).map((city) => cityPreviews.get(city.id)).find(Boolean);
+  return cityPreviews.get(provinceId) ?? (citiesByProvince.get(provinceId) ?? []).map((city) => cityPreviews.get(city.id)).find(Boolean);
 }
 
 function getRawBounds(coordinates: number[][]): Bounds {
@@ -88,11 +99,6 @@ function getBounds(coordinates: number[][]): Bounds {
   const padding = Math.max(spanLng, spanLat) * 0.09;
   return { minLng: raw.minLng - padding, maxLng: raw.maxLng + padding, minLat: raw.minLat - padding, maxLat: raw.maxLat + padding };
 }
-function getContextBounds(bounds: Bounds): Bounds {
-  const span = Math.max(bounds.maxLng - bounds.minLng, bounds.maxLat - bounds.minLat, 1.2);
-  const padding = Math.min(Math.max(span * .45, .8), 2.2);
-  return { minLng: bounds.minLng - padding, maxLng: bounds.maxLng + padding, minLat: bounds.minLat - padding, maxLat: bounds.maxLat + padding };
-}
 function intersects(a: Bounds, b: Bounds) { return a.minLng <= b.maxLng && a.maxLng >= b.minLng && a.minLat <= b.maxLat && a.maxLat >= b.minLat; }
 function getDetailBounds(coordinates: number[][]): Bounds {
   const raw = getRawBounds(coordinates);
@@ -103,8 +109,20 @@ function getDetailBounds(coordinates: number[][]): Bounds {
   const padding = Math.max(spanLng, spanLat) * .09;
   return { minLng: raw.minLng - padding, maxLng: raw.maxLng + padding, minLat: raw.minLat - padding, maxLat: raw.maxLat + padding };
 }
-const bounds = getBounds(points);
-const viewBox = `${bounds.minLng} ${-bounds.maxLat} ${bounds.maxLng - bounds.minLng} ${bounds.maxLat - bounds.minLat}`;
+function getViewBox(points: number[][]) {
+  const bounds = getBounds(points);
+  return `${bounds.minLng} ${-bounds.maxLat} ${bounds.maxLng - bounds.minLng} ${bounds.maxLat - bounds.minLat}`;
+}
+function zoomViewBox(viewBox: string, factor: number) {
+  const [x, y, width, height] = viewBox.split(" ").map(Number);
+  const nextWidth = width * factor;
+  const nextHeight = height * factor;
+  return `${x + (width - nextWidth) / 2} ${y + (height - nextHeight) / 2} ${nextWidth} ${nextHeight}`;
+}
+const domesticViewBox = getViewBox(domesticPoints);
+const japanViewBox = zoomViewBox(getViewBox(japanPoints), .9);
+const initialRegion = domesticPoints.length ? "domestic" : "japan";
+const viewBox = initialRegion === "domestic" ? domesticViewBox : japanViewBox;
 function point([lng, lat]: number[]) { return `${lng} ${-lat}`; }
 function ringArea(ring: number[][]) {
   return ring.reduce((area, [x, y], index) => {
@@ -130,13 +148,17 @@ function getCityLabel(name: string) {
   const shortened = name.replace("香港特别行政区", "香港").replace("澳门特别行政区", "澳门");
   return ["省", "市", "县"].includes(shortened.at(-1) ?? "") ? shortened.slice(0, -1) : shortened;
 }
-function path(feature: MapFeature) {
+function path(feature: Pick<MapFeature, "polygons">) {
   return feature.polygons.map((ring) => ring.map((coordinates, index) => `${index ? "L" : "M"}${point(coordinates)}`).join("") + "Z").join("");
 }
 ---
 
-<section class="travel-map" data-travel-map aria-label="Travel map">
+<section class="travel-map" data-travel-map data-map-region={initialRegion} data-domestic-view-box={domesticViewBox} data-japan-view-box={japanViewBox} aria-label="Travel map">
   <div class="map-stage">
+    <div class="map-tabs" role="tablist" aria-label="地图地区">
+      {domesticPoints.length > 0 && <button type="button" role="tab" data-map-tab="domestic" aria-selected={initialRegion === "domestic"} aria-controls="travel-map-canvas"><span data-lang="zh">国内</span><span data-lang="en">China</span></button>}
+      {japanPoints.length > 0 && <button type="button" role="tab" data-map-tab="japan" aria-selected={initialRegion === "japan"} aria-controls="travel-map-canvas"><span data-lang="zh">日本</span><span data-lang="en">Japan</span></button>}
+    </div>
     <div class="map-key" aria-label="Map legend"><span class="key-province"></span><span data-lang="zh">有游记的省份</span><span data-lang="en">Province with travel</span></div>
     <div class="map-controls" aria-label="Map controls">
       <button type="button" data-map-overview aria-expanded="false" aria-controls="travel-map-overview"><span data-lang="zh">全部信息</span><span data-lang="en">All info</span></button>
@@ -144,22 +166,23 @@ function path(feature: MapFeature) {
       <button type="button" data-map-zoom-out aria-label="Zoom out"><span data-lang="zh">缩小</span><span data-lang="en">Zoom out</span></button>
       <button type="button" data-map-zoom-reset><span data-lang="zh">复位</span><span data-lang="en">Reset</span></button>
     </div>
-    <svg viewBox={viewBox} role="group" aria-label="Travel destinations map. Drag or use arrow keys to pan." preserveAspectRatio="xMidYMid meet" tabindex="0" data-map-canvas>
+    <svg id="travel-map-canvas" viewBox={viewBox} role="group" aria-label="Travel destinations map. Drag or use arrow keys to pan." preserveAspectRatio="xMidYMid meet" tabindex="0" data-map-canvas>
     <g class="provinces">
       {provinces.map((province) => {
         const cities = citiesByProvince.get(province.id) ?? [];
         const [labelX, labelY] = labelPoint(province);
         const preview = getProvincePreview(province.id);
-        return <g class:list={["province", { "is-visited": visitedProvinceIds.has(province.id) }]} data-province data-province-preview={preview ? "" : undefined} data-preview-title={preview?.title} data-preview-description={preview?.description} data-preview-place={preview?.place} data-preview-href={preview?.href}>
+        return <g class:list={["province", { "is-visited": visitedProvinceIds.has(province.id) }]} data-map-region={province.id.startsWith("JP-") ? "japan" : "domestic"} data-province data-province-preview={preview ? "" : undefined} data-preview-title={preview?.title} data-preview-description={preview?.description} data-preview-place={preview?.place} data-preview-href={preview?.href}>
           <path class="province-shape" d={path(province)} fill-rule="evenodd" tabindex="0" role="button" aria-label={`Show ${province.name} cities`} aria-expanded="false" />
           <text class="province-label" x={labelX} y={labelY}>{province.name.replace(/(省|市|自治区|特别行政区)$/, "")}</text>
           <g class="cities" aria-hidden="true">
             {cities.map((city) => {
               const [cityX, cityY] = labelPoint(city);
               const preview = cityPreviews.get(city.id);
+              const cityLabel = preview?.place ?? getCityLabel(city.name);
               return preview ? (
-                <a class="city-region" href={preview.href} aria-label={city.name} data-city-region data-city-preview data-preview-title={preview.title} data-preview-description={preview.description} data-preview-place={preview.place} data-preview-href={preview.href}><path class="city visited" d={path(city)} fill-rule="evenodd" /><text class="city-label" x={cityX} y={cityY}>{preview.place || getCityLabel(city.name)}</text></a>
-              ) : <g class="city-region" data-city-region tabindex="0" role="button" aria-label={city.name}><path class="city" d={path(city)} fill-rule="evenodd" /><text class="city-label" x={cityX} y={cityY}>{getCityLabel(city.name)}</text></g>;
+                <a class="city-region" href={preview.href} aria-label={preview.place} data-city-region data-city-preview data-preview-title={preview.title} data-preview-description={preview.description} data-preview-place={preview.place} data-preview-href={preview.href}><path class="city visited" d={path(city)} fill-rule="evenodd" /><text class="city-label" x={cityX} y={cityY}>{cityLabel}</text></a>
+              ) : <g class="city-region" data-city-region tabindex="0" role="button" aria-label={cityLabel || "日本市级边界"}><path class="city" d={path(city)} fill-rule="evenodd" />{cityLabel && <text class="city-label" x={cityX} y={cityY}>{cityLabel}</text>}</g>;
             })}
           </g>
         </g>;
@@ -172,14 +195,14 @@ function path(feature: MapFeature) {
       })}
     </g>}
     <g class="markers">
-      {destinationMarkers.map((marker) => <a href={marker.href} aria-label={marker.name}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
+      {destinationMarkers.map((marker) => <a href={marker.href} aria-label={marker.name} data-map-region={marker.country === "JP" ? "japan" : "domestic"}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
     </g>
     {specialRegions.length > 0 && <g class="special-region-markers">
       {specialRegions.map((region, index) => {
         const [x, y] = labelPoint(region.feature);
         const markerX = x + (index ? 2.2 : -2.2);
         const markerY = y + (index ? -1.1 : 1.1);
-        return <g class="special-region-marker" data-special-region data-region-id={region.feature.id} data-region-view-box={region.viewBox} tabindex="0" role="button" aria-label={`Show ${region.name} travel`}>
+        return <g class="special-region-marker" data-map-region="domestic" data-special-region data-region-id={region.feature.id} data-region-view-box={region.viewBox} tabindex="0" role="button" aria-label={`Show ${region.name} travel`}>
           <line x1={x} y1={y} x2={markerX} y2={markerY} />
           <circle cx={markerX} cy={markerY} r=".46" />
           <text x={markerX} y={markerY + .1}>{region.name}</text>
@@ -216,9 +239,9 @@ function path(feature: MapFeature) {
     const overviewButton = map.querySelector<HTMLButtonElement>("[data-map-overview]");
     const svg = map.querySelector<SVGSVGElement>("[data-map-canvas]");
     if (!svg) return;
-    const initial = svg.viewBox.baseVal;
-    const original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
-    const initialViewBox = svg.getAttribute("viewBox") ?? "";
+    let initial = svg.viewBox.baseVal;
+    let original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
+    let initialViewBox = svg.getAttribute("viewBox") ?? "";
     const specialRegionShapes = [...map.querySelectorAll<SVGGElement>("[data-special-region-shape]")];
     let specialRegionOpen = false;
     const hideSpecialRegions = () => {
@@ -304,6 +327,22 @@ function path(feature: MapFeature) {
       map.classList.remove("is-province-open");
       stage?.classList.remove("is-preview-open");
     };
+    const regionTabs = [...map.querySelectorAll<HTMLButtonElement>("[data-map-tab]")];
+    const selectRegion = (region: string) => {
+      const viewBox = region === "japan" ? map.dataset.japanViewBox : map.dataset.domesticViewBox;
+      if (!viewBox) return;
+      close();
+      map.dataset.mapRegion = region;
+      regionTabs.forEach((tab) => tab.setAttribute("aria-selected", String(tab.dataset.mapTab === region)));
+      svg.setAttribute("viewBox", viewBox);
+      initialViewBox = viewBox;
+      initial = svg.viewBox.baseVal;
+      original = { x: initial.x, y: initial.y, width: initial.width, height: initial.height };
+      zoom = 1;
+      centerX = original.x + original.width / 2;
+      centerY = original.y + original.height / 2;
+    };
+    regionTabs.forEach((tab) => tab.addEventListener("click", () => selectRegion(tab.dataset.mapTab ?? "domestic")));
     overviewButton?.addEventListener("click", () => {
       const open = !stage?.classList.contains("is-overview-open");
       close();
@@ -353,11 +392,18 @@ function path(feature: MapFeature) {
 </script>
 
 <style>
+  [data-map-region="domestic"] [data-map-region="japan"], [data-map-region="japan"] [data-map-region="domestic"] { display: none; }
+  .map-tabs { position: absolute; z-index: 2; top: 1.35rem; left: 1.35rem; display: flex; gap: .3rem; padding: .3rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); box-shadow: var(--shadow-soft); }
+  .map-tabs button { min-height: 2rem; padding: .25rem .65rem; border: 1px solid transparent; border-radius: calc(var(--radius-sm) - .1rem); background: transparent; color: var(--muted); cursor: pointer; }
+  .map-tabs button[aria-selected="true"] { border-color: color-mix(in srgb, var(--primary) 48%, var(--border)); background: color-mix(in srgb, var(--primary) 18%, var(--surface)); color: var(--text); font-weight: 700; }
   .travel-map { position: relative; width: 100%; padding: .75rem; border-radius: var(--radius-xl); } svg { display: block; width: 100%; min-height: 62vh; overflow: hidden; border: 1px solid color-mix(in srgb, var(--primary) 58%, var(--border)); border-radius: calc(var(--radius-xl) - .35rem); background: color-mix(in srgb, var(--bg-soft) 72%, transparent); backdrop-filter: blur(18px); cursor: grab; touch-action: none; } svg:active { cursor: grabbing; } .map-controls, .map-key { position: absolute; z-index: 1; display: flex; align-items: center; gap: .35rem; padding: .35rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); box-shadow: var(--shadow-soft); } .map-controls { top: 1.35rem; right: 1.35rem; } .map-key { top: 1.35rem; left: 1.35rem; color: var(--text); font-size: .82rem; } .key-province { width: .7rem; height: .7rem; border: 2px solid var(--text); border-radius: .18rem; background: color-mix(in srgb, var(--primary) 52%, var(--surface-strong)); } .map-controls button { min-width: 2.25rem; min-height: 2.25rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-strong); color: var(--text); cursor: pointer; } .map-controls button:last-child { padding-inline: .55rem; } .province { cursor: pointer; } .province-shape { fill: color-mix(in srgb, var(--surface-strong) 84%, var(--primary)); stroke: color-mix(in srgb, var(--text) 72%, var(--primary)); stroke-width: 1.1; vector-effect: non-scaling-stroke; transition: fill .25s ease, filter .25s ease, opacity .25s ease; } .province.is-visited .province-shape { fill: color-mix(in srgb, var(--primary) 32%, var(--surface)); stroke: var(--text); stroke-width: 1.35; } .province:hover .province-shape, .province:focus-within .province-shape, .province.is-open .province-shape { fill: color-mix(in srgb, var(--primary) 48%, var(--surface)); filter: drop-shadow(0 .6rem .65rem color-mix(in srgb, var(--primary) 38%, transparent)); } .province-label { pointer-events: none; fill: var(--text); font-size: .3px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .08px; transition: opacity .16s ease; } .province.is-open .province-label { opacity: 0; } .cities { opacity: 0; pointer-events: none; transform: translateY(-.48px) scale(.985); transform-box: fill-box; transform-origin: center; transition: opacity .18s ease, transform .3s ease; } .province.is-open .cities { opacity: 1; pointer-events: auto; transform: translateY(-.9px) scale(2.4); } .city { fill: color-mix(in srgb, var(--surface) 84%, var(--primary)); stroke: color-mix(in srgb, var(--text) 68%, var(--primary)); stroke-width: .8; vector-effect: non-scaling-stroke; } .city-label { pointer-events: none; fill: var(--text); font-size: .2px; font-weight: 650; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: .06px; } .city.visited, .destination-marker { fill: var(--accent); stroke: var(--text); stroke-width: 1.15; vector-effect: non-scaling-stroke; cursor: pointer; } a:hover .city.visited, a:focus .city.visited, a:hover .destination-marker, a:focus .destination-marker { fill: var(--primary); } .province-shape:focus-visible, svg:focus-visible, .map-controls button:focus-visible, a:focus-visible .city, a:focus-visible .destination-marker { outline: none; stroke: var(--text); stroke-width: 1.6; } .destination-list { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: .8rem .2rem 0; padding: 0; list-style: none; color: var(--muted); font-size: .9rem; } .destination-list li { display: flex; gap: .35rem; } .destination-list a { color: var(--primary); } .destination-list span::before { content: "·"; margin-right: .35rem; } @media (max-width: 640px) { svg { min-height: 48vh; } .map-controls { top: 1.2rem; right: 1.2rem; } .map-key { top: 1.2rem; left: 1.2rem; } .map-controls button:last-child { display: none; } .province-label { font-size: .24px; } .city-label { font-size: .16px; } } @media (prefers-reduced-motion: reduce) { .province-label, .cities { transition: none; } }
   .map-stage { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-items: stretch; } .map-stage.is-preview-open { grid-template-columns: minmax(0, 1fr) minmax(15rem, 21rem); gap: 1rem; } .map-stage svg { grid-column: 1; } .map-stage .map-controls { right: 1.35rem; } .map-stage.is-preview-open .map-controls { right: calc(21rem + 1.35rem); } .map-preview { display: none; align-content: center; gap: .7rem; min-width: 0; padding: 1.4rem; border-radius: var(--radius-lg); } .map-stage.is-preview-open .map-preview { display: grid; } .map-preview p, .map-preview h2 { margin: 0; } .map-preview > p { color: var(--primary); font-size: .86rem; font-weight: 700; } .map-preview h2 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.2vw, 2.2rem); line-height: 1.2; } .map-preview .preview-description { color: var(--muted); line-height: 1.7; } .map-preview a { width: fit-content; color: var(--primary); font-weight: 700; } .city-region { cursor: pointer; } .city-region:hover .city, .city-region:focus .city, .city-region.is-active .city { fill: color-mix(in srgb, var(--primary) 74%, var(--surface)); stroke: var(--text); stroke-width: 1.2; filter: drop-shadow(0 .22rem .28rem color-mix(in srgb, var(--primary) 42%, transparent)); } .city-label { font-size: .12px; } @media (max-width: 940px) { .map-stage.is-preview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage svg { grid-column: auto; } .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.35rem; } .map-preview { min-height: 12rem; } } @media (max-width: 640px) { .map-stage .map-controls, .map-stage.is-preview-open .map-controls { right: 1.2rem; } .city-label { font-size: .1px; } }
   .travel-map.is-province-open .province-shape { opacity: .24; filter: blur(1.6px); }
   .travel-map.is-province-open .province-label { opacity: .18; }
   .travel-map.is-province-open .province.is-open .province-shape { opacity: .34; filter: blur(.8px); }
+  .province[data-map-region="japan"].is-open .cities { transform: translateY(-.9px) scale(5); }
+  .province[data-map-region="japan"] .city-label { font-size: .06px; }
+  .province-label, .city-label, .special-region-label, .special-region-marker text { paint-order: normal; stroke: none; }
   .special-region-marker { cursor: pointer; }
   .special-region-marker line { stroke: var(--accent); stroke-width: .08; vector-effect: non-scaling-stroke; }
   .special-region-marker circle { fill: var(--accent); stroke: var(--text); stroke-width: .1; vector-effect: non-scaling-stroke; transition: r .18s ease, fill .18s ease; }
@@ -383,4 +429,6 @@ function path(feature: MapFeature) {
   .map-overview a { color: var(--primary); font-weight: 700; }
   @media (max-width: 940px) { .map-stage.is-overview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage.is-overview-open .map-controls { right: 1.35rem; } .map-overview { max-height: none; } }
   @media (max-width: 640px) { .map-stage.is-overview-open .map-controls { right: 1.2rem; } }
+  .map-key { top: 4rem; }
+  @media (max-width: 640px) { .map-tabs { top: 1.2rem; left: 1.2rem; } .map-key { top: 3.8rem; } }
 </style>
