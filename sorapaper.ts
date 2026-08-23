@@ -28,7 +28,8 @@ const config = {
     working: "A new project"
   },
   featureFlags: {
-    travel: true
+    travel: true,
+    japanTravelMap: true
   },
   codeBlocks: {
     copyButton: true,

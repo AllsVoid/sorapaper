@@ -4,13 +4,13 @@ import taiwanCityData from "@/data/maps/taiwan-cities.json";
 import japanMapData from "@/data/maps/japan-admin.json";
 import { getTravelHref, type TravelEntry } from "@/lib/travel";
 
-interface Props { travels: TravelEntry[]; }
+interface Props { travels: TravelEntry[]; showJapan?: boolean; }
 interface MapFeature { id: string; pid: string; level: number; name: string; polygons: number[][][]; }
 interface Bounds { minLng: number; maxLng: number; minLat: number; maxLat: number; }
 interface TravelPreview { href: string; title: string; description: string; place: string; }
 interface SpecialRegion { name: string; feature: MapFeature; viewBox: string; }
 
-const { travels } = Astro.props;
+const { travels, showJapan = true } = Astro.props;
 const features = [...mapData.features, ...taiwanCityData.features, ...japanMapData.features] as MapFeature[];
 const allProvinces = features.filter((feature) => feature.level === 0 && !["81", "82"].includes(feature.id));
 const citiesByProvince = new Map(allProvinces.map((province) => [province.id, features.filter((feature) => feature.level === 1 && feature.pid === province.id)]));
@@ -62,17 +62,20 @@ const chinaVisibleProvinces = visitedChinaProvinces.length < 2 ? visitedChinaPro
 const hasJapanTravel = visitedJapanProvinces.length > 0;
 // ADM1 preserves the full prefectural extent instead of cropping to the
 // prefectures near the recorded destination.
-const japanVisibleProvinces = hasJapanTravel ? japanProvinces : [];
+const japanVisibleProvinces = showJapan && hasJapanTravel ? japanProvinces : [];
 const domesticProvinces = chinaVisibleProvinces;
 const provinces = [...domesticProvinces, ...japanVisibleProvinces];
 const domesticFeatures = [...domesticProvinces, ...domesticProvinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
-const japanFeatures = [...japanVisibleProvinces, ...japanVisibleProvinces.flatMap((province) => citiesByProvince.get(province.id) ?? [])];
+const japanFeatures = japanVisibleProvinces;
 const domesticPoints = [
   ...domesticFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)),
   ...specialRegions.flatMap((region) => region.feature.polygons.flat()),
   ...destinationMarkers.filter((marker) => marker.country !== "JP").map((marker) => marker.coordinates)
 ];
-const japanPoints = [...japanFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)), ...destinationMarkers.filter((marker) => marker.country === "JP").map((marker) => marker.coordinates)];
+const japanPoints = showJapan
+  ? [...japanFeatures.flatMap((feature) => feature.polygons.flatMap((ring) => ring)), ...destinationMarkers.filter((marker) => marker.country === "JP").map((marker) => marker.coordinates)]
+  : [];
+const hasMap = domesticPoints.length > 0 || japanPoints.length > 0;
 function getProvincePreview(provinceId: string) {
   return cityPreviews.get(provinceId) ?? (citiesByProvince.get(provinceId) ?? []).map((city) => cityPreviews.get(city.id)).find(Boolean);
 }
@@ -121,7 +124,7 @@ function zoomViewBox(viewBox: string, factor: number) {
 }
 const domesticViewBox = getViewBox(domesticPoints);
 const japanViewBox = zoomViewBox(getViewBox(japanPoints), .9);
-const initialRegion = domesticPoints.length ? "domestic" : "japan";
+const initialRegion = domesticPoints.length || !japanPoints.length ? "domestic" : "japan";
 const viewBox = initialRegion === "domestic" ? domesticViewBox : japanViewBox;
 function point([lng, lat]: number[]) { return `${lng} ${-lat}`; }
 function ringArea(ring: number[][]) {
@@ -154,10 +157,10 @@ function path(feature: Pick<MapFeature, "polygons">) {
 ---
 
 <section class="travel-map" data-travel-map data-map-region={initialRegion} data-domestic-view-box={domesticViewBox} data-japan-view-box={japanViewBox} aria-label="Travel map">
-  <div class="map-stage">
+  {hasMap && <div class="map-stage">
     <div class="map-tabs" role="tablist" aria-label="地图地区">
       {domesticPoints.length > 0 && <button type="button" role="tab" data-map-tab="domestic" aria-selected={initialRegion === "domestic"} aria-controls="travel-map-canvas"><span data-lang="zh">国内</span><span data-lang="en">China</span></button>}
-      {japanPoints.length > 0 && <button type="button" role="tab" data-map-tab="japan" aria-selected={initialRegion === "japan"} aria-controls="travel-map-canvas"><span data-lang="zh">日本</span><span data-lang="en">Japan</span></button>}
+      {showJapan && japanPoints.length > 0 && <button type="button" role="tab" data-map-tab="japan" aria-selected={initialRegion === "japan"} aria-controls="travel-map-canvas"><span data-lang="zh">日本</span><span data-lang="en">Japan</span></button>}
     </div>
     <div class="map-key" aria-label="Map legend"><span class="key-province"></span><span data-lang="zh">有游记的省份</span><span data-lang="en">Province with travel</span></div>
     <div class="map-controls" aria-label="Map controls">
@@ -169,11 +172,12 @@ function path(feature: Pick<MapFeature, "polygons">) {
     <svg id="travel-map-canvas" viewBox={viewBox} role="group" aria-label="Travel destinations map. Drag or use arrow keys to pan." preserveAspectRatio="xMidYMid meet" tabindex="0" data-map-canvas>
     <g class="provinces">
       {provinces.map((province) => {
-        const cities = citiesByProvince.get(province.id) ?? [];
+        const isJapanProvince = province.id.startsWith("JP-");
+        const cities = isJapanProvince ? [] : citiesByProvince.get(province.id) ?? [];
         const [labelX, labelY] = labelPoint(province);
         const preview = getProvincePreview(province.id);
-        return <g class:list={["province", { "is-visited": visitedProvinceIds.has(province.id) }]} data-map-region={province.id.startsWith("JP-") ? "japan" : "domestic"} data-province data-province-preview={preview ? "" : undefined} data-preview-title={preview?.title} data-preview-description={preview?.description} data-preview-place={preview?.place} data-preview-href={preview?.href}>
-          <path class="province-shape" d={path(province)} fill-rule="evenodd" tabindex="0" role="button" aria-label={`Show ${province.name} cities`} aria-expanded="false" />
+        return <g class:list={["province", { "is-visited": visitedProvinceIds.has(province.id) }]} data-map-region={isJapanProvince ? "japan" : "domestic"} data-province data-province-expandable={!isJapanProvince ? "" : undefined} data-province-preview={preview ? "" : undefined} data-preview-title={preview?.title} data-preview-description={preview?.description} data-preview-place={preview?.place} data-preview-href={preview?.href}>
+          <path class="province-shape" d={path(province)} fill-rule="evenodd" tabindex="0" role="button" aria-label={isJapanProvince ? `Show ${province.name} travel` : `Show ${province.name} cities`} aria-expanded={!isJapanProvince ? "false" : undefined} />
           <text class="province-label" x={labelX} y={labelY}>{province.name.replace(/(省|市|自治区|特别行政区)$/, "")}</text>
           <g class="cities" aria-hidden="true">
             {cities.map((city) => {
@@ -195,7 +199,7 @@ function path(feature: Pick<MapFeature, "polygons">) {
       })}
     </g>}
     <g class="markers">
-      {destinationMarkers.map((marker) => <a href={marker.href} aria-label={marker.name} data-map-region={marker.country === "JP" ? "japan" : "domestic"}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
+      {destinationMarkers.filter((marker) => showJapan || marker.country !== "JP").map((marker) => <a href={marker.href} aria-label={marker.name} data-map-region={marker.country === "JP" ? "japan" : "domestic"}><circle class="destination-marker" cx={marker.coordinates[0]} cy={-marker.coordinates[1]} r="0.18" /></a>)}
     </g>
     {specialRegions.length > 0 && <g class="special-region-markers">
       {specialRegions.map((region, index) => {
@@ -222,7 +226,7 @@ function path(feature: Pick<MapFeature, "polygons">) {
         {mapOverviewItems.map((item) => <li><p class="overview-place">{item.place} · {item.country}</p><h3><a href={item.href}>{item.title}</a></h3><p>{item.description}</p></li>)}
       </ul>
     </aside>
-  </div>
+  </div>}
   <ul class="destination-list" aria-label="Travel destinations">
     {travels.flatMap((travel) => travel.data.destinations.map((destination) => <li><a href={getTravelHref(travel)}>{destination.name}</a><span>{destination.country}</span></li>))}
   </ul>
@@ -245,9 +249,10 @@ function path(feature: Pick<MapFeature, "polygons">) {
     const specialRegionShapes = [...map.querySelectorAll<SVGGElement>("[data-special-region-shape]")];
     let specialRegionOpen = false;
     const hideSpecialRegions = () => {
+      const wasSpecialRegionOpen = specialRegionOpen;
       specialRegionOpen = false;
       specialRegionShapes.forEach((shape) => { shape.classList.remove("is-open"); shape.setAttribute("aria-hidden", "true"); });
-      svg.setAttribute("viewBox", initialViewBox);
+      if (wasSpecialRegionOpen) svg.setAttribute("viewBox", initialViewBox);
     };
     const showPreview = (source: DOMStringMap) => {
       if (!preview || !source.previewHref) return;
@@ -282,14 +287,17 @@ function path(feature: Pick<MapFeature, "polygons">) {
     const provinceLayer = map.querySelector<SVGGElement>(".provinces");
     provinces.forEach((province) => {
       const open = (showArticle = false) => {
-        provinces.forEach((item) => {
-          const active = item === province;
-          item.classList.toggle("is-open", active);
-          item.querySelector<SVGPathElement>(".province-shape")?.setAttribute("aria-expanded", String(active));
-          item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
-        });
-        provinceLayer?.append(province);
-        map.classList.add("is-province-open");
+        const expandable = province.dataset.provinceExpandable !== undefined;
+        if (expandable) {
+          provinces.forEach((item) => {
+            const active = item === province;
+            item.classList.toggle("is-open", active);
+            item.querySelector<SVGPathElement>(".province-shape")?.setAttribute("aria-expanded", String(active));
+            item.querySelector<SVGGElement>(".cities")?.setAttribute("aria-hidden", String(!active));
+          });
+          provinceLayer?.append(province);
+          map.classList.add("is-province-open");
+        }
         hideSpecialRegions();
         specialRegions.forEach((item) => item.classList.remove("is-active"));
         if (showArticle && province.dataset.provincePreview !== undefined) showPreview(province.dataset);
@@ -352,6 +360,7 @@ function path(feature: Pick<MapFeature, "polygons">) {
     stage?.addEventListener("mouseleave", close);
 
     svg.addEventListener("pointermove", (event) => {
+      if (dragStart) return;
       const target = event.target;
       if (!specialRegionOpen && (!(target instanceof Element) || !target.closest("[data-province], [data-special-region]"))) close();
     });
@@ -401,8 +410,7 @@ function path(feature: Pick<MapFeature, "polygons">) {
   .travel-map.is-province-open .province-shape { opacity: .24; filter: blur(1.6px); }
   .travel-map.is-province-open .province-label { opacity: .18; }
   .travel-map.is-province-open .province.is-open .province-shape { opacity: .34; filter: blur(.8px); }
-  .province[data-map-region="japan"].is-open .cities { transform: translateY(-.9px) scale(5); }
-  .province[data-map-region="japan"] .city-label { font-size: .06px; }
+  .province[data-map-region="japan"] .province-label { font-size: .22px; }
   .province-label, .city-label, .special-region-label, .special-region-marker text { paint-order: normal; stroke: none; }
   .special-region-marker { cursor: pointer; }
   .special-region-marker line { stroke: var(--accent); stroke-width: .08; vector-effect: non-scaling-stroke; }
@@ -430,5 +438,5 @@ function path(feature: Pick<MapFeature, "polygons">) {
   @media (max-width: 940px) { .map-stage.is-overview-open { grid-template-columns: 1fr; gap: 1rem; } .map-stage.is-overview-open .map-controls { right: 1.35rem; } .map-overview { max-height: none; } }
   @media (max-width: 640px) { .map-stage.is-overview-open .map-controls { right: 1.2rem; } }
   .map-key { top: 4rem; }
-  @media (max-width: 640px) { .map-tabs { top: 1.2rem; left: 1.2rem; } .map-key { top: 3.8rem; } }
+  @media (max-width: 640px) { .map-tabs { top: 1.2rem; left: 1.2rem; } .map-key { top: 3.8rem; } .province[data-map-region="japan"] .province-label { font-size: .17px; } }
 </style>

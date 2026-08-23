@@ -129,6 +129,7 @@ export interface SoraPaperThemeConfig {
   };
   featureFlags: {
     travel: boolean;
+    japanTravelMap: boolean;
   };
   codeBlocks: {
     copyButton: boolean;

@@ -1,13 +1,14 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import TravelMap from "@/components/TravelMap.astro";
+import { themeConfig } from "@/config/theme";
 import { getPublishedTravels } from "@/lib/travel";
 
 const travels = await getPublishedTravels();
 ---
 
 <BaseLayout title="Travel" description="Travel notes and map records.">
-  <main class="travel-page">{travels.length > 0 && <TravelMap travels={travels} />}</main>
+  <main class="travel-page">{travels.length > 0 && <TravelMap travels={travels} showJapan={themeConfig.featureFlags.japanTravelMap} />}</main>
 </BaseLayout>
 
 <style>

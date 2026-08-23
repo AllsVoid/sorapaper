@@ -240,7 +240,7 @@ toc: true
 
 日本地图使用单一的 `src/data/maps/japan-admin.json`：其中同时包含 ADM1 都道府县和 ADM2 市町村边界。日本目的地优先通过 `adminCode` 命中 ADM2 区域（如镰仓），缺少有效编码时再用中文 `province` 回退到都道府县。
 
-日本标签的初始视图会略微放大；展开都道府县时，ADM2 图层按 5 倍显示，并使用更小的市级标签。ADM2 名称已由日本地方自治体公开名录补全为中文汉字标签，不显示罗马字名称。
+日本地图由 `featureFlags.japanTravelMap` 独立控制，默认开启；关闭后不渲染日本标签、边界或坐标点，但日本游记仍保留在内容和文本列表中。日本标签的初始视图会略微放大，只渲染 ADM1 都道府县并使用比国内省名更小的标签。ADM2 数据仅用于把目的地 `adminCode` 关联到所属都道府县，不提供市町村展开交互；选择有游记的都道府县会直接显示文章预览。
 
 游记 collection 位于 `src/content/travel/`，在 `src/content.config.ts` 中定义。每篇游记必须包含 `title`、`description`、`startDate`、`endDate`，以及至少一个 `destinations` 项。每个目的地包含 `name`、`country`，并可选填 `province`、`adminCode`、`coordinates: [lng, lat]` 和 `summary`；坐标必须落在有效经纬度范围内，`endDate` 不得早于 `startDate`。
 
@@ -496,7 +496,7 @@ tags: ["Framework", "Frontend"]
 - 站点描述：`description`
 - 作者信息：`author`
 - Now 卡片：`now`
-- 功能开关：`featureFlags`（其中 `travel` 控制游记导航与页面）
+- 功能开关：`featureFlags`（其中 `travel` 控制游记导航与页面，`japanTravelMap` 单独控制日本地图标签与图层）
 - 文章许可协议：`article.license`，可选 `cc-by-4.0`（默认）或 `cc-by-nc-4.0`。
 - 导航文案。
 - 首页 Hero 文案。

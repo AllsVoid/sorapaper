@@ -37,8 +37,18 @@ Desktop.ini
 # Test and coverage output
 coverage/
 .nyc_output/
+.playwright-cli/
+output/
 
 # Temporary files
 tmp/
 temp/
 .cache/
+
+# Local research and one-off migration artifacts
+docs/blog-feature-roadmap.md
+docs/dependency-decision-audit.md
+docs/map-interaction-demo.html
+docs/map-interaction-research.md
+docs/mermaid-directive-support.patch
+scripts/localize-japan-admin.mjs

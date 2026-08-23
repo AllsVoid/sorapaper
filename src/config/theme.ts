@@ -30,7 +30,8 @@ export const defaultThemeConfig = {
     working: "A new project"
   },
   featureFlags: {
-    travel: false
+    travel: false,
+    japanTravelMap: true
   },
   codeBlocks: {
     copyButton: true,

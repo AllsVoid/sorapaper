@@ -88,7 +88,7 @@ See the [development guide](docs/development-guide.md) for all frontmatter field
 
 ## Write a travel entry
 
-The travel MVP is enabled with `featureFlags.travel` in `sorapaper.ts`. Add a `.md` or `.mdx` file under `src/content/travel/`; every entry needs a date range and at least one destination:
+The travel MVP is enabled with `featureFlags.travel` in `sorapaper.ts`. Set `featureFlags.japanTravelMap` to `false` to hide the Japan map tab while keeping Japanese travel entries available in the content list. Add a `.md` or `.mdx` file under `src/content/travel/`; every entry needs a date range and at least one destination:
 
 ```yaml
 ---
@@ -108,9 +108,7 @@ destinations:
 
 Entries appear alongside normal posts on the home page. `/travel/` contains a local, static map that renders Chinese provinces represented by published `adminCode` values plus the provinces between them, preserving a continuous regional view; hover, focus, or tap a province to reveal its city boundaries and recorded cities. Its upper-left tabs separate domestic and international regions with local map data; each tab receives its own view and controls. Japanese destinations use local ADM1 prefecture boundaries, so the map highlights the matching prefecture by its Chinese `province` value and shows all of Japan, including remote islands. This deliberately omits Japan's city-level boundaries to keep the map data small. Destinations with `coordinates` are included as markers, so future international entries can extend the map without an external API. Hong Kong and Macau are rendered as separate, clickable regions on the main map, while Taiwan city and county boundaries are bundled locally in `src/data/maps/taiwan-cities.json`. The map has optional zoom controls when its selected area is broad. Regenerate its simplified province/city data with `node scripts/build-travel-map.mjs /path/to/ok_geo.csv src/data/maps/china-admin.json`. Regenerate Japan ADM1 + ADM2 data with `node scripts/build-japan-travel-map.mjs /path/to/geoBoundaries-JPN-ADM2.geojson src/data/maps/japan-admin.json /path/to/geoBoundaries-JPN-ADM1.geojson`. See [the travel PRD](docs/travel-prd.md) for interaction details.
 
-Japan now uses the single `src/data/maps/japan-admin.json` bundle: it contains both ADM1 prefectures and ADM2 municipalities. A Japanese destination first matches its ADM2 `adminCode` (for example, Kamakura), then falls back to its Chinese `province` when an ADM2 code is unavailable.
-
-The Japan tab starts at a slightly closer view. Its prefecture interaction expands the ADM2 layer by 5×, with smaller municipality labels to preserve readability. Japanese ADM2 labels use normalized Chinese-character municipality names sourced from Japanese local-government records, so the map does not present romanized municipality labels.
+Japan uses the single `src/data/maps/japan-admin.json` bundle. ADM2 municipality records remain available for matching destination `adminCode` values to their parent prefectures, but the map renders and interacts with ADM1 prefectures only. Selecting a prefecture opens its travel preview directly instead of expanding a municipality layer.
 
 ## Deploy
 

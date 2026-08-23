@@ -59,6 +59,10 @@ Article page:
 - The article share panel should stay compact and optional, use the same glass card language, keep buttons keyboard accessible, and provide a QR fallback for WeChat instead of assuming platform-specific JavaScript SDK access.
 - The article license notice should appear quietly at the end of the body, use the configured CC BY 4.0 or CC BY-NC 4.0 canonical license link, and remain readable in both themes and locales.
 
+Travel page:
+
+- The domestic map may reveal city boundaries as a secondary interaction. The optional Japan map must remain ADM1-only: show all 47 prefectures with a smaller label scale, open travel previews directly from prefectures, and do not expose municipality expansion states.
+
 Archive and tags:
 
 - Archive should use a compact timeline layout instead of homepage post cards, with year markers, optional thumbnails, concise metadata and clipped summaries.
