@@ -11,8 +11,7 @@ export const defaultUi = {
       tags: "标签",
       series: "系列",
       about: "关于",
-      friends: "友链",
-      travel: "游记"
+      friends: "友链"
     },
     hero: {
       eyebrow: "欢迎来到我的空间",
@@ -74,11 +73,7 @@ export const defaultUi = {
       seriesEmpty: "这个语言下还没有系列文章。",
       aboutTitle: "关于",
       friendsTitle: "网络花园里的邻居",
-      friendsDescription: "一些值得访问的链接。",
-      travelTitle: "游记",
-      travelDescription: "在地图、城市和文字之间，收集旅行留下的路径。",
-      travelEmptyTitle: "还没有旅行记录",
-      travelEmptyDescription: "添加一篇旅行内容后，它会出现在这里。"
+      friendsDescription: "一些值得访问的链接。"
     },
     search: {
       label: "搜索文章",
@@ -109,8 +104,7 @@ export const defaultUi = {
       tags: "Tags",
       series: "Series",
       about: "About",
-      friends: "Friends",
-      travel: "Travel"
+      friends: "Friends"
     },
     hero: {
       eyebrow: "Welcome to my space",
@@ -172,11 +166,7 @@ export const defaultUi = {
       seriesEmpty: "There are no series posts in this language yet.",
       aboutTitle: "About",
       friendsTitle: "Neighbors in the web garden",
-      friendsDescription: "A small collection of links worth visiting.",
-      travelTitle: "Travel",
-      travelDescription: "A collection of routes, cities and travel stories.",
-      travelEmptyTitle: "No travel records yet",
-      travelEmptyDescription: "Add a travel entry and it will appear here."
+      friendsDescription: "A small collection of links worth visiting."
     },
     search: {
       label: "Search posts",

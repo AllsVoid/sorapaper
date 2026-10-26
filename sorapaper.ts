@@ -27,10 +27,6 @@ const config = {
     reading: "The Design of Everyday Things",
     working: "A new project"
   },
-  featureFlags: {
-    travel: true,
-    japanTravelMap: true
-  },
   codeBlocks: {
     copyButton: true,
     lineNumbers: false
@@ -59,8 +55,7 @@ const config = {
         tags: "标签",
         series: "系列",
         about: "关于",
-        friends: "友链",
-        travel: "游记"
+        friends: "友链"
       },
       hero: {
         eyebrow: "欢迎来到我的空间",
@@ -87,8 +82,7 @@ const config = {
         tags: "Tags",
         series: "Series",
         about: "About",
-        friends: "Friends",
-        travel: "Travel"
+        friends: "Friends"
       },
       hero: {
         eyebrow: "Welcome to my space",

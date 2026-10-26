@@ -26,7 +26,7 @@ pnpm dev
 ## 特性
 
 - **静态优先。** 基于 Astro 与 Content Collections，内置 RSS、站点地图和 Pagefind 本地搜索。
-- **集中配置。** 在 `sorapaper.ts` 中设置站点信息、个人资料、配色、导航、多语言文案和功能开关。
+- **集中配置。** 在 `sorapaper.ts` 中设置站点信息、个人资料、配色、导航和多语言文案。
 - **动态分享图片。** 每篇文章可生成 SVG、PNG Open Graph 卡片；分享面板支持复制链接、系统分享、下载卡片和微信二维码兜底。
 - **丰富的写作能力。** 类型化 frontmatter、Shiki 代码窗口、公式、脚注、提示块、标签页、折叠块、加密内容、画廊、音乐与视频。
 - **按需 Mermaid。** 仅含图表的文章才加载 Mermaid，并在图表接近视口时渲染；保留源码 fallback，移动端可横向查看，且支持无障碍的放大预览。
@@ -164,3 +164,7 @@ pnpm run build
 ## 许可证
 
 [MIT](LICENSE)
+
+## 游记功能迁移
+
+游记功能已从主题中独立。主题不再提供 `/travel/` 路由、首页游记卡片、游记集合、地图数据及示例游记。升级前请将已有游记内容迁移到独立项目，并从旧配置中删除 `featureFlags`（含 `travel`、`japanTravelMap`）、`ui.*.nav.travel` 和 `ui.*.pages.travel*` 覆盖项。博客文章 URL 和配置合并规则保持不变。

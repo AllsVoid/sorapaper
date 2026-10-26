@@ -12,7 +12,7 @@ export type LocaleCode = "zh" | "en";
 export type ArticleLicense = "cc-by-4.0" | "cc-by-nc-4.0";
 
 export interface LocaleUiConfig {
-  nav: Record<"home" | "archive" | "tags" | "series" | "about" | "friends" | "travel", string>;
+  nav: Record<"home" | "archive" | "tags" | "series" | "about" | "friends", string>;
   hero: {
     eyebrow: string;
     title: string;
@@ -71,10 +71,6 @@ export interface LocaleUiConfig {
     aboutTitle: string;
     friendsTitle: string;
     friendsDescription: string;
-    travelTitle: string;
-    travelDescription: string;
-    travelEmptyTitle: string;
-    travelEmptyDescription: string;
   };
   search: {
     label: string;
@@ -126,10 +122,6 @@ export interface SoraPaperThemeConfig {
     listening: string;
     reading: string;
     working: string;
-  };
-  featureFlags: {
-    travel: boolean;
-    japanTravelMap: boolean;
   };
   codeBlocks: {
     copyButton: boolean;

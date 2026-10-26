@@ -10,7 +10,7 @@ SoraPaper is a soft, content-first Astro blog theme inspired by the readability 
 - Built-in i18n structure for Chinese and English without visible locale prefixes.
 - Soft glass cards, rounded surfaces, light/dark mode and four color schemes.
 - Homepage hero, latest posts, profile sidebar, tags and now card.
-- Archive, tag index, tag detail, series index, series detail, about, friends and travel pages.
+- Archive, tag index, tag detail, series index, series detail, about and friends pages.
 - Article layout with metadata, reading time, floating TOC, reading progress and previous/next post navigation.
 - Build-time encrypted Markdown blocks unlocked in the browser with a passphrase.
 - Pagefind-powered localized static search.
@@ -283,15 +283,7 @@ For reliable playback, the JPEG and MOV should be a real Live Photo pair. In tes
 
 ## Theme Configuration
 
-Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, feature flags, sidebar content, localized navigation, hero text and page copy. Pagefind-powered search is enabled by default and does not require configuration.
-
-The Travel page is optional and disabled by default. Set `featureFlags.travel` to `true` to show its navigation entry and enable the route:
-
-```ts
-featureFlags: {
-  travel: true
-}
-```
+Edit the root `sorapaper.ts` file for site metadata, default Open Graph image, author profile, sidebar content, localized navigation, hero text and page copy. Pagefind-powered search is enabled by default and does not require configuration.
 
 Internal files such as `src/config/theme.ts` and `src/i18n/ui.ts` provide defaults. If the same option is defined in `sorapaper.ts`, the root config wins. Set `site.ogImage` to an absolute URL or a public asset path such as `/covers/sky.svg` for the default social sharing image. Blog posts automatically get generated Open Graph cards at `/og/posts/{slug}.svg` and `/og/posts/{slug}.png`; a post-level `ogImage` overrides the generated card used in metadata.
 

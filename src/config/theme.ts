@@ -29,10 +29,6 @@ export const defaultThemeConfig = {
     reading: "The Design of Everyday Things",
     working: "A new project"
   },
-  featureFlags: {
-    travel: false,
-    japanTravelMap: true
-  },
   codeBlocks: {
     copyButton: true,
     lineNumbers: true

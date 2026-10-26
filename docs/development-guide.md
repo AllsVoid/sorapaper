@@ -234,18 +234,6 @@ toc: true
 ---
 ```
 
-### 游记内容
-
-`/travel/` 左上角按地区显示标签（目前为“国内”和“日本”）；切换标签会替换地图边界、标记与缩放范围，避免不同国家/地区的地理范围相互挤压。
-
-日本地图使用单一的 `src/data/maps/japan-admin.json`：其中同时包含 ADM1 都道府县和 ADM2 市町村边界。日本目的地优先通过 `adminCode` 命中 ADM2 区域（如镰仓），缺少有效编码时再用中文 `province` 回退到都道府县。
-
-日本地图由 `featureFlags.japanTravelMap` 独立控制，默认开启；关闭后不渲染日本标签、边界或坐标点，但日本游记仍保留在内容和文本列表中。日本标签的初始视图会略微放大，只渲染 ADM1 都道府县并使用比国内省名更小的标签。ADM2 数据仅用于把目的地 `adminCode` 关联到所属都道府县，不提供市町村展开交互；选择有游记的都道府县会直接显示文章预览。
-
-游记 collection 位于 `src/content/travel/`，在 `src/content.config.ts` 中定义。每篇游记必须包含 `title`、`description`、`startDate`、`endDate`，以及至少一个 `destinations` 项。每个目的地包含 `name`、`country`，并可选填 `province`、`adminCode`、`coordinates: [lng, lat]` 和 `summary`；坐标必须落在有效经纬度范围内，`endDate` 不得早于 `startDate`。
-
-游记会作为内容卡片展示在首页的最新内容流中；`/travel/` 初始只显示省级底图、简短省名及“有游记”的省份强调色。构建时渲染这些省份，以及落在其联合边界范围内的过渡省份，从而保持区域视觉连续；日本游记使用 ADM1 的全部都道府县边界（中文名）及离岛，并以目的地的 `province` 匹配高亮的都道府县，不渲染日本市级边界以控制数据体积；地图范围按最终渲染边界计算。香港、澳门的游记会以地图下方的独立可点击区域显示，避免覆盖广东市级投影。台湾省使用本地静态的县市边界数据（`src/data/maps/taiwan-cities.json`）显示二级区域。悬停或键盘聚焦省份仅展开市级投影层；点击或键盘确认有游记的省份后，才会在桌面右侧（移动端地图下方）显示该省的文章预览。当前省会提升到 SVG 最上层，省名淡出，市级边界和市名以 2.2 倍投影层展开；投影打开时底层省份会弱化以聚焦市级选择，鼠标离开地图区域会收起投影和文章预览。第二层城市有独立的悬停、焦点和选中高亮；文章预览打开后，悬停或键盘聚焦有游记的城市会更新文章预览，点击该城市进入 `/travel/[slug]/`。未在本地中国行政区数据中关联的国际目的地可用 `coordinates` 渲染为标记；没有坐标时仍会显示在地图下方的可访问目的地列表。地图范围较大时，浏览器端提供缩放、复位以及鼠标/触摸拖动和键盘方向键平移。当前视觉版使用本地静态的全国省、市两级边界数据：`src/data/maps/china-admin.json`。该文件由 `scripts/build-travel-map.mjs` 从 AreaCity 的 `ok_geo.csv` 提取并简化，原始 CSV 不进入仓库或网页；日本数据由 `scripts/build-japan-admin1.mjs` 从 geoBoundaries 的 JPN ADM1 GeoJSON 提取并简化；原始 GeoJSON 不进入网页；接入真实行政区的状态机、命中区和无障碍约束见 [游记功能 PRD](travel-prd.md)。
-
 Markdown 扩展：
 
 - 文章支持 `:::note`、`:::info`、`:::tips`、`:::warning`、`:::success` 和 `:::error` 提示块。
@@ -455,7 +443,7 @@ tags: ["Framework", "Frontend"]
 - `PostLayout.astro` 将文章内容标记为 Pagefind 索引主体，并写入语言过滤字段。
 - 客户端打开搜索弹窗时懒加载 Pagefind API，并按当前 `html[data-locale]` 过滤结果。
 - Pagefind 提供全文索引、相关性排序与命中片段高亮。
-- 搜索始终启用，不通过 `featureFlags` 配置。
+- 搜索始终启用，无需配置开关。
 
 ### 阅读进度条
 
@@ -496,7 +484,6 @@ tags: ["Framework", "Frontend"]
 - 站点描述：`description`
 - 作者信息：`author`
 - Now 卡片：`now`
-- 功能开关：`featureFlags`（其中 `travel` 控制游记导航与页面，`japanTravelMap` 单独控制日本地图标签与图层）
 - 文章许可协议：`article.license`，可选 `cc-by-4.0`（默认）或 `cc-by-nc-4.0`。
 - 导航文案。
 - 首页 Hero 文案。
@@ -554,7 +541,7 @@ src/components/Comments.astro
 src/lib/comments.ts
 ```
 
-并在 `themeConfig.featureFlags.comments` 控制启用。不要默认加载第三方脚本。
+在 `sorapaper.ts` 中新增对应配置，并同步类型、默认值和组件消费逻辑来控制启用。不要默认加载第三方脚本。
 
 ### 新增 Open Graph 图片
 

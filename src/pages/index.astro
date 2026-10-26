@@ -1,26 +1,20 @@
 ---
 import HeroSection from "@/components/HeroSection.astro";
 import PostCard from "@/components/PostCard.astro";
-import TravelCard from "@/components/TravelCard.astro";
 import Sidebar from "@/components/Sidebar.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { locales, localizePath } from "@/i18n/config";
 import { getUi } from "@/i18n/ui";
 import { getPinnedPosts, getPublishedPosts } from "@/lib/posts";
-import { getPublishedTravels } from "@/lib/travel";
 
 const localeData = await Promise.all(
   locales.map(async (locale) => {
     const posts = await getPublishedPosts(locale);
     const pinned = await getPinnedPosts(locale);
     const featuredPosts = pinned.length > 0 ? pinned : posts.slice(0, 1);
-    const allTravels = await getPublishedTravels();
-    const localizedTravels = await getPublishedTravels(locale);
-    const travels = localizedTravels.length > 0 ? localizedTravels : allTravels;
     const items = [
-      ...featuredPosts.map((post) => ({ type: "post" as const, entry: post, featured: true })),
-      ...travels.map((travel) => ({ type: "travel" as const, entry: travel, featured: false })),
-      ...posts.filter((post) => !featuredPosts.includes(post)).map((post) => ({ type: "post" as const, entry: post, featured: false }))
+      ...featuredPosts.map((post) => ({ entry: post, featured: true })),
+      ...posts.filter((post) => !featuredPosts.includes(post)).map((post) => ({ entry: post, featured: false }))
     ].slice(0, 6);
     return { locale, t: getUi(locale), items };
   })
@@ -39,10 +33,8 @@ const localeData = await Promise.all(
               <a href={localizePath(locale, "/archive/")}>{t.home.viewAll} →</a>
             </div>
             <div class="posts">
-              {items.map((item) => item.type === "post" ? (
+              {items.map((item) => (
                 <PostCard post={item.entry} locale={locale} featured={item.featured} />
-              ) : (
-                <TravelCard travel={item.entry} locale={locale} />
               ))}
             </div>
           </div>

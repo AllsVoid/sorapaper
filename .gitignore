@@ -52,3 +52,5 @@ docs/map-interaction-demo.html
 docs/map-interaction-research.md
 docs/mermaid-directive-support.patch
 scripts/localize-japan-admin.mjs
+
+.agents/
